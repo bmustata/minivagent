@@ -60,10 +60,15 @@ MiniVAgent is a visual workflow tool that lets you build AI pipelines by connect
     ```
 
 3. Create a `.env.local` file in the root directory:
+
     ```
     GEMINI_API_KEY=your_api_key_here
     ```
-    Note: Replace with your actual API key
+
+    Get your API key from [https://aistudio.google.com/api-keys](https://aistudio.google.com/api-keys).
+
+    > **⚠️ Security Warning:** Never commit `.env.local` or any file containing your API key to version control. It is already included in `.gitignore`.
+    > Keep your key private — anyone with access to it can make requests billed to your account.
 
 ### Run Locally
 
