@@ -7,6 +7,7 @@ on:
         branches: ["**"]
 
 jobs:
+    # Installs dependencies and runs the full test suite
     test:
         runs-on: ubuntu-latest
         env:
@@ -21,6 +22,7 @@ jobs:
             - run: npm ci
             - run: npm run test
 
+    # Scans dependencies for known vulnerabilities; fails on critical severity
     audit:
         runs-on: ubuntu-latest
         steps:
@@ -29,4 +31,4 @@ jobs:
               with:
                   node-version: "25.x"
                   cache: "npm"
-            - run: npm audit
+            - run: npm audit --audit-level=critical
