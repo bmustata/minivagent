@@ -32,3 +32,19 @@ jobs:
                   node-version: "25.x"
                   cache: "npm"
             - run: npm audit --audit-level=critical
+
+    # Runs Snyk to check for vulnerabilities and monitor the project
+    snyk-monitor:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: "25.x"
+                  cache: "npm"
+            - run: npm ci
+            - uses: snyk/actions/node@master
+              env:
+                  SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+              with:
+                  args: --severity-threshold=critical
