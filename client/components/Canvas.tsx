@@ -462,15 +462,13 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
 
         // Update URL and title with graph ID
         window.history.pushState({}, '', `/graph/${graphId}`)
-        const source = availableGraphs.find((g) => g.id === graphId)?.source.replace('.json', '') ?? graphId
-        document.title = `MiniVAgent — ${source}`
+        document.title = `MiniVAgent — ${graphName || graphId}`
     }
 
     const handleSaveSuccess = (graphId: string, graphName: string) => {
         setCurrentGraphId(graphId)
         setCurrentGraphName(graphName)
-        const source = availableGraphs.find((g) => g.id === graphId)?.source.replace('.json', '') ?? graphId
-        document.title = `MiniVAgent — ${source}`
+        document.title = `MiniVAgent — ${graphName || graphId}`
     }
 
     const handleNewGraph = () => {
