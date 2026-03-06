@@ -42,7 +42,7 @@ if (!GEMINI_API_KEY) {
     logger.error('❌ GEMINI_API_KEY is not set in environment variables')
     throw new Error('GEMINI_API_KEY is required')
 }
-logger.info(`✓ GEMINI_API_KEY found: ${GEMINI_API_KEY.substring(0, 8)}...`)
+logger.info(`✓ GEMINI_API_KEY found (length: ${GEMINI_API_KEY.length})`)
 
 // Initialize Gemini AI
 export const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY })
