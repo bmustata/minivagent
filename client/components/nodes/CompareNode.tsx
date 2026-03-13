@@ -1,5 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { Eye, EyeOff, Maximize2 } from 'lucide-react'
+import React, { useEffect, useRef, useState, useCallback } from 'react'
+import { Eye, Maximize2, Minimize2, X } from 'lucide-react'
+import { createPortal } from 'react-dom'
 import { Node, NodeData } from '../../types'
 
 interface CompareNodeProps {
@@ -12,33 +13,73 @@ interface CompareNodeProps {
 type CompareMode = 'slider' | 'toggle'
 
 export const CompareNode: React.FC<CompareNodeProps> = ({ node, connectedImages, updateNodeData, onExpand }) => {
-    const images = connectedImages.slice(0, 2)
+    // Slider always uses first 2; toggle can cycle through all
+    const sliderImages = connectedImages.slice(0, 2)
 
     const [mode, setMode] = useState<CompareMode>((node.data.compareMode as CompareMode) ?? 'slider')
     const [sliderPos, setSliderPos] = useState(50) // 0–100 percent
-    const [toggleVisible, setToggleVisible] = useState<0 | 1>(0)
+    const [toggleVisible, setToggleVisible] = useState<number>(0)
+    const [isFullscreen, setIsFullscreen] = useState(false)
 
     const containerRef = useRef<HTMLDivElement>(null)
+    const fsContainerRef = useRef<HTMLDivElement>(null)
     const isDragging = useRef(false)
+    const isFsDragging = useRef(false)
+
+    // Keyboard navigation: arrows cycle images in toggle mode / nudge slider in slider mode; Escape closes fullscreen
+    useEffect(() => {
+        const handler = (e: KeyboardEvent) => {
+            if (e.key === 'Escape' && isFullscreen) {
+                setIsFullscreen(false)
+                return
+            }
+            if (mode === 'toggle') {
+                if (connectedImages.length < 2) return
+                if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                    e.preventDefault()
+                    setToggleVisible((v) => (v + 1) % connectedImages.length)
+                } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                    e.preventDefault()
+                    setToggleVisible((v) => (v - 1 + connectedImages.length) % connectedImages.length)
+                }
+            } else if (mode === 'slider') {
+                const step = e.shiftKey ? 1 : 5
+                if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                    e.preventDefault()
+                    setSliderPos((p) => Math.min(100, p + step))
+                } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                    e.preventDefault()
+                    setSliderPos((p) => Math.max(0, p - step))
+                }
+            }
+        }
+        window.addEventListener('keydown', handler)
+        return () => window.removeEventListener('keydown', handler)
+    }, [isFullscreen, mode, connectedImages.length])
 
     // Sync passthrough outputs into nodeData.imageResources.
     // connectedImages arrive as display URLs (/api/resources/<uuid> or data:).
     // Strip the /api/resources/ prefix so only the bare UUID is stored in the graph file.
     useEffect(() => {
-        const resourceIds = images.map((url) =>
+        const resourceIds = connectedImages.map((url) =>
             url.startsWith('/api/resources/') ? url.slice('/api/resources/'.length) : url
         )
         updateNodeData(node.id, { imageResources: resourceIds.length > 0 ? resourceIds : undefined })
+        // Reset toggle index if it's now out of bounds
+        setToggleVisible((v) => (v >= connectedImages.length ? 0 : v))
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [connectedImages.join(',')])
 
-    // --- Slider drag ---
-    const getSliderPosFromEvent = (clientX: number): number => {
-        if (!containerRef.current) return sliderPos
-        const rect = containerRef.current.getBoundingClientRect()
+    // --- Slider drag (shared logic) ---
+    const getPosFromEvent = (clientX: number, ref: React.RefObject<HTMLDivElement | null>): number => {
+        if (!ref.current) return sliderPos
+        const rect = ref.current.getBoundingClientRect()
         const x = clientX - rect.left
         return Math.max(0, Math.min(100, (x / rect.width) * 100))
     }
+
+    const getSliderPosFromEvent = (clientX: number): number => getPosFromEvent(clientX, containerRef)
+    const getFsSliderPosFromEvent = useCallback((clientX: number): number => getPosFromEvent(clientX, fsContainerRef), [])
 
     const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
         if (mode !== 'slider') return
@@ -57,14 +98,32 @@ export const CompareNode: React.FC<CompareNodeProps> = ({ node, connectedImages,
         e.currentTarget.releasePointerCapture(e.pointerId)
     }
 
+    // Fullscreen pointer handlers
+    const handleFsPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+        if (mode !== 'slider') return
+        isFsDragging.current = true
+        e.currentTarget.setPointerCapture(e.pointerId)
+        setSliderPos(getFsSliderPosFromEvent(e.clientX))
+    }
+
+    const handleFsPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+        if (!isFsDragging.current || mode !== 'slider') return
+        setSliderPos(getFsSliderPosFromEvent(e.clientX))
+    }
+
+    const handleFsPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+        isFsDragging.current = false
+        e.currentTarget.releasePointerCapture(e.pointerId)
+    }
+
     // --- Render ---
     const CONTAINER_HEIGHT = 220
 
-    const img0 = images[0]
-    const img1 = images[1]
+    const img0 = sliderImages[0]
+    const img1 = sliderImages[1]
 
-    const isEmpty = images.length === 0
-    const isSingle = images.length === 1
+    const isEmpty = connectedImages.length === 0
+    const isSingle = sliderImages.length === 1 // slider-specific
 
     return (
         <div className="flex flex-col gap-2">
@@ -132,8 +191,8 @@ export const CompareNode: React.FC<CompareNodeProps> = ({ node, connectedImages,
                                     </div>
 
                                     {/* Labels */}
-                                    <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-black/40 text-white text-[10px] font-bold pointer-events-none z-10 backdrop-blur-sm">1</div>
-                                    <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-black/40 text-white text-[10px] font-bold pointer-events-none z-10 backdrop-blur-sm">2</div>
+                                    {sliderPos >= 20 && <div className="absolute bottom-2 left-2 px-1.5 py-0.5 rounded bg-black/40 text-white text-[10px] font-bold pointer-events-none z-10 backdrop-blur-sm">Image 1</div>}
+                                    {sliderPos <= 80 && <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/40 text-white text-[10px] font-bold pointer-events-none z-10 backdrop-blur-sm">Image 2</div>}
 
                                     {/* Expand buttons */}
                                     <button
@@ -158,7 +217,7 @@ export const CompareNode: React.FC<CompareNodeProps> = ({ node, connectedImages,
                     {mode === 'toggle' && (
                         <>
                             <img
-                                src={images[toggleVisible]}
+                                src={connectedImages[toggleVisible]}
                                 alt={`Image ${toggleVisible + 1}`}
                                 className="w-full h-full object-cover"
                                 draggable={false}
@@ -167,7 +226,7 @@ export const CompareNode: React.FC<CompareNodeProps> = ({ node, connectedImages,
                             {/* Expand */}
                             <button
                                 className="absolute bottom-2 right-2 p-1 rounded bg-black/40 text-white opacity-0 hover:opacity-100 transition-opacity z-10 backdrop-blur-sm"
-                                onClick={(e) => { e.stopPropagation(); onExpand(images[toggleVisible]) }}
+                                onClick={(e) => { e.stopPropagation(); onExpand(connectedImages[toggleVisible]) }}
                                 title="Expand image"
                             >
                                 <Maximize2 size={12} />
@@ -176,20 +235,28 @@ export const CompareNode: React.FC<CompareNodeProps> = ({ node, connectedImages,
                     )}
                     </div>
 
-                    {/* Eye toggle button — outside overflow-hidden so it's never clipped */}
-                    {mode === 'toggle' && !isSingle && (
-                        <button
-                            className="absolute top-2 left-2 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-zinc-900 text-white text-[11px] font-bold z-20 shadow-lg border border-white/20 hover:bg-zinc-700 active:scale-95 transition-all"
-                            onClick={(e) => {
-                                e.stopPropagation()
-                                setToggleVisible((v) => (v === 0 ? 1 : 0))
-                            }}
-                            title="Toggle between images"
-                        >
-                            {toggleVisible === 0 ? <Eye size={14} /> : <EyeOff size={14} />}
-                            <span>{toggleVisible + 1}</span>
-                        </button>
+                    {/* Eye / cycle button — outside overflow-hidden so it's never clipped */}
+                    {mode === 'toggle' && connectedImages.length > 1 && (
+                        <div className="absolute top-2 left-2 flex items-center gap-1 z-20">
+                            <button
+                                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-zinc-900 text-white text-[11px] font-bold shadow-lg border border-white/20 hover:bg-zinc-700 active:scale-95 transition-all"
+                                onClick={(e) => { e.stopPropagation(); setToggleVisible((v) => (v + 1) % connectedImages.length) }}
+                                title="Next image (→)"
+                            >
+                                <Eye size={14} />
+                                <span>{toggleVisible + 1}/{connectedImages.length}</span>
+                            </button>
+                        </div>
                     )}
+
+                    {/* Fullscreen button — top-right, always visible on hover */}
+                    <button
+                        className="absolute top-2 right-2 p-1.5 rounded-lg bg-zinc-900/80 text-white z-20 shadow-lg border border-white/20 hover:bg-zinc-700 active:scale-95 transition-all"
+                        onClick={(e) => { e.stopPropagation(); setIsFullscreen(true) }}
+                        title="Compare fullscreen"
+                    >
+                        <Maximize2 size={13} />
+                    </button>
                 </div>
             )}
 
@@ -210,6 +277,122 @@ export const CompareNode: React.FC<CompareNodeProps> = ({ node, connectedImages,
                     <option value="toggle">Toggle</option>
                 </select>
             </div>
+
+            {/* Fullscreen overlay — rendered via portal so it escapes node stacking contexts */}
+            {isFullscreen && createPortal(
+                <div
+                    className="fixed inset-0 z-[200] bg-black flex flex-col animate-in fade-in duration-150"
+                    onClick={() => setIsFullscreen(false)}
+                >
+                    {/* Top bar */}
+                    <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-4 z-30 pointer-events-none">
+                        {/* Mode selector */}
+                        <select
+                            value={mode}
+                            onChange={(e) => {
+                                const next = e.target.value as CompareMode
+                                setMode(next)
+                                updateNodeData(node.id, { compareMode: next })
+                            }}
+                            className="text-sm font-medium rounded-lg border border-white/20 bg-black/60 text-white px-3 py-1.5 cursor-pointer focus:outline-none focus:ring-1 focus:ring-teal-400 backdrop-blur-md pointer-events-auto"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <option value="slider">Slider</option>
+                            <option value="toggle">Toggle</option>
+                        </select>
+
+                        <button
+                            onClick={(e) => { e.stopPropagation(); setIsFullscreen(false) }}
+                            className="p-2 rounded-full hover:bg-white/10 transition-colors text-white/70 hover:text-white pointer-events-auto"
+                        >
+                            <X size={24} />
+                        </button>
+                    </div>
+
+                    {/* Image area */}
+                    <div className="relative flex-1" onClick={(e) => e.stopPropagation()}>
+                        <div
+                            ref={fsContainerRef}
+                            className="absolute inset-0 select-none"
+                            style={{ cursor: mode === 'slider' ? 'col-resize' : 'default' }}
+                            onPointerDown={handleFsPointerDown}
+                            onPointerMove={handleFsPointerMove}
+                            onPointerUp={handleFsPointerUp}
+                            onPointerCancel={handleFsPointerUp}
+                        >
+                            {mode === 'slider' && (
+                                isSingle ? (
+                                    <img src={img0} alt="Image 1" className="absolute inset-0 w-full h-full object-contain" draggable={false} />
+                                ) : (
+                                    <>
+                                        {/* Right image */}
+                                        <img src={img1} alt="Image 2" className="absolute inset-0 w-full h-full object-contain" draggable={false} />
+
+                                        {/* Left image — clipped */}
+                                        <img
+                                            src={img0}
+                                            alt="Image 1"
+                                            className="absolute inset-0 w-full h-full object-contain"
+                                            style={{ clipPath: `inset(0 ${100 - sliderPos}% 0 0)` }}
+                                            draggable={false}
+                                        />
+
+                                        {/* Divider */}
+                                        <div
+                                            className="absolute top-0 bottom-0 w-0.5 bg-white shadow-lg pointer-events-none z-10"
+                                            style={{ left: `${sliderPos}%`, transform: 'translateX(-50%)' }}
+                                        >
+                                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white shadow-md border border-slate-200 flex items-center justify-center pointer-events-none">
+                                                <div className="flex gap-0.5">
+                                                    <div className="w-px h-4 bg-slate-400 rounded-full" />
+                                                    <div className="w-px h-4 bg-slate-400 rounded-full" />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Labels */}
+                                        {sliderPos >= 20 && <div className="absolute bottom-4 left-4 px-2 py-1 rounded bg-black/50 text-white text-xs font-bold pointer-events-none z-10 backdrop-blur-sm">Image 1</div>}
+                                        {sliderPos <= 80 && <div className="absolute bottom-4 right-4 px-2 py-1 rounded bg-black/50 text-white text-xs font-bold pointer-events-none z-10 backdrop-blur-sm">Image 2</div>}
+                                    </>
+                                )
+                            )}
+
+                            {mode === 'toggle' && (
+                                <img
+                                    src={connectedImages[toggleVisible]}
+                                    alt={`Image ${toggleVisible + 1}`}
+                                    className="absolute inset-0 w-full h-full object-contain"
+                                    draggable={false}
+                                />
+                            )}
+                        </div>
+
+                        {/* Eye / cycle button for fullscreen toggle mode */}
+                        {mode === 'toggle' && connectedImages.length > 1 && (
+                            <div className="absolute top-16 left-4 flex items-center gap-2 z-20">
+                                <button
+                                    className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-zinc-900 text-white text-sm font-bold shadow-lg border border-white/20 hover:bg-zinc-700 active:scale-95 transition-all"
+                                    onClick={(e) => { e.stopPropagation(); setToggleVisible((v) => (v + 1) % connectedImages.length) }}
+                                    title="Next image (→)"
+                                >
+                                    <Eye size={16} />
+                                    <span>{toggleVisible + 1}/{connectedImages.length}</span>
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Minimize button */}
+                        <button
+                            className="absolute bottom-4 right-4 p-2 rounded-lg bg-zinc-900/80 text-white z-20 shadow-lg border border-white/20 hover:bg-zinc-700 active:scale-95 transition-all"
+                            onClick={(e) => { e.stopPropagation(); setIsFullscreen(false) }}
+                            title="Exit fullscreen"
+                        >
+                            <Minimize2 size={18} />
+                        </button>
+                    </div>
+                </div>,
+                document.body
+            )}
         </div>
     )
 }

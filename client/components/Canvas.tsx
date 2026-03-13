@@ -1360,14 +1360,14 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                         <span className="text-[10px] font-semibold uppercase">Source</span>
                     </button>
                     <div className="w-[1px] h-8 bg-slate-200 dark:bg-zinc-800 mx-1" />
-                    <button onClick={() => addNode(NodeType.NOTE)} className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors text-slate-600 dark:text-zinc-400">
-                        <StickyNote size={20} />
-                        <span className="text-[10px] font-semibold uppercase">Note</span>
-                    </button>
-                    <div className="w-[1px] h-8 bg-slate-200 dark:bg-zinc-800 mx-1" />
                     <button onClick={() => addNode(NodeType.COMPARE)} className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors text-slate-600 dark:text-zinc-400">
                         <Columns2 size={20} />
                         <span className="text-[10px] font-semibold uppercase">Compare</span>
+                    </button>
+                    <div className="w-[1px] h-8 bg-slate-200 dark:bg-zinc-800 mx-1" />
+                    <button onClick={() => addNode(NodeType.NOTE)} className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors text-slate-600 dark:text-zinc-400">
+                        <StickyNote size={20} />
+                        <span className="text-[10px] font-semibold uppercase">Note</span>
                     </button>
                 </div>
             </div>

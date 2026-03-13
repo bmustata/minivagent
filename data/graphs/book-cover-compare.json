@@ -16,7 +16,7 @@
                 "outputFormat": "JPEG",
                 "model": "gemini-2.5-flash-image",
                 "imageResources": [
-                    "8ef8d1ea-70bc-4c46-832c-a2c57596c01e"
+                    "ea038519-e623-4c67-998a-cd2e0e94336d"
                 ]
             }
         },
@@ -36,7 +36,7 @@
                 "model": "gemini-3.1-flash-image-preview",
                 "preset": "1K",
                 "imageResources": [
-                    "225175bf-4e5b-47a7-89a8-99af260b327b"
+                    "b8927d60-8f71-4fa1-9226-d55e42c423c4"
                 ]
             }
         },
@@ -48,9 +48,10 @@
                 "y": 408
             },
             "data": {
+                "compareMode": "slider",
                 "imageResources": [
-                    "8ef8d1ea-70bc-4c46-832c-a2c57596c01e",
-                    "225175bf-4e5b-47a7-89a8-99af260b327b"
+                    "ea038519-e623-4c67-998a-cd2e0e94336d",
+                    "b8927d60-8f71-4fa1-9226-d55e42c423c4"
                 ]
             }
         },
@@ -62,8 +63,9 @@
                 "y": 1560
             },
             "data": {
+                "compareMode": "slider",
                 "imageResources": [
-                    "8ef8d1ea-70bc-4c46-832c-a2c57596c01e"
+                    "ea038519-e623-4c67-998a-cd2e0e94336d"
                 ]
             }
         },
@@ -72,13 +74,14 @@
             "type": "COMPARE",
             "position": {
                 "x": 2136,
-                "y": 744
+                "y": 768
             },
             "data": {
                 "compareMode": "toggle",
                 "imageResources": [
-                    "8ef8d1ea-70bc-4c46-832c-a2c57596c01e",
-                    "225175bf-4e5b-47a7-89a8-99af260b327b"
+                    "ea038519-e623-4c67-998a-cd2e0e94336d",
+                    "b8927d60-8f71-4fa1-9226-d55e42c423c4",
+                    "1c3e0277-58fe-4c1c-89e3-a15f8e76a172"
                 ]
             }
         },
@@ -90,9 +93,10 @@
                 "y": 1128
             },
             "data": {
+                "compareMode": "slider",
                 "imageResources": [
-                    "225175bf-4e5b-47a7-89a8-99af260b327b",
-                    "730e393e-e6f7-4001-aea4-4cae8ddb36eb"
+                    "b8927d60-8f71-4fa1-9226-d55e42c423c4",
+                    "1c3e0277-58fe-4c1c-89e3-a15f8e76a172"
                 ]
             }
         },
@@ -112,7 +116,7 @@
                 "model": "imagen-4.0-generate-001",
                 "preset": "1K",
                 "imageResources": [
-                    "730e393e-e6f7-4001-aea4-4cae8ddb36eb"
+                    "1c3e0277-58fe-4c1c-89e3-a15f8e76a172"
                 ]
             }
         }
@@ -165,6 +169,13 @@
             "source": "imagegen433556",
             "sourceHandle": "image-0",
             "target": "compare055606",
+            "targetHandle": "image"
+        },
+        {
+            "id": "e626302",
+            "source": "imagegen433556",
+            "sourceHandle": "image-0",
+            "target": "compare066147",
             "targetHandle": "image"
         }
     ]
