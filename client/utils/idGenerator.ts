@@ -24,6 +24,8 @@ const getNodeTypePrefix = (type: NodeType): string => {
             return 'vision'
         case NodeType.NOTE:
             return 'note'
+        case NodeType.COMPARE:
+            return 'compare'
         default:
             return 'node'
     }

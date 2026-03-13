@@ -3,7 +3,8 @@ export enum NodeType {
     IMAGE_GEN = 'IMAGE_GEN',
     IMAGE_SOURCE = 'IMAGE_SOURCE',
     NOTE = 'NOTE',
-    IMAGE_TO_TEXT = 'IMAGE_TO_TEXT'
+    IMAGE_TO_TEXT = 'IMAGE_TO_TEXT',
+    COMPARE = 'COMPARE'
 }
 
 export interface ImageMetadata {
@@ -29,6 +30,9 @@ export interface NodeData {
     // For Image to Text and Image Source
     imageInput?: string // Base64 or URL
     imageInputType?: 'UPLOAD' | 'URL'
+
+    // For Compare node
+    compareMode?: 'slider' | 'toggle'
 }
 
 export interface Node {

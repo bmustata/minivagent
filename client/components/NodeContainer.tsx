@@ -1,5 +1,5 @@
 import React from 'react'
-import { X, StickyNote, Type, Image as ImageIcon, ScanEye, Box } from 'lucide-react'
+import { X, StickyNote, Type, Image as ImageIcon, ScanEye, Box, Columns2 } from 'lucide-react'
 import { Node, NodeType } from '../types'
 
 interface NodeContainerProps {
@@ -50,6 +50,11 @@ export const NodeContainer: React.FC<NodeContainerProps> = ({ node, selected, on
             headerIcon = <StickyNote size={14} />
             title = 'Note'
             break
+        case NodeType.COMPARE:
+            headerColor = 'bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300'
+            headerIcon = <Columns2 size={14} />
+            title = 'Compare'
+            break
     }
 
     // Configure Handles
@@ -88,6 +93,11 @@ export const NodeContainer: React.FC<NodeContainerProps> = ({ node, selected, on
         outputHandles.push({ id: 'output', label: 'RESULT', top: 200, color: 'bg-emerald-400' })
     } else if (node.type === NodeType.NOTE) {
         outputHandles.push({ id: 'prompt', label: 'TEXT', top: 45, color: 'bg-zinc-400' })
+    } else if (node.type === NodeType.COMPARE) {
+        // Compare Node: 1 multi-image input, 2 passthrough outputs
+        inputHandles.push({ id: 'image', label: 'Images', top: 80, color: 'bg-pink-400' })
+        outputHandles.push({ id: 'image-0', label: 'IMG 1', top: 100, color: 'bg-teal-400' })
+        outputHandles.push({ id: 'image-1', label: 'IMG 2', top: 160, color: 'bg-teal-400' })
     }
 
     return (

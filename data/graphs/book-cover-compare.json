@@ -1,0 +1,171 @@
+{
+    "name": "Book cover compare",
+    "nodes": [
+        {
+            "id": "imagegen373916",
+            "type": "IMAGE_GEN",
+            "position": {
+                "x": 504,
+                "y": 360
+            },
+            "data": {
+                "prompt": "A LEGO space battleship orbiting a planet.\n\nA massive brick-built space battleship patrols the orbit of a glowing blue planet.",
+                "isLoading": false,
+                "imageCount": 1,
+                "aspectRatio": "1:1",
+                "outputFormat": "JPEG",
+                "model": "gemini-2.5-flash-image",
+                "imageResources": [
+                    "8ef8d1ea-70bc-4c46-832c-a2c57596c01e"
+                ]
+            }
+        },
+        {
+            "id": "imagegen478038",
+            "type": "IMAGE_GEN",
+            "position": {
+                "x": 936,
+                "y": 360
+            },
+            "data": {
+                "prompt": "A LEGO space battleship orbiting a planet.\n\nA massive brick-built space battleship patrols the orbit of a glowing blue planet.",
+                "isLoading": false,
+                "imageCount": 1,
+                "aspectRatio": "1:1",
+                "outputFormat": "JPEG",
+                "model": "gemini-3.1-flash-image-preview",
+                "preset": "1K",
+                "imageResources": [
+                    "225175bf-4e5b-47a7-89a8-99af260b327b"
+                ]
+            }
+        },
+        {
+            "id": "compare878995",
+            "type": "COMPARE",
+            "position": {
+                "x": 2016,
+                "y": 408
+            },
+            "data": {
+                "imageResources": [
+                    "8ef8d1ea-70bc-4c46-832c-a2c57596c01e",
+                    "225175bf-4e5b-47a7-89a8-99af260b327b"
+                ]
+            }
+        },
+        {
+            "id": "compare759892",
+            "type": "COMPARE",
+            "position": {
+                "x": 2112,
+                "y": 1560
+            },
+            "data": {
+                "imageResources": [
+                    "8ef8d1ea-70bc-4c46-832c-a2c57596c01e"
+                ]
+            }
+        },
+        {
+            "id": "compare066147",
+            "type": "COMPARE",
+            "position": {
+                "x": 2136,
+                "y": 744
+            },
+            "data": {
+                "compareMode": "toggle",
+                "imageResources": [
+                    "8ef8d1ea-70bc-4c46-832c-a2c57596c01e",
+                    "225175bf-4e5b-47a7-89a8-99af260b327b"
+                ]
+            }
+        },
+        {
+            "id": "compare055606",
+            "type": "COMPARE",
+            "position": {
+                "x": 2376,
+                "y": 1128
+            },
+            "data": {
+                "imageResources": [
+                    "225175bf-4e5b-47a7-89a8-99af260b327b",
+                    "730e393e-e6f7-4001-aea4-4cae8ddb36eb"
+                ]
+            }
+        },
+        {
+            "id": "imagegen433556",
+            "type": "IMAGE_GEN",
+            "position": {
+                "x": 1368,
+                "y": 360
+            },
+            "data": {
+                "prompt": "A LEGO space battleship orbiting a planet.\n\nA massive brick-built space battleship patrols the orbit of a glowing blue planet.",
+                "isLoading": false,
+                "imageCount": 1,
+                "aspectRatio": "1:1",
+                "outputFormat": "JPEG",
+                "model": "imagen-4.0-generate-001",
+                "preset": "1K",
+                "imageResources": [
+                    "730e393e-e6f7-4001-aea4-4cae8ddb36eb"
+                ]
+            }
+        }
+    ],
+    "edges": [
+        {
+            "id": "e486981",
+            "source": "imagegen373916",
+            "sourceHandle": "image-0",
+            "target": "compare878995",
+            "targetHandle": "image"
+        },
+        {
+            "id": "e922177",
+            "source": "imagegen478038",
+            "sourceHandle": "image-0",
+            "target": "compare878995",
+            "targetHandle": "image"
+        },
+        {
+            "id": "e311754",
+            "source": "imagegen373916",
+            "sourceHandle": "image-0",
+            "target": "compare759892",
+            "targetHandle": "image"
+        },
+        {
+            "id": "e055930",
+            "source": "imagegen373916",
+            "sourceHandle": "image-0",
+            "target": "compare066147",
+            "targetHandle": "image"
+        },
+        {
+            "id": "e904272",
+            "source": "imagegen478038",
+            "sourceHandle": "image-0",
+            "target": "compare066147",
+            "targetHandle": "image"
+        },
+        {
+            "id": "e063203",
+            "source": "imagegen478038",
+            "sourceHandle": "image-0",
+            "target": "compare055606",
+            "targetHandle": "image"
+        },
+        {
+            "id": "e608660",
+            "source": "imagegen433556",
+            "sourceHandle": "image-0",
+            "target": "compare055606",
+            "targetHandle": "image"
+        }
+    ]
+}

@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { Save, FilePlus, X, Loader2, AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { createGraph, updateGraph, GraphData } from '../services/graphService'
-import { Node, Edge } from '../types'
+import { Node, Edge, NodeType } from '../types'
 
 interface GraphManagerProps {
     currentNodes: Node[]
@@ -28,9 +28,28 @@ export const GraphManager: React.FC<GraphManagerProps> = ({ currentNodes, curren
         setIsLoading(true)
 
         try {
+            // Sanitize COMPARE node imageResources: strip /api/resources/ prefix down to bare UUIDs
+            const sanitizedNodes = currentNodes.map((node) => {
+                if (node.type === NodeType.COMPARE) {
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    const { prompt, isLoading, imageResources, compareMode, ...rest } = node.data
+                    return {
+                        ...node,
+                        data: {
+                            ...rest,
+                            ...(compareMode ? { compareMode } : {}),
+                            imageResources: (imageResources ?? []).map((r) =>
+                                r.startsWith('/api/resources/') ? r.slice('/api/resources/'.length) : r
+                            )
+                        }
+                    }
+                }
+                return node
+            })
+
             const content: GraphData = {
                 name: currentGraphName,
-                nodes: currentNodes,
+                nodes: sanitizedNodes,
                 edges: currentEdges
             }
 

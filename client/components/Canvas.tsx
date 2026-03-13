@@ -2,13 +2,13 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Node, Edge, NodeType, NodeData } from '../types'
 import { NodeContainer } from './NodeContainer'
-import { TextGenNode, ImageGenNode, ImageSourceNode, NoteNode, ImageToTextNode } from './nodes'
+import { TextGenNode, ImageGenNode, ImageSourceNode, NoteNode, ImageToTextNode, CompareNode } from './nodes'
 import { ConfigModal } from './ConfigModal'
 import { GalleryModal, GalleryImage } from './GalleryModal'
 import { GraphManager } from './GraphManager'
 import { GraphTitle } from './GraphTitle'
 import { listGraphs, GraphResource } from '../services/graphService'
-import { Sun, Moon, Image as ImageIcon, Type, StickyNote, X, ZoomIn, ZoomOut, Maximize2, Minimize2, Info, Code, ChevronDown, Play, Loader2, ScanEye, Box, Sparkles, MessageSquare, RotateCcw } from 'lucide-react'
+import { Sun, Moon, Image as ImageIcon, Type, StickyNote, X, ZoomIn, ZoomOut, Maximize2, Minimize2, Info, Code, ChevronDown, Play, Loader2, ScanEye, Box, Sparkles, MessageSquare, RotateCcw, Columns2 } from 'lucide-react'
 import { APP_CONFIG } from '../config'
 import { generateText, extractTextFromImage, generateImages, planGraphFromPrompt } from '../services/generateService'
 import { getBase64ImageSize, getImageTypeFromUrl, resourceToUrl } from '../utils/imageUtils'
@@ -191,6 +191,16 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
             } else if (sourceNode.type === NodeType.IMAGE_SOURCE) {
                 if (sourceNode.data.imageInput) {
                     images.push(sourceNode.data.imageInput)
+                }
+            } else if (sourceNode.type === NodeType.COMPARE) {
+                // Compare node passthrough: reads from imageResources[index] via image-0/image-1 handles
+                if (edge.sourceHandle && edge.sourceHandle.startsWith('image-')) {
+                    const indexStr = edge.sourceHandle.split('-')[1]
+                    const index = parseInt(indexStr, 10)
+                    if (!isNaN(index) && sourceNode.data.imageResources && sourceNode.data.imageResources[index]) {
+                        const ref = sourceNode.data.imageResources[index]
+                        images.push(ref.startsWith('http://') || ref.startsWith('https://') || ref.startsWith('data:') ? ref : `resource:${ref}`)
+                    }
                 }
             }
         })
@@ -716,8 +726,8 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
             type,
             position: { x: snappedX, y: snappedY },
             data: {
-                prompt: '',
-                isLoading: false,
+                prompt: type === NodeType.COMPARE ? undefined! : '',
+                isLoading: type === NodeType.COMPARE ? undefined! : false,
                 imageCount: type === NodeType.IMAGE_GEN ? 1 : undefined,
                 aspectRatio: type === NodeType.IMAGE_GEN ? '1:1' : undefined,
                 outputFormat: type === NodeType.IMAGE_GEN ? 'JPEG' : undefined,
@@ -852,7 +862,7 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
 
                 // Check if target node allows multiple connections on this handle
                 const targetNode = nodes.find((n) => n.id === targetId)
-                const isMultiInputHandle = handleId === 'prompt' || (handleId === 'image' && (targetNode?.type === NodeType.IMAGE_GEN || targetNode?.type === NodeType.IMAGE_TO_TEXT))
+                const isMultiInputHandle = handleId === 'prompt' || (handleId === 'image' && (targetNode?.type === NodeType.IMAGE_GEN || targetNode?.type === NodeType.IMAGE_TO_TEXT || targetNode?.type === NodeType.COMPARE))
 
                 let filtered = prev
                 if (!isMultiInputHandle) {
@@ -1006,7 +1016,7 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
 
                             // Check if target node allows multiple connections on this handle
                             const targetNode = nodes.find((n) => n.id === targetId)
-                            const isMultiInputHandle = targetHandleId === 'prompt' || (targetHandleId === 'image' && (targetNode?.type === NodeType.IMAGE_GEN || targetNode?.type === NodeType.IMAGE_TO_TEXT))
+                            const isMultiInputHandle = targetHandleId === 'prompt' || (targetHandleId === 'image' && (targetNode?.type === NodeType.IMAGE_GEN || targetNode?.type === NodeType.IMAGE_TO_TEXT || targetNode?.type === NodeType.COMPARE))
 
                             let filtered = prev
                             if (!isMultiInputHandle) {
@@ -1058,8 +1068,9 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
         if (type === 'target') {
             let offsetY = 45
             if (handleId === 'image') {
-                // ImageGen is 125, ImageToText is 100
-                offsetY = node.type === NodeType.IMAGE_GEN ? 125 : 100
+                if (node.type === NodeType.IMAGE_GEN) offsetY = 125
+                else if (node.type === NodeType.COMPARE) offsetY = 80
+                else offsetY = 100 // IMAGE_TO_TEXT
             }
             return { x: node.position.x - 12, y: node.position.y + offsetY }
         }
@@ -1081,6 +1092,10 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
             }
         } else if (node.type === NodeType.IMAGE_SOURCE) {
             offsetY = 120
+        } else if (node.type === NodeType.COMPARE) {
+            if (handleId === 'image-0') offsetY = 100
+            else if (handleId === 'image-1') offsetY = 160
+            else offsetY = 100
         } else {
             offsetY = 45
         }
@@ -1226,6 +1241,18 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                                 />
                             )}
                             {node.type === NodeType.NOTE && <NoteNode node={node} updateNodeData={updateNodeData} />}
+                            {node.type === NodeType.COMPARE && (
+                                <CompareNode
+                                    node={node}
+                                    connectedImages={toDisplayUrls(getConnectedImages(node.id))}
+                                    updateNodeData={updateNodeData}
+                                    onExpand={(url) => {
+                                        setActiveGalleryImages([{ url, nodeId: node.id }])
+                                        setGalleryStartIndex(0)
+                                        setShowGallery(true)
+                                    }}
+                                />
+                            )}
                         </NodeContainer>
                     ))}
                 </div>
@@ -1336,6 +1363,11 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                     <button onClick={() => addNode(NodeType.NOTE)} className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors text-slate-600 dark:text-zinc-400">
                         <StickyNote size={20} />
                         <span className="text-[10px] font-semibold uppercase">Note</span>
+                    </button>
+                    <div className="w-[1px] h-8 bg-slate-200 dark:bg-zinc-800 mx-1" />
+                    <button onClick={() => addNode(NodeType.COMPARE)} className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors text-slate-600 dark:text-zinc-400">
+                        <Columns2 size={20} />
+                        <span className="text-[10px] font-semibold uppercase">Compare</span>
                     </button>
                 </div>
             </div>
