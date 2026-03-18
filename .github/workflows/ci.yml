@@ -14,8 +14,8 @@ jobs:
             GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
         steps:
-            - uses: actions/checkout@v4.2.2
-            - uses: actions/setup-node@v4.4.0
+            - uses: actions/checkout@v6.0.2
+            - uses: actions/setup-node@v6.3.0
               with:
                   node-version: "25.x"
                   cache: "npm"
@@ -26,8 +26,8 @@ jobs:
     audit:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4.2.2
-            - uses: actions/setup-node@v4.4.0
+            - uses: actions/checkout@v6.0.2
+            - uses: actions/setup-node@v6.3.0
               with:
                   node-version: "25.x"
                   cache: "npm"
@@ -37,8 +37,8 @@ jobs:
     snyk-monitor:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4.2.2
-            - uses: actions/setup-node@v4.4.0
+            - uses: actions/checkout@v6.0.2
+            - uses: actions/setup-node@v6.3.0
               with:
                   node-version: "25.x"
                   cache: "npm"
