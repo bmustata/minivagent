@@ -29,22 +29,7 @@ Helper   (server/helpers/)   — Graph traversal, image saving, shared utilities
 
 ## Project Structure
 
-```
-minivagent/
-├── client/              # React frontend
-│   ├── components/      # Canvas, node types, modals
-│   └── services/        # API client wrappers
-├── server/              # Express backend
-│   ├── handlers/        # HTTP request handlers
-│   ├── services/        # AI service integrations
-│   ├── helpers/         # Graph traversal, execution
-│   └── utils/           # Types, constants, utilities
-├── data/
-│   ├── graphs/          # Saved graph JSON files
-│   └── resources/       # Uploaded image resources
-├── docs/                # Documentation
-└── tests/               # Vitest unit tests
-```
+See [docs/project-structure.md](docs/project-structure.md) for a full breakdown of the directory layout.
 
 ## Node Types
 
@@ -103,30 +88,7 @@ Nodes execute in dependency order. Connected text and images are resolved by tra
 
 ## API Endpoints
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/health` | Health check |
-| GET | `/api/models` | All supported models by category |
-| GET | `/api/meta` | All endpoints as JSON |
-| GET | `/api/meta-llms` | All endpoints as Markdown (LLM-friendly) |
-| POST | `/api/enhance-prompt` | AI-enhance a prompt |
-| POST | `/api/generate-text` | Generate text from prompt |
-| POST | `/api/extract-text-from-image` | Vision / image-to-text |
-| POST | `/api/generate-images` | Generate images from prompt |
-| POST | `/api/plan-graph` | Natural language → graph JSON |
-| POST | `/api/render/run` | Execute an inline graph (nodes/edges in body, no saved file required) |
-| POST | `/api/render/:graphId/run` | Execute saved graph, returns unified node states as JSON |
-| POST | `/api/render/:graphId/run/stream` | Execute graph, streams results as SSE (`job_start`, `node_start`, `node_end`, `job_done`, `job_error`) |
-| GET | `/api/graphs` | List saved graphs |
-| GET | `/api/graphs/:graphId` | Get graph by ID |
-| POST | `/api/graphs` | Create graph |
-| PUT | `/api/graphs/:graphId` | Update graph |
-| DELETE | `/api/graphs/:graphId` | Delete graph |
-| GET | `/api/resources` | List image resources |
-| POST | `/api/resources` | Upload image (`multipart/form-data`, field: `file`) |
-| GET | `/api/resources/:id/info` | Resource metadata |
-| GET | `/api/resources/:id` | Raw image binary |
-| DELETE | `/api/resources/:id` | Delete resource |
+See [docs/api-endpoints.md](docs/api-endpoints.md) for the full list of available endpoints.
 
 ## Setup & Commands
 
@@ -162,9 +124,11 @@ npm run test:coverage
 ## Documentation
 
 - [README.md](README.md): Full project overview and quick start
+- [docs/api-endpoints.md](docs/api-endpoints.md): Full API endpoints reference
 - [docs/node-types.md](docs/node-types.md): Node types reference
 - [docs/supported-models.md](docs/supported-models.md): Supported AI models
 - [docs/graph-id-conventions.md](docs/graph-id-conventions.md): Node/edge ID conventions
+- [docs/project-structure.md](docs/project-structure.md): Directory layout
 - [AGENTS.md](AGENTS.md): Architecture rules and patterns for AI agents
 
 ## AI-Friendly
