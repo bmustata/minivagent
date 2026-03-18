@@ -1,6 +1,6 @@
 # MiniVAgent: Digital Alchemy Lab
 
-A node-based generative AI workspace supporting text and image generation using modern AI models.
+MiniVAgent is a node-based workflow application powered by Nano Banana Pro for building AI-driven image and text pipelines. Create flexible generation flows by connecting nodes on a visual canvas, leveraging Google Gemini models and other modern AI tools.
 
 MiniVAgent is released under the [Apache 2.0 License](LICENSE) and encourages all types of contributions. No contribution is too small, and we want to thank all our community contributors.
 

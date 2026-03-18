@@ -2,7 +2,7 @@
 
 ## Overview
 
-MiniVAgent is a visual AI workflow tool — a node-based canvas where you connect nodes to build generative AI pipelines. Nodes can generate text, generate images, analyze images with vision models, or feed static content into the flow. The project runs locally and is not intended for public internet exposure.
+MiniVAgent is a node-based workflow application powered by Nano Banana Pro for building AI-driven image and text pipelines. Create flexible generation flows by connecting nodes on a visual canvas, leveraging Google Gemini models and other modern AI tools.
 
 ![MiniVAgent Screenshot](docs/screenshots/mini-v-agent-v1.png)
 
