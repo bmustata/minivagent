@@ -40,11 +40,11 @@ export function runUI(projectRoot) {
  */
 export function showHelp() {
     const version = getVersion()
-    console.log(`mini-v-agent - Mini Agent v${version}`)
+    console.log(`minivagent - Mini Agent v${version}`)
     console.log('\nUsage:')
-    console.log('  mini-v-agent srv   Start server only')
-    console.log('  mini-v-agent ui    Start both UI and server')
+    console.log('  minivagent srv   Start server only')
+    console.log('  minivagent ui    Start both UI and server')
     console.log('\nExamples:')
-    console.log('  npx mini-v-agent srv')
-    console.log('  npx mini-v-agent ui')
+    console.log('  npx minivagent srv')
+    console.log('  npx minivagent ui')
 }

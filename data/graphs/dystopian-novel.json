@@ -67,7 +67,7 @@
                 "y": 768
             },
             "data": {
-                "prompt": "Multi-Input Workflow:\n\nThis sample demonstrates connecting multiple nodes to a single Text Generator.\n\nBoth the 'Setting' and 'Character' notes are connected to the Text Generator's input. mini-v-agent combines them automatically to provide full context for the story generation.",
+                "prompt": "Multi-Input Workflow:\n\nThis sample demonstrates connecting multiple nodes to a single Text Generator.\n\nBoth the 'Setting' and 'Character' notes are connected to the Text Generator's input. minivagent combines them automatically to provide full context for the story generation.",
                 "isLoading": false
             }
         }

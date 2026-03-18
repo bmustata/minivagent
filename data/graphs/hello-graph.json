@@ -45,7 +45,7 @@
                 "y": 744
             },
             "data": {
-                "prompt": "Welcome to mini-v-agent!\n\nThis basic flow demonstrates how to turn a simple text idea into a high-quality image.\n\n1. The Text Node enhances your rough prompt.\n2. The Image Generation Node creates the visual result.",
+                "prompt": "Welcome to minivagent!\n\nThis basic flow demonstrates how to turn a simple text idea into a high-quality image.\n\n1. The Text Node enhances your rough prompt.\n2. The Image Generation Node creates the visual result.",
                 "isLoading": false
             }
         }

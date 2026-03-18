@@ -1,6 +1,6 @@
 # Supported Models
 
-mini-v-agent supports multiple AI models across different categories. Models can be selected via the API or UI.
+minivagent supports multiple AI models across different categories. Models can be selected via the API or UI.
 
 ## Model Categories
 

@@ -30,7 +30,7 @@ Helper   (server/helpers/)   — Graph traversal, image saving, shared utilities
 ## Project Structure
 
 ```
-mini-v-agent/
+minivagent/
 ├── client/              # React frontend
 │   ├── components/      # Canvas, node types, modals
 │   └── services/        # API client wrappers

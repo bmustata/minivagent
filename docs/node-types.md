@@ -1,10 +1,10 @@
 # Node Types Reference
 
-This document describes all supported node types in mini-v-agent and their properties.
+This document describes all supported node types in minivagent and their properties.
 
 ## Overview
 
-mini-v-agent supports 5 node types for building AI workflows:
+minivagent supports 5 node types for building AI workflows:
 
 | Node Type     | Purpose                          | Input Handles | Output Handles     |
 | ------------- | -------------------------------- | ------------- | ------------------ |

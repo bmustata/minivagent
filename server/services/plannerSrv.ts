@@ -18,7 +18,7 @@ export interface PlanGraphResult {
 }
 
 const PLANNER_SYSTEM_INSTRUCTION = `
-You are an AI Flow Planner for "mini-v-agent", a node-based generative AI tool.
+You are an AI Flow Planner for "minivagent", a node-based generative AI tool.
 Your task is to interpret a user's natural language request and return a JSON object representing a graph of nodes and edges.
 
 **Available Node Types:**

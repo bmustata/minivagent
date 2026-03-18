@@ -1,12 +1,12 @@
 {
-    "name": "mini-v-agent",
+    "name": "minivagent",
     "description": "A node-based generative AI workspace",
     "license": "Apache-2.0",
     "private": true,
     "version": "1.0.0",
     "type": "module",
     "bin": {
-        "mini-v-agent": "agent/index.js"
+        "minivagent": "agent/index.js"
     },
     "scripts": {
         "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",

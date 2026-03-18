@@ -1,8 +1,8 @@
 # MiniVAgent: Digital Alchemy Lab
 
-A node-based generative AI workspace supporting text and image generation using modern AI models.
+MiniVAgent is a node-based workflow application powered by Nano Banana Pro for building AI-driven image and text pipelines. Create flexible generation flows by connecting nodes on a visual canvas, leveraging Google Gemini models and other modern AI tools.
 
-[![Known Vulnerabilities](https://snyk.io/test/github/bmustata/mini-v-agent/badge.svg)](https://snyk.io/test/github/bmustata/mini-v-agent)
+[![Known Vulnerabilities](https://snyk.io/test/github/bmustata/minivagent/badge.svg)](https://snyk.io/test/github/bmustata/minivagent)
 
 ![MiniVAgent Screenshot](docs/screenshots/mini-v-agent-v1.png)
 
@@ -100,10 +100,10 @@ Then open http://localhost:3201 in your browser.
 
 ```bash
 # Start both UI and server
-npx mini-v-agent ui
+npx minivagent ui
 
 # Start server only
-npx mini-v-agent srv
+npx minivagent srv
 ```
 
 ## Usage
@@ -118,7 +118,7 @@ npx mini-v-agent srv
 ## Project Structure
 
 ```
-mini-v-agent/
+minivagent/
 ├── agent/               # CLI tool
 ├── client/              # React frontend
 │   ├── components/      # UI components and nodes
