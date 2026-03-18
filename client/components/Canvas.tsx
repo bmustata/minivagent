@@ -8,7 +8,7 @@ import { GalleryModal, GalleryImage } from './GalleryModal'
 import { GraphManager } from './GraphManager'
 import { GraphTitle } from './GraphTitle'
 import { listGraphs, GraphResource } from '../services/graphService'
-import { Sun, Moon, Image as ImageIcon, Type, StickyNote, X, ZoomIn, ZoomOut, Maximize2, Minimize2, Info, Code, ChevronDown, Play, Loader2, ScanEye, Box, Sparkles, MessageSquare, RotateCcw, Columns2 } from 'lucide-react'
+import { Sun, Moon, Image as ImageIcon, Type, StickyNote, X, ZoomIn, ZoomOut, Maximize2, Minimize2, Info, Code, ChevronDown, Play, Loader2, ScanEye, Box, Sparkles, MessageSquare, RotateCcw, Columns2, Github } from 'lucide-react'
 import { APP_CONFIG } from '../config'
 import { generateText, extractTextFromImage, generateImages, planGraphFromPrompt } from '../services/generateService'
 import { getBase64ImageSize, getImageTypeFromUrl, resourceToUrl } from '../utils/imageUtils'
@@ -1311,6 +1311,9 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                     <button onClick={() => setShowConfigModal(true)} className="p-2 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-md transition-colors text-slate-700 dark:text-zinc-300" title="View Configuration">
                         <Code size={18} />
                     </button>
+                    <a href="https://github.com/bmustata/minivagent" target="_blank" rel="noreferrer" className="p-2 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-md transition-colors text-slate-700 dark:text-zinc-300" title="GitHub">
+                        <Github size={18} />
+                    </a>
                     <button onClick={toggleTheme} className="p-2 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-md transition-colors text-slate-700 dark:text-zinc-300">
                         {isDark ? <Sun size={18} /> : <Moon size={18} />}
                     </button>
