@@ -1,5 +1,14 @@
+import dotenv from 'dotenv'
+import { resolve } from 'path'
 import { GoogleGenAI } from '@google/genai'
 import { logger } from './logger.ts'
+
+// Load env files in priority order: process.env > .env.local > .env
+// dotenv does not override existing process.env values, so we load
+// higher-priority files first and lower-priority ones after.
+const root = resolve(process.cwd())
+dotenv.config({ path: resolve(root, '.env.local'), quiet: true })
+dotenv.config({ path: resolve(root, '.env'), quiet: true })
 
 const imagegen = true
 
@@ -42,6 +51,10 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 if (!GEMINI_API_KEY) {
     logger.error('❌ GEMINI_API_KEY is not set in environment variables')
     throw new Error('GEMINI_API_KEY is required')
+}
+if (GEMINI_API_KEY.length < 20) {
+    logger.error(`❌ GEMINI_API_KEY is too short (length: ${GEMINI_API_KEY.length})`)
+    throw new Error('GEMINI_API_KEY appears invalid')
 }
 logger.info(`✓ GEMINI_API_KEY found (length: ${GEMINI_API_KEY.length})`)
 
