@@ -12,6 +12,7 @@ import { Sun, Moon, Image as ImageIcon, Type, StickyNote, X, ZoomIn, ZoomOut, Ma
 import { APP_CONFIG } from '../config'
 import { generateText, extractTextFromImage, generateImages, planGraphFromPrompt } from '../services/generateService'
 import { ImageGenPropsPanel } from './nodes/ImageGenPropsPanel'
+import { TextGenPropsPanel } from './nodes/TextGenPropsPanel'
 import { getBase64ImageSize, getImageTypeFromUrl, resourceToUrl } from '../utils/imageUtils'
 import { generateNodeId, generateEdgeId } from '../utils/idGenerator'
 
@@ -897,6 +898,10 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                 e.preventDefault()
                 duplicateSelectedNode()
             }
+            // Escape: close props panel
+            if (e.key === 'Escape') {
+                setSelectedNodeId(null)
+            }
             // Delete: Backspace or Delete
             if ((e.key === 'Delete' || e.key === 'Backspace') && selectedNodeId) {
                 // Check if we are not in an input field
@@ -1270,7 +1275,7 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                         </div>
 
                         {/* Dropdown */}
-                        <div className="absolute top-full left-0 mt-1 w-56 max-h-96 overflow-y-auto bg-white dark:bg-zinc-900 rounded-lg shadow-xl border border-slate-200 dark:border-zinc-700 hidden group-hover:block animate-in fade-in zoom-in-95 duration-150">
+                        <div className="absolute top-full left-0 mt-1 w-56 max-h-96 overflow-y-auto bg-white dark:bg-zinc-900 rounded-lg shadow-xl border border-slate-200 dark:border-zinc-700 hidden group-hover:block animate-in fade-in zoom-in-95 duration-150" onWheel={(e) => e.stopPropagation()}>
                             {availableGraphs.length === 0 ? (
                                 <div className="px-3 py-4 text-sm text-slate-500 dark:text-zinc-500 text-center">No graphs available</div>
                             ) : (
@@ -1376,19 +1381,30 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                 </div>
             </div>
 
-            {/* Node Properties Panel — left side, shown when IMAGE_GEN selected */}
+            {/* Node Properties Panel — right side, shown when IMAGE_GEN or TEXT_GEN selected */}
             {(() => {
                 const selectedNode = nodes.find((n) => n.id === selectedNodeId)
-                if (selectedNode?.type !== NodeType.IMAGE_GEN) return null
+                if (!selectedNode) return null
                 return (
                     <div className="absolute right-6 top-1/2 -translate-y-1/2 z-50 pointer-events-auto" onMouseDown={(e) => e.stopPropagation()}>
-                        <ImageGenPropsPanel
-                            node={selectedNode}
-                            updateNodeData={updateNodeData}
-                            connectedInputText={getConnectedText(selectedNode.id)}
-                            onClose={() => setSelectedNodeId(null)}
-                            onRun={() => executeNode(selectedNode.id)}
-                        />
+                        {selectedNode.type === NodeType.IMAGE_GEN && (
+                            <ImageGenPropsPanel
+                                node={selectedNode}
+                                updateNodeData={updateNodeData}
+                                connectedInputText={getConnectedText(selectedNode.id)}
+                                onClose={() => setSelectedNodeId(null)}
+                                onRun={() => executeNode(selectedNode.id)}
+                            />
+                        )}
+                        {selectedNode.type === NodeType.TEXT_GEN && (
+                            <TextGenPropsPanel
+                                node={selectedNode}
+                                updateNodeData={updateNodeData}
+                                connectedInputText={getConnectedText(selectedNode.id)}
+                                onClose={() => setSelectedNodeId(null)}
+                                onRun={() => executeNode(selectedNode.id)}
+                            />
+                        )}
                     </div>
                 )
             })()}

@@ -1,9 +1,6 @@
-import React, { useState, useEffect } from 'react'
-import { Play, Loader2, Copy, Link as LinkIcon, Sparkles, Eye } from 'lucide-react'
-import { toast } from 'sonner'
+import React from 'react'
+import { Play, Loader2, Link as LinkIcon } from 'lucide-react'
 import { Node, NodeData } from '../../types'
-import { TextPreviewModal } from '../TextPreviewModal'
-import { getModels } from '../../services/generateService'
 
 interface TextGenNodeProps {
     node: Node
@@ -13,28 +10,9 @@ interface TextGenNodeProps {
 }
 
 export const TextGenNode: React.FC<TextGenNodeProps> = ({ node, updateNodeData, connectedInputText, onRun }) => {
-    const { prompt, output, isLoading, error, enhancePrompt, model } = node.data
-    const [showPreview, setShowPreview] = useState(false)
-    const [availableModels, setAvailableModels] = useState<Array<{ name: string; model: string }>>([])
-    const [modelsLoading, setModelsLoading] = useState(true)
-
-    useEffect(() => {
-        const fetchModels = async () => {
-            try {
-                const response = await getModels()
-                setAvailableModels(response.models.TEXT)
-            } catch (error) {
-                console.error('Failed to fetch models:', error)
-                toast.error('Failed to load models')
-            } finally {
-                setModelsLoading(false)
-            }
-        }
-        fetchModels()
-    }, [])
+    const { prompt, isLoading, model } = node.data
 
     const isLinked = !!connectedInputText
-    // Allow running if we have a prompt OR a connected input
     const canRun = !!prompt.trim() || isLinked
 
     const handleWheel = (e: React.WheelEvent) => {
@@ -46,38 +24,19 @@ export const TextGenNode: React.FC<TextGenNodeProps> = ({ node, updateNodeData, 
 
     return (
         <div className="flex flex-col gap-3">
-            <div>
-                {/* Model Selector */}
-                <div className="mb-2">
-                    <label className="text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1 block">Model</label>
-                    <select
-                        value={model || ''}
-                        onChange={(e) => updateNodeData(node.id, { model: e.target.value || undefined })}
-                        disabled={modelsLoading}
-                        className="w-full text-xs p-1.5 rounded-md bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 disabled:opacity-50"
-                    >
-                        <option value="">Default</option>
-                        {availableModels.map((m) => (
-                            <option key={m.model} value={m.model}>
-                                {m.name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+            {/* Model Badge */}
+            <div className="flex items-center justify-between">
+                <span className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Model</span>
+                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium truncate max-w-[140px]">{model || 'Default'}</span>
+            </div>
 
+            {/* Prompt */}
+            <div>
                 <div className="flex items-center justify-between mb-2">
-                    <label className="text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase">{isLinked ? 'Input & Instructions' : 'Input Prompt'}</label>
-                    <div className="flex items-center gap-2">
-                        <button
-                            onClick={() => updateNodeData(node.id, { enhancePrompt: !enhancePrompt })}
-                            className={`flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-medium transition-all duration-200 border ${enhancePrompt ? 'bg-indigo-50 border-indigo-200 text-indigo-600 dark:bg-indigo-900/30 dark:border-indigo-800 dark:text-indigo-300' : 'bg-transparent border-transparent text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:text-zinc-500 dark:hover:text-zinc-300 dark:hover:bg-zinc-800'}`}
-                            title={enhancePrompt ? 'Disable Prompt Enhancement' : 'Enable Prompt Enhancement'}
-                        >
-                            <Sparkles size={10} fill={enhancePrompt ? 'currentColor' : 'none'} />
-                            {enhancePrompt ? 'Enhanced' : 'Enhance'}
-                        </button>
-                        {isLinked && <LinkIcon size={12} className="text-indigo-500" />}
-                    </div>
+                    <label className="text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase">
+                        {isLinked ? 'Input & Instructions' : 'Input Prompt'}
+                    </label>
+                    {isLinked && <LinkIcon size={12} className="text-indigo-500" />}
                 </div>
 
                 {isLinked && (
@@ -85,7 +44,8 @@ export const TextGenNode: React.FC<TextGenNodeProps> = ({ node, updateNodeData, 
                         className="w-full text-xs p-2 mb-2 rounded-md bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 italic whitespace-pre-wrap max-h-24 overflow-y-auto custom-scrollbar relative group"
                         onWheel={handleWheel}
                     >
-                        <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity bg-indigo-100 dark:bg-indigo-900 text-[9px] px-1 rounded text-indigo-500">CONTEXT</div>"{connectedInputText}"
+                        <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity bg-indigo-100 dark:bg-indigo-900 text-[9px] px-1 rounded text-indigo-500">CONTEXT</div>
+                        "{connectedInputText}"
                     </div>
                 )}
 
@@ -107,46 +67,6 @@ export const TextGenNode: React.FC<TextGenNodeProps> = ({ node, updateNodeData, 
                 {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} fill="currentColor" />}
                 Generate Text
             </button>
-
-            {(output || error) && (
-                <div className="animate-in fade-in slide-in-from-top-2 duration-200">
-                    <div className="flex items-center justify-between mb-1">
-                        <label className="text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase">Output</label>
-                        {output && (
-                            <button
-                                onClick={() => {
-                                    navigator.clipboard.writeText(output)
-                                    toast.success('Copied to clipboard!')
-                                }}
-                                className="flex items-center gap-1 text-slate-400 hover:text-indigo-500 transition-colors text-xs"
-                                title="Copy to clipboard"
-                            >
-                                <Copy size={12} />
-                                <span>Copy</span>
-                            </button>
-                        )}
-                    </div>
-
-                    <div
-                        className={`text-sm p-2 rounded-md max-h-40 overflow-y-auto custom-scrollbar ${error ? 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400' : 'bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300'}`}
-                        onWheel={handleWheel}
-                    >
-                        {error ? error : output}
-                    </div>
-
-                    {output && (
-                        <div className="flex justify-end mt-1">
-                            <button onClick={() => setShowPreview(true)} className="flex items-center gap-1 text-xs text-slate-400 hover:text-blue-500 transition-colors" title="Preview Full Text">
-                                <Eye size={12} />
-                                <span>Preview</span>
-                            </button>
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {/* Preview Modal */}
-            <TextPreviewModal isOpen={showPreview} onClose={() => setShowPreview(false)} text={output || ''} title="Text Generator Preview" />
         </div>
     )
 }
