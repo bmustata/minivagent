@@ -12,7 +12,7 @@
                 "isLoading": false,
                 "prompt": "Generate a book cover for a pirate ship built from lego\nHave a big bad ship on the main cover\nThe ship must be built from lego bricks\n\nHave no title or subtitle.",
                 "enhancePrompt": true,
-                "output": "A high-resolution, professional book cover image featuring an enormous, intimidating pirate ship, meticulously constructed entirely from LEGO bricks. Emphasize the authentic LEGO aesthetic: visible studs, distinct brick connections, and the characteristic matte plastic texture of the bricks. The ship appears powerful, weathered, and formidable, with intricate details like brick-built cannons protruding from its hull, tattered, brick-like sails made of LEGO elements, and a menacing brick-built skull and crossbones flag flying high, all rendered with clear LEGO construction.\n\nThe ship dominates the dynamic, vertical composition, filling the frame and creating a sense of awe and grand adventure. Use dramatic, volumetric lighting to cast strong shadows and highlights, enhancing the brick textures. The background seamlessly extends the LEGO theme: a turbulent LEGO-style sea depicted with blocky, interconnected LEGO elements forming cresting waves, meets a dramatic LEGO-style sky where clouds are also rendered as abstract, interconnected LEGO bricks. The entire scene maintains a consistent, high-fidelity brick-built theme. Absolutely no text, title, or subtitle is present on the cover."
+                "output": "High-resolution, professional-grade book cover image. A colossal, formidable pirate ship stands prominently in the center of the frame, meticulously detailed and unequivocally built entirely from LEGO bricks. The distinctive LEGO aesthetic is paramount, with every visible stud, the unmistakable texture of plastic building blocks, and intricate brickwork clearly rendered. This vessel exudes immense power and a menacing, 'bad' aura. It boasts numerous towering masts with complex, LEGO-built rigging, billowing, tattered sails (constructed from LEGO fabric pieces or cleverly arranged plates), multiple cannons protruding from its sides, and a tattered flag, perhaps a skull and crossbones, waving defiantly from its peak. The ship churns through a rough, turbulent sea with dynamic, realistically rendered waves and foam. Above, the sky is dramatically lit, either a brewing storm with dark, heavy clouds and flashes of distant lightning, or a fiery, intense sunset casting long, ominous shadows across the scene. The overall style is a hyper-realistic, cinematic render of a highly detailed LEGO model, showcasing sharp focus, exquisite textures, and professional lighting to emphasize its imposing scale and formidable presence. Absolutely no text, titles, subtitles, author names, or any other typographic elements are to be included in the image."
             }
         },
         {
@@ -29,7 +29,7 @@
                 "aspectRatio": "16:9",
                 "outputFormat": "JPEG",
                 "imageResources": [
-                    "306c86a6-87a2-4c7d-bf02-9e09e2aee0bb"
+                    "445a57a4-3bef-4692-bc0e-30104ddad345"
                 ],
                 "model": "gemini-3.1-flash-image-preview",
                 "enhancePrompt": false,

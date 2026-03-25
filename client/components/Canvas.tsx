@@ -479,14 +479,48 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
 
     // --- Graph Management Handlers ---
 
+    const fitNodesToView = (nodesToFit: Node[]) => {
+        if (nodesToFit.length === 0) {
+            setZoom(0.8)
+            setViewport({ x: 0, y: 0 })
+            return
+        }
+        const NODE_W = 320
+        const NODE_H = 220
+        const PADDING = 80
+
+        const minX = Math.min(...nodesToFit.map((n) => n.position.x))
+        const minY = Math.min(...nodesToFit.map((n) => n.position.y))
+        const maxX = Math.max(...nodesToFit.map((n) => n.position.x + NODE_W))
+        const maxY = Math.max(...nodesToFit.map((n) => n.position.y + NODE_H))
+
+        const graphW = maxX - minX
+        const graphH = maxY - minY
+
+        const screenW = window.innerWidth
+        const screenH = window.innerHeight
+
+        const scaleX = (screenW - PADDING * 2) / graphW
+        const scaleY = (screenH - PADDING * 2) / graphH
+        const newZoom = Math.min(Math.max(Math.min(scaleX, scaleY), 0.2), 1.2)
+
+        const centerX = (minX + maxX) / 2
+        const centerY = (minY + maxY) / 2
+
+        setZoom(newZoom)
+        setViewport({
+            x: screenW / 2 - centerX * newZoom,
+            y: screenH / 2 - centerY * newZoom,
+        })
+    }
+
     const handleLoadGraph = (loadedNodes: Node[], loadedEdges: Edge[], graphId: string, graphName: string) => {
         setNodes(JSON.parse(JSON.stringify(loadedNodes)))
         setEdges(JSON.parse(JSON.stringify(loadedEdges)))
         setCurrentGraphId(graphId)
         setCurrentGraphName(graphName)
-        setViewport({ x: 0, y: 0 })
-        setZoom(0.8)
         setSelectedNodeId(null)
+        fitNodesToView(loadedNodes)
 
         // Auto-open panel for IMAGE_TO_TEXT nodes
         const ittNode = loadedNodes.find((n) => n.type === NodeType.IMAGE_TO_TEXT)

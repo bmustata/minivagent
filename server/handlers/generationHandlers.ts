@@ -3,7 +3,7 @@ import type { Request, Response } from 'express'
 import * as generationService from '../services/index.ts'
 import { imageGetMetadata, isValidAspectRatio, getValidAspectRatios, getRefImageSourceDescription } from '../utils/imageUtils.ts'
 import { resolveReferenceImages } from '../helpers/index.ts'
-import { logger } from '../utils/logger.ts'
+import { logger, truncatePromptForLog } from '../utils/logger.ts'
 import { startTimer } from '../utils/observabilityUtils.ts'
 
 const RESOURCES_DIR = path.join(process.cwd(), 'data', 'resources')
@@ -19,7 +19,7 @@ export const enhancePrompt = async (req: Request, res: Response): Promise<void> 
         const timer = startTimer()
         const { prompt, type } = req.body
         logger.info(`POST /api/enhance-prompt - type: ${type}, prompt length: ${prompt?.length}`)
-        logger.info(`--- PROMPT START\n${prompt}\n--- PROMPT END`)
+        logger.info(`--- PROMPT START\n${truncatePromptForLog(prompt)}\n--- PROMPT END`)
 
         const enhancedPrompt = await generationService.enhancePrompt(prompt, type || 'TEXT')
 
@@ -45,7 +45,7 @@ export const generateText = async (req: Request, res: Response): Promise<void> =
         const timer = startTimer()
         const { prompt, shouldEnhance, model } = req.body
         logger.info(`POST /api/generate-text - shouldEnhance: ${shouldEnhance}, model: ${model || 'default'}, prompt length: ${prompt?.length}`)
-        logger.info(`--- PROMPT START\n${prompt}\n--- PROMPT END`)
+        logger.info(`--- PROMPT START\n${truncatePromptForLog(prompt)}\n--- PROMPT END`)
 
         const result = await generationService.generateText({ prompt, shouldEnhance, model })
 
@@ -78,7 +78,7 @@ export const extractTextFromImage = async (req: Request, res: Response): Promise
         const timer = startTimer()
         const { prompt, images, model } = req.body
         logger.info(`POST /api/extract-text-from-image - images: ${images?.length || 0}, model: ${model || 'default'}, prompt length: ${prompt?.length}`)
-        logger.info(`--- PROMPT START\n${prompt}\n--- PROMPT END`)
+        logger.info(`--- PROMPT START\n${truncatePromptForLog(prompt)}\n--- PROMPT END`)
 
         const result = await generationService.extractTextFromImage({ prompt, images, model })
 
@@ -115,7 +115,7 @@ export const generateImages = async (req: Request, res: Response): Promise<void>
         logger.info(
             `POST /api/generate-images - count: ${count}, ratio: ${aspectRatio}, format: ${outputFormat || 'default'}, preset: ${preset || 'none'}, enhance: ${shouldEnhance}, model: ${model || 'none'}, refs: ${referenceImages?.length || 0}, prompt length: ${prompt?.length}`
         )
-        logger.info(`--- PROMPT START\n${prompt}\n--- PROMPT END`)
+        logger.info(`--- PROMPT START\n${truncatePromptForLog(prompt)}\n--- PROMPT END`)
 
         // Validate aspectRatio if provided
         if (aspectRatio && !isValidAspectRatio(aspectRatio)) {
@@ -178,7 +178,7 @@ export const planGraph = async (req: Request, res: Response): Promise<void> => {
         const timer = startTimer()
         const { prompt } = req.body
         logger.info(`POST /api/plan-graph - prompt length: ${prompt?.length}`)
-        logger.info(`--- PROMPT START\n${prompt}\n--- PROMPT END`)
+        logger.info(`--- PROMPT START\n${truncatePromptForLog(prompt)}\n--- PROMPT END`)
 
         const graph = await generationService.planGraph(prompt)
 

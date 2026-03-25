@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Play, Loader2, Link as LinkIcon } from 'lucide-react'
+import { Play, Loader2, Link as LinkIcon, Sparkles } from 'lucide-react'
 import { Node, NodeData } from '../../types'
 import { getModels } from '../../services/generateService'
 
@@ -11,7 +11,7 @@ interface TextGenNodeProps {
 }
 
 export const TextGenNode: React.FC<TextGenNodeProps> = ({ node, updateNodeData, connectedInputText, onRun }) => {
-    const { prompt, isLoading, model } = node.data
+    const { prompt, isLoading, model, enhancePrompt } = node.data
     const [availableModels, setAvailableModels] = useState<{ name: string; model: string }[]>([])
 
     useEffect(() => {
@@ -48,7 +48,21 @@ export const TextGenNode: React.FC<TextGenNodeProps> = ({ node, updateNodeData, 
                     <label className="text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase">
                         {isLinked ? 'Input & Instructions' : 'Input Prompt'}
                     </label>
-                    {isLinked && <LinkIcon size={12} className="text-indigo-500" />}
+                    <div className="flex items-center gap-1.5">
+                        <button
+                            onClick={(e) => { e.stopPropagation(); updateNodeData(node.id, { enhancePrompt: !enhancePrompt }) }}
+                            title={enhancePrompt ? 'Prompt Enhancement ON' : 'Prompt Enhancement OFF'}
+                            className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium transition-all border ${
+                                enhancePrompt
+                                    ? 'bg-indigo-50 border-indigo-200 text-indigo-500 dark:bg-indigo-900/30 dark:border-indigo-800 dark:text-indigo-300'
+                                    : 'bg-transparent border-transparent text-slate-300 dark:text-zinc-600 hover:text-slate-500 dark:hover:text-zinc-400'
+                            }`}
+                        >
+                            <Sparkles size={9} fill={enhancePrompt ? 'currentColor' : 'none'} />
+                            Enhance
+                        </button>
+                        {isLinked && <LinkIcon size={12} className="text-indigo-500" />}
+                    </div>
                 </div>
 
                 {isLinked && (

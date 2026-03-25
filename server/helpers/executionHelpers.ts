@@ -6,7 +6,7 @@ import { extractTextFromImage } from '../services/visionSrv.ts'
 import { imageUrlToBase64 } from '../utils/imageUtils.ts'
 import { readResource, saveResource } from '../services/resourcesSrv.ts'
 import { graphGetConnectedText, graphGetConnectedImages } from './graphHelpers.ts'
-import { logger } from '../utils/logger.ts'
+import { logger, truncatePromptForLog } from '../utils/logger.ts'
 
 const RESOURCES_DIR = path.join(process.cwd(), 'data', 'resources')
 
@@ -68,7 +68,7 @@ export async function executeNode(nodeId: string, nodes: GraphNode[], edges: Gra
             if (!finalPrompt.trim()) throw new Error('No input prompt provided.')
 
             logger.info(`[${jobId}]   → generateText model=${node.data.model ?? 'default'} enhance=${!!node.data.enhancePrompt}`)
-            logger.info(`[${jobId}] --- PROMPT START\n${finalPrompt}\n--- PROMPT END`)
+            logger.info(`[${jobId}] --- PROMPT START\n${truncatePromptForLog(finalPrompt)}\n--- PROMPT END`)
 
             const textResult = await generateText({
                 prompt: finalPrompt,
@@ -101,7 +101,7 @@ export async function executeNode(nodeId: string, nodes: GraphNode[], edges: Gra
             const count = node.data.imageCount || 1
 
             logger.info(`[${jobId}]   → generateImagesBase64 model=${node.data.model ?? 'default'} preset=${node.data.preset ?? 'default'} count=${count} refImages=${processedImages.length}`)
-            logger.info(`[${jobId}] --- PROMPT START\n${finalPrompt}\n--- PROMPT END`)
+            logger.info(`[${jobId}] --- PROMPT START\n${truncatePromptForLog(finalPrompt)}\n--- PROMPT END`)
 
             const result = await generateImagesBase64({
                 prompt: finalPrompt,
@@ -147,7 +147,7 @@ export async function executeNode(nodeId: string, nodes: GraphNode[], edges: Gra
             const processedImages = await resolveReferenceImages(allImages)
 
             logger.info(`[${jobId}]   → extractTextFromImage model=${node.data.model ?? 'default'} images=${processedImages.length}`)
-            logger.info(`[${jobId}] --- PROMPT START\n${prompt}\n--- PROMPT END`)
+            logger.info(`[${jobId}] --- PROMPT START\n${truncatePromptForLog(prompt)}\n--- PROMPT END`)
 
             const visionResult = await extractTextFromImage({
                 prompt,
