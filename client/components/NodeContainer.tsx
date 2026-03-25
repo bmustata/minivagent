@@ -6,13 +6,14 @@ interface NodeContainerProps {
     node: Node
     selected: boolean
     onDelete: (id: string) => void
+    onSelect: (id: string) => void
     onDragStart: (e: React.MouseEvent | React.TouchEvent, id: string) => void
     onConnectStart: (e: React.MouseEvent | React.TouchEvent, id: string, type: 'source' | 'target', handleId?: string) => void
     onConnectEnd: (e: React.MouseEvent | React.TouchEvent, id: string, handleId: string) => void
     children: React.ReactNode
 }
 
-export const NodeContainer: React.FC<NodeContainerProps> = ({ node, selected, onDelete, onDragStart, onConnectStart, onConnectEnd, children }) => {
+export const NodeContainer: React.FC<NodeContainerProps> = ({ node, selected, onDelete, onSelect, onDragStart, onConnectStart, onConnectEnd, children }) => {
     const handlePointerDown = (e: React.MouseEvent | React.TouchEvent) => {
         onDragStart(e, node.id)
     }
@@ -131,7 +132,7 @@ export const NodeContainer: React.FC<NodeContainerProps> = ({ node, selected, on
             </div>
 
             {/* Content */}
-            <div className="p-3 relative cursor-default">{children}</div>
+            <div className="p-3 relative cursor-default" onClick={() => onSelect(node.id)}>{children}</div>
 
             {/* Input Handles (Left) */}
             {inputHandles.map((handle) => (

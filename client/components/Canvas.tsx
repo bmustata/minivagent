@@ -11,6 +11,7 @@ import { listGraphs, GraphResource } from '../services/graphService'
 import { Sun, Moon, Image as ImageIcon, Type, StickyNote, X, ZoomIn, ZoomOut, Maximize2, Minimize2, Info, Code, ChevronDown, Play, Loader2, ScanEye, Box, Sparkles, MessageSquare, RotateCcw, Columns2, Github } from 'lucide-react'
 import { APP_CONFIG } from '../config'
 import { generateText, extractTextFromImage, generateImages, planGraphFromPrompt } from '../services/generateService'
+import { ImageGenPropsPanel } from './nodes/ImageGenPropsPanel'
 import { getBase64ImageSize, getImageTypeFromUrl, resourceToUrl } from '../utils/imageUtils'
 import { generateNodeId, generateEdgeId } from '../utils/idGenerator'
 
@@ -1194,7 +1195,7 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
             >
                 <div className="pointer-events-auto">
                     {nodes.map((node) => (
-                        <NodeContainer key={node.id} node={node} selected={selectedNodeId === node.id} onDelete={deleteNode} onDragStart={handleDragStart} onConnectStart={handleConnectStart} onConnectEnd={handleConnectEnd}>
+                        <NodeContainer key={node.id} node={node} selected={selectedNodeId === node.id} onDelete={deleteNode} onSelect={setSelectedNodeId} onDragStart={handleDragStart} onConnectStart={handleConnectStart} onConnectEnd={handleConnectEnd}>
                             {node.type === NodeType.TEXT_GEN && <TextGenNode node={node} updateNodeData={updateNodeData} connectedInputText={getConnectedText(node.id)} onRun={() => executeNode(node.id)} />}
                             {node.type === NodeType.IMAGE_GEN && (
                                 <ImageGenNode
@@ -1374,6 +1375,23 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                     </button>
                 </div>
             </div>
+
+            {/* Node Properties Panel — left side, shown when IMAGE_GEN selected */}
+            {(() => {
+                const selectedNode = nodes.find((n) => n.id === selectedNodeId)
+                if (selectedNode?.type !== NodeType.IMAGE_GEN) return null
+                return (
+                    <div className="absolute right-6 top-1/2 -translate-y-1/2 z-50 pointer-events-auto" onMouseDown={(e) => e.stopPropagation()}>
+                        <ImageGenPropsPanel
+                            node={selectedNode}
+                            updateNodeData={updateNodeData}
+                            connectedInputText={getConnectedText(selectedNode.id)}
+                            onClose={() => setSelectedNodeId(null)}
+                            onRun={() => executeNode(selectedNode.id)}
+                        />
+                    </div>
+                )
+            })()}
 
             {/* Zoom Controls */}
             <div className="absolute bottom-6 left-6 z-50 pointer-events-auto flex flex-col gap-2" onMouseDown={(e) => e.stopPropagation()}>
