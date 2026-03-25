@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Play, Loader2, Link as LinkIcon } from 'lucide-react'
 import { Node, NodeData } from '../../types'
+import { getModels } from '../../services/generateService'
 
 interface TextGenNodeProps {
     node: Node
@@ -11,6 +12,17 @@ interface TextGenNodeProps {
 
 export const TextGenNode: React.FC<TextGenNodeProps> = ({ node, updateNodeData, connectedInputText, onRun }) => {
     const { prompt, isLoading, model } = node.data
+    const [availableModels, setAvailableModels] = useState<{ name: string; model: string }[]>([])
+
+    useEffect(() => {
+        getModels()
+            .then((r) => setAvailableModels(r.models.TEXT ?? []))
+            .catch(() => {})
+    }, [])
+
+    const modelLabel = model
+        ? (availableModels.find((m) => m.model === model)?.name ?? model)
+        : availableModels[0] ? `Default (${availableModels[0].name})` : 'Default'
 
     const isLinked = !!connectedInputText
     const canRun = !!prompt.trim() || isLinked
@@ -27,7 +39,7 @@ export const TextGenNode: React.FC<TextGenNodeProps> = ({ node, updateNodeData, 
             {/* Model Badge */}
             <div className="flex items-center justify-between">
                 <span className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Model</span>
-                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium truncate max-w-[140px]">{model || 'Default'}</span>
+                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium truncate max-w-[140px]" title={modelLabel}>{modelLabel}</span>
             </div>
 
             {/* Prompt */}
@@ -60,12 +72,12 @@ export const TextGenNode: React.FC<TextGenNodeProps> = ({ node, updateNodeData, 
             </div>
 
             <button
-                onClick={onRun}
+                onClick={(e) => { e.stopPropagation(); onRun() }}
                 disabled={isLoading || !canRun}
                 className="flex items-center justify-center gap-2 w-full py-1.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-300 dark:disabled:bg-zinc-700 text-white text-sm font-medium rounded-md transition-colors"
             >
                 {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} fill="currentColor" />}
-                Generate Text
+                Generate
             </button>
         </div>
     )

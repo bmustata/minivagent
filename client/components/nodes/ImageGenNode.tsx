@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Play, Loader2, Maximize2, Info, ImageOff } from 'lucide-react'
+import { Play, Loader2, Maximize2, ImageOff } from 'lucide-react'
 import { Node, NodeData } from '../../types'
 import { getModels } from '../../services/generateService'
 import { resourceToUrl } from '../../utils/imageUtils'
@@ -32,7 +32,7 @@ export const ImageGenNode: React.FC<ImageGenNodeProps> = ({ node, connectedInput
 
     const modelLabel = model
         ? (availableModels.find((m) => m.model === model)?.name ?? model)
-        : 'Default'
+        : availableModels[0] ? `Default (${availableModels[0].name})` : 'Default'
 
     const hasImages = connectedInputImages.length > 0
     const canRun = !!prompt.trim() || !!connectedInputText || hasImages
@@ -72,15 +72,6 @@ export const ImageGenNode: React.FC<ImageGenNodeProps> = ({ node, connectedInput
             {/* Output Image Grid */}
             {imageResources && imageResources.length > 0 && !isLoading && (
                 <div className="space-y-2">
-                    <div className="flex items-center px-2 py-1 bg-purple-50 dark:bg-purple-900/10 rounded-md border border-purple-200 dark:border-purple-900/30">
-                        <div className="flex items-center gap-1.5 text-[10px] text-purple-600 dark:text-purple-400">
-                            <Info size={10} />
-                            <span className="font-semibold">
-                                {imageResources.length} image{imageResources.length > 1 ? 's' : ''}
-                            </span>
-                        </div>
-                    </div>
-
                     <div className={`grid gap-2 ${imageResources.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
                         {imageResources.map((item, idx) => {
                             const imgUrl = resourceToUrl(item)
@@ -125,7 +116,7 @@ export const ImageGenNode: React.FC<ImageGenNodeProps> = ({ node, connectedInput
 
             {/* Generate Button */}
             <button
-                onClick={onRun}
+                onClick={(e) => { e.stopPropagation(); onRun() }}
                 disabled={isLoading || !canRun}
                 className="flex items-center justify-center gap-2 w-full py-1.5 bg-purple-600 hover:bg-purple-500 disabled:bg-slate-300 dark:disabled:bg-zinc-700 text-white text-sm font-medium rounded-md transition-colors"
             >

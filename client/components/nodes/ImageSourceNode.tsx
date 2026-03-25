@@ -360,16 +360,6 @@ export const ImageSourceNode: React.FC<ImageSourceNodeProps> = ({ node, updateNo
             {/* Input Fields */}
             {imageInputType === 'UPLOAD' && <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept="image/*" />}
 
-            {imageInputType === 'URL' && !imageInput?.startsWith('data:') && (
-                <input
-                    type="text"
-                    value={imageInput || ''}
-                    onChange={(e) => updateNodeData(node.id, { imageInput: e.target.value })}
-                    placeholder="https://example.com/image.jpg"
-                    className="w-full text-xs p-2 rounded-md bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
-                />
-            )}
-
             {/* Visual Handle Indicator */}
             <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-cyan-500/50 rounded-l-full blur-[2px]" />
         </div>

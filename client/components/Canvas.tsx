@@ -13,6 +13,9 @@ import { APP_CONFIG } from '../config'
 import { generateText, extractTextFromImage, generateImages, planGraphFromPrompt } from '../services/generateService'
 import { ImageGenPropsPanel } from './nodes/ImageGenPropsPanel'
 import { TextGenPropsPanel } from './nodes/TextGenPropsPanel'
+import { ComparePropsPanel } from './nodes/ComparePropsPanel'
+import { ImageSourcePropsPanel } from './nodes/ImageSourcePropsPanel'
+import { ImageToTextPropsPanel } from './nodes/ImageToTextPropsPanel'
 import { getBase64ImageSize, getImageTypeFromUrl, resourceToUrl } from '../utils/imageUtils'
 import { generateNodeId, generateEdgeId } from '../utils/idGenerator'
 
@@ -70,6 +73,18 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
     // Instruction state
     const [showInstructions, setShowInstructions] = useState(false)
     const [enlargeInstructions, setEnlargeInstructions] = useState(false)
+
+    // Graph dropdown
+    const [showGraphDropdown, setShowGraphDropdown] = useState(false)
+    const graphDropdownHideTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+    const openGraphDropdown = () => {
+        if (graphDropdownHideTimer.current) clearTimeout(graphDropdownHideTimer.current)
+        setShowGraphDropdown(true)
+    }
+    const closeGraphDropdown = () => {
+        graphDropdownHideTimer.current = setTimeout(() => setShowGraphDropdown(false), 300)
+    }
 
     // Assistant / Chat State
     const [showAssistant, setShowAssistant] = useState(false)
@@ -471,8 +486,11 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
         setCurrentGraphName(graphName)
         setViewport({ x: 0, y: 0 })
         setZoom(0.8)
+        setSelectedNodeId(null)
 
-        // Update URL and title with graph ID
+        // Auto-open panel for IMAGE_TO_TEXT nodes
+        const ittNode = loadedNodes.find((n) => n.type === NodeType.IMAGE_TO_TEXT)
+        if (ittNode) setTimeout(() => setSelectedNodeId(ittNode.id), 0)
         window.history.pushState({}, '', `/graph/${graphId}`)
         document.title = `MiniVAgent — ${graphName || graphId}`
     }
@@ -737,6 +755,7 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
             }
         }
         setNodes((prev) => [...prev, newNode])
+        if (type === NodeType.IMAGE_TO_TEXT) setSelectedNodeId(id)
     }
 
     const updateNodeData = (id: string, newData: Partial<NodeData>) => {
@@ -1268,14 +1287,15 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
             <div className="absolute top-4 left-4 z-50 flex items-center gap-2 pointer-events-none" onMouseDown={(e) => e.stopPropagation()}>
                 <div className="pointer-events-auto flex items-center bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md rounded-lg shadow-lg border border-slate-200 dark:border-zinc-700 p-1 gap-1">
                     {/* Graph Selector */}
-                    <div className="relative group">
+                    <div className="relative" onMouseEnter={openGraphDropdown} onMouseLeave={closeGraphDropdown}>
                         <div className="flex items-center gap-2 px-3 py-1.5 cursor-pointer rounded-md hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors">
                             <div className="font-bold text-lg bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-500 whitespace-nowrap">MiniVAgent</div>
                             <ChevronDown size={14} className="text-slate-400" />
                         </div>
 
                         {/* Dropdown */}
-                        <div className="absolute top-full left-0 mt-1 w-56 max-h-96 overflow-y-auto bg-white dark:bg-zinc-900 rounded-lg shadow-xl border border-slate-200 dark:border-zinc-700 hidden group-hover:block animate-in fade-in zoom-in-95 duration-150" onWheel={(e) => e.stopPropagation()}>
+                        {showGraphDropdown && <div className="absolute top-full left-0 mt-1 w-56 max-h-96 overflow-y-auto thin-scrollbar bg-white dark:bg-zinc-900 rounded-lg shadow-xl border border-slate-200 dark:border-zinc-700 animate-in fade-in zoom-in-95 duration-150" onWheel={(e) => e.stopPropagation()}>
+                            <div className="px-3 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-zinc-500">Recent files</div>
                             {availableGraphs.length === 0 ? (
                                 <div className="px-3 py-4 text-sm text-slate-500 dark:text-zinc-500 text-center">No graphs available</div>
                             ) : (
@@ -1289,7 +1309,7 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                                     </button>
                                 ))
                             )}
-                        </div>
+                        </div>}
                     </div>
 
                     <div className="h-6 w-[1px] bg-slate-200 dark:bg-zinc-700 mx-1" />
@@ -1384,7 +1404,7 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
             {/* Node Properties Panel — right side, shown when IMAGE_GEN or TEXT_GEN selected */}
             {(() => {
                 const selectedNode = nodes.find((n) => n.id === selectedNodeId)
-                if (!selectedNode) return null
+                if (!selectedNode || selectedNode.type === NodeType.IMAGE_TO_TEXT) return null
                 return (
                     <div className="absolute right-6 top-1/2 -translate-y-1/2 z-50 pointer-events-auto" onMouseDown={(e) => e.stopPropagation()}>
                         {selectedNode.type === NodeType.IMAGE_GEN && (
@@ -1405,6 +1425,37 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                                 onRun={() => executeNode(selectedNode.id)}
                             />
                         )}
+                        {selectedNode.type === NodeType.COMPARE && (
+                            <ComparePropsPanel
+                                node={selectedNode}
+                                updateNodeData={updateNodeData}
+                                onClose={() => setSelectedNodeId(null)}
+                            />
+                        )}
+                        {selectedNode.type === NodeType.IMAGE_SOURCE && (
+                            <ImageSourcePropsPanel
+                                node={selectedNode}
+                                updateNodeData={updateNodeData}
+                                onClose={() => setSelectedNodeId(null)}
+                            />
+                        )}
+                    </div>
+                )
+            })()}
+
+            {/* Image-to-Text Properties Panel — left side, enabled by default */}
+            {(() => {
+                const selectedNode = nodes.find((n) => n.id === selectedNodeId)
+                if (!selectedNode || selectedNode.type !== NodeType.IMAGE_TO_TEXT) return null
+                return (
+                    <div className="absolute right-6 top-1/2 -translate-y-1/2 z-50 pointer-events-auto" onMouseDown={(e) => e.stopPropagation()}>
+                        <ImageToTextPropsPanel
+                            node={selectedNode}
+                            updateNodeData={updateNodeData}
+                            connectedInputText={getConnectedText(selectedNode.id)}
+                            onClose={() => setSelectedNodeId(null)}
+                            onRun={() => executeNode(selectedNode.id)}
+                        />
                     </div>
                 )
             })()}

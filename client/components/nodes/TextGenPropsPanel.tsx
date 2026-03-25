@@ -72,7 +72,7 @@ export const TextGenPropsPanel: React.FC<TextGenPropsPanelProps> = ({ node, upda
                             disabled={modelsLoading}
                             className="w-full text-xs p-1.5 rounded-md bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 disabled:opacity-50"
                         >
-                            <option value="">Default</option>
+                            <option value="">{availableModels[0] ? `Default (${availableModels[0].name})` : 'Default'}</option>
                             {availableModels.map((m) => (
                                 <option key={m.model} value={m.model}>
                                     {m.name}

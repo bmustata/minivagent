@@ -17,6 +17,22 @@ export const CompareNode: React.FC<CompareNodeProps> = ({ node, connectedImages,
     const sliderImages = connectedImages.slice(0, 2)
 
     const [mode, setMode] = useState<CompareMode>((node.data.compareMode as CompareMode) ?? 'slider')
+
+    // Sync mode when changed externally via props panel
+    useEffect(() => {
+        if (node.data.compareMode && node.data.compareMode !== mode) {
+            setMode(node.data.compareMode as CompareMode)
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [node.data.compareMode])
+
+    // Sync mode when changed externally (e.g. via props panel)
+    useEffect(() => {
+        if (node.data.compareMode && node.data.compareMode !== mode) {
+            setMode(node.data.compareMode as CompareMode)
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [node.data.compareMode])
     const [sliderPos, setSliderPos] = useState(50) // 0–100 percent
     const [toggleVisible, setToggleVisible] = useState<number>(0)
     const [isFullscreen, setIsFullscreen] = useState(false)

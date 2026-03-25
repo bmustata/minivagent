@@ -25,3 +25,18 @@ body {
     display: flex;
     flex-direction: column;
 }
+
+/* Thin scrollbar utility */
+.thin-scrollbar::-webkit-scrollbar {
+    width: 4px;
+}
+.thin-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.thin-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(148, 163, 184, 0.5);
+    border-radius: 9999px;
+}
+.dark .thin-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(113, 113, 122, 0.5);
+}
