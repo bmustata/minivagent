@@ -19,7 +19,7 @@
             "id": "vision027244",
             "type": "IMAGE_TO_TEXT",
             "position": {
-                "x": 720,
+                "x": 672,
                 "y": 1272
             },
             "data": {
@@ -29,6 +29,28 @@
                 "model": "gemini-3-flash-preview",
                 "output": "This is a highly detailed, vertical portrait of an elderly man who appears to be a seasoned mariner or fisherman. He is the central focus of the image, captured from the chest up against a soft, blurred coastal background.\n\n**The Subject:**\nThe man has a rugged, weather-worn face with deep wrinkles and piercing light-blue eyes that look directly at the viewer with a stoic and contemplative expression. He has thick, salt-and-pepper hair peeking out from under his hat, and a full, well-groomed grey beard and mustache. A classic wooden smoking pipe with a dark brown bowl and black stem is clenched in his teeth.\n\n**Attire:**\nHe is dressed in heavy, practical layers suitable for a maritime environment:\n*   **Hat:** He wears a dark grey or charcoal-colored fiddler cap (also known as a mariner's cap) made of textured fabric.\n*   **Jacket:** He is wearing a dark, weathered outdoor jacket with various details like zippers, buttons, and multiple layers of fabric. \n*   **Accessories:** Around his neck is a thick, olive-green scarf. A heavy, worn brown leather strap with metallic buckles and rivets crosses over his shoulder, possibly for a bag or tool. A thick, tan-colored drawstring or rope is also visible on his right side.\n\n**Background and Composition:**\nThe background is out of focus, showing a muted teal sea and the faint, blurry silhouettes of what appear to be wooden dock pilings or ship masts under an overcast, grey sky. The lighting is soft and natural, highlighting the intricate textures of the man’s skin, the fibers of his clothing, and the grain of the wooden pipe. \n\nThe overall mood is serious and atmospheric, conveying a sense of a life lived at sea."
             }
+        },
+        {
+            "id": "imagegen673883",
+            "type": "IMAGE_GEN",
+            "position": {
+                "x": 864,
+                "y": 504
+            },
+            "data": {
+                "prompt": "Generate multiple views for the character\n\nNo text description \n\nBackground under the images / view gray",
+                "isLoading": false,
+                "imageCount": 3,
+                "aspectRatio": "1:1",
+                "outputFormat": "JPEG",
+                "model": "gemini-3.1-flash-image-preview",
+                "preset": "1K",
+                "imageResources": [
+                    "cb3edaa5-0b00-4ee8-be39-ca8144a3952b",
+                    "1ad6febd-e475-41bb-b093-d40da790e4da",
+                    "b4d1c2c9-e64d-4a8f-b739-d71ea12738b6"
+                ]
+            }
         }
     ],
     "edges": [
@@ -37,6 +59,13 @@
             "source": "imgsrc025306",
             "sourceHandle": "image",
             "target": "vision027244",
+            "targetHandle": "image"
+        },
+        {
+            "id": "e044764",
+            "source": "imgsrc025306",
+            "sourceHandle": "image",
+            "target": "imagegen673883",
             "targetHandle": "image"
         }
     ]

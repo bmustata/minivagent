@@ -531,14 +531,8 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
         setCurrentGraphId(graphId)
         setCurrentGraphName(graphName)
         setSelectedNodeId(null)
+        setSelectedNodeIds([])
         fitNodesToView(loadedNodes)
-
-        // Auto-open panel for IMAGE_TO_TEXT nodes
-        const ittNode = loadedNodes.find((n) => n.type === NodeType.IMAGE_TO_TEXT)
-        if (ittNode) setTimeout(() => {
-            setSelectedNodeId(ittNode.id)
-            setSelectedNodeIds([ittNode.id])
-        }, 0)
         window.history.pushState({}, '', `/graph/${graphId}`)
         document.title = `MiniVAgent — ${graphName || graphId}`
     }
