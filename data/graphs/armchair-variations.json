@@ -29,7 +29,7 @@
                 "aspectRatio": "1:1",
                 "outputFormat": "PNG",
                 "imageResources": [
-                    "b16d3066-4e2c-42ef-b20d-54f5c816dec5"
+                    "49677620-3ac9-4f05-a934-6511623cb1f1"
                 ]
             }
         },
@@ -60,7 +60,7 @@
                 "model": "gemini-3-pro-image-preview",
                 "preset": "1K",
                 "imageResources": [
-                    "7c8e580d-d801-4baf-ba60-b3229a0a7891"
+                    "c0c6b23f-e6f2-40fd-a3f8-9cec5d733aef"
                 ]
             }
         },
@@ -79,7 +79,7 @@
                 "model": "gemini-3-pro-image-preview",
                 "preset": "1K",
                 "imageResources": [
-                    "87c6902c-db14-48b9-bea4-7bbac869faeb"
+                    "f70deb70-a1bf-4246-a1f5-e9e09b27ec23"
                 ]
             }
         },
@@ -98,7 +98,7 @@
                 "model": "gemini-3-pro-image-preview",
                 "preset": "1K",
                 "imageResources": [
-                    "3426e652-f3de-423b-b924-157aefa9321f"
+                    "9f8d44b9-39e3-462c-b837-9064543e89fb"
                 ]
             }
         }

@@ -11,3 +11,12 @@ export const logger = pino({
         }
     }
 })
+
+const PROMPT_LOG_LINES = 10
+
+export function truncatePromptForLog(prompt: string): string {
+    const lines = prompt.split('\n')
+    if (lines.length <= PROMPT_LOG_LINES) return prompt
+    const skipped = lines.length - PROMPT_LOG_LINES
+    return lines.slice(0, PROMPT_LOG_LINES).join('\n') + `\n... (${skipped} line${skipped === 1 ? '' : 's'} omitted)`
+}

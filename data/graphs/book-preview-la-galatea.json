@@ -9,9 +9,9 @@
                 "y": 648
             },
             "data": {
-                "prompt": "Bold book cover with a vivid yellow background and delicate line-art of a pastoral landscape. Large white title text: \u201cLA GALATEA\u201d. Refined classical typography, poetic and elegant composition. Author name: \u201cMiguel de Cervantes\u201d.",
+                "prompt": "Bold book cover with a vivid yellow background and delicate line-art of a pastoral landscape. Large white title text: “LA GALATEA”. Refined classical typography, poetic and elegant composition. Author name: “Miguel de Cervantes”.",
                 "isLoading": false,
-                "output": "Here are a few options for a Midjourney prompt, each with slightly different nuances to capture your vision:\n\n**Option 1 (Focus on directness and contrast):**\n\n```\nA bold and elegant book cover design. Vivid yellow background. Delicate, thin-line art illustration of a classical pastoral landscape: rolling hills, graceful trees, a gentle river, and a few grazing sheep. The line-art should be in a subtle dark grey or black, minimalist and refined. Large white title text: \"LA GALATEA\" in sophisticated, classic serif typography. Author name: \"Miguel de Cervantes\" in smaller white serif text below the title. Poetic and clean composition, high contrast, literary feel. --ar 2:3 --style raw\n```\n\n**Option 2 (Emphasizing the \"ethereal\" quality of the line art):**\n\n```\nBook cover art, poetic and elegant composition. Bright, vivid lemon yellow background. Centered, ethereal and delicate single-line art drawing of an idyllic pastoral scene: distant classical ruins among rolling hills, ancient trees, and a winding stream. The line-art is intricate but subtle, in a very fine charcoal grey. Prominent large white title: \"LA GALATEA\" in a refined, calligraphic serif font. Author: \"Miguel de Cervantes\" in elegant smaller white text. Graphic design, clean aesthetic. --ar 2:3 --v 5.2\n```\n\n**Option 3 (Slightly more descriptive for the landscape):**\n\n```\nStriking book cover with a luminous yellow background. A beautifully rendered, delicate line-art illustration of a pastoral landscape covers the central area: imagine an Arcadian valley with slender cypress trees, a shepherd's crook visible among distant sheep, and a sun-dappled stream. The line-art is in a refined black ink sketch style, very fine and detailed. The title \"LA GALATEA\" is presented in large, elegant white classical serif lettering. Below, the author \"Miguel de Cervantes\" in matching smaller white typography. Bold, clean, and classic design. --ar 2:3 --s 750\n```\n\n**Key elements used and why:**\n\n*   **`--ar 2:3`**: Standard book cover aspect ratio.\n*   **`--style raw`**: (Midjourney V5.2 onwards) Helps prevent Midjourney from over-stylizing and keeps the output closer to a clean graphic design.\n*   **`--v 5.2`**: (If you want to ensure a specific version, good for control).\n*   **`--s 750`**: (Stylize parameter, 750 is moderately high, can be adjusted between 0-1000 to control how \"artistic\" vs. \"literal\" the output is).\n*   **\"Vivid yellow background\" / \"Bright lemon yellow background\" / \"Luminous yellow background\"**: Different ways to prompt the specific yellow.\n*   **\"Delicate, thin-line art\" / \"Ethereal and delicate single-line art\" / \"Refined black ink sketch style, very fine and detailed\"**: Emphasizes the requested line-art style.\n*   **\"Pastoral landscape: rolling hills, graceful trees, a gentle river, and a few grazing sheep\" / \"Arcadian valley with slender cypress trees, a shepherd's crook visible among distant sheep, and a sun-dappled stream\"**: Provides specifics for the landscape.\n*   **\"Large white title text: \"LA GALATEA\" in sophisticated, classic serif typography\"**: Specifies text, color, size, and font style.\n*   **\"Author name: \"Miguel de Cervantes\" in smaller white serif text below the title\"**: Specifies author, color, size, and placement.\n*   **\"Poetic and clean composition, high contrast, literary feel\"**: Captures the overall mood and design goals.\n\nChoose the prompt that best reflects the exact nuance you're aiming for!"
+                "output": "Here's a detailed description of that book cover:\n\n---\n\n**Book Cover: LA GALATEA**\n\nThe book cover immediately commands attention with a **vibrant, luminous yellow background** that is both bold and sophisticated. This isn't a harsh primary yellow, but a deep, rich daffodil or marigold hue that feels warm, inviting, and inherently classical, evoking sun-drenched pastoral scenes.\n\nSuperimposed over this radiant backdrop, and primarily occupying the lower third to half of the cover, is an exquisite example of **delicate line-art**. Rendered in a fine, almost whisper-thin black or dark charcoal line, the illustration depicts a serene **pastoral landscape**. Rolling hills, gently contoured, recede into the distance, suggesting depth and tranquility. A winding, stylized river or stream flows gracefully through the foreground, bordered by elegant, slender trees—perhaps classical cypresses or willows—with sparse, artfully placed foliage. A few tiny, evocative details might include a small flock of sheep grazing peacefully, or a solitary, idealized figure of a shepherd playing a pipe, subtly hinting at the story's themes. The lines are fluid, almost calligraphic, conveying a sense of peace, timelessness, and natural beauty without cluttering the vibrant yellow.\n\nCentered prominently in the upper half of the cover, standing out boldly against the yellow, is the title: **“LA GALATEA”**. The text is rendered in pristine, crisp **white**. The typography is **refined classical**, perhaps a sophisticated serif font like Trajan Pro, Garamond Premier Pro, or a similar elegant Roman typeface. Its lines are clean, well-proportioned, and generously spaced, conveying a sense of antiquity and literary weight. The \"poetic and elegant composition\" of the title makes it feel both monumental and graceful.\n\nBeneath the title, and also in **white** using the same, or a complementary, refined classical serif font (but in a smaller, subordinate size), is the author's name: **“Miguel de Cervantes”**. It is positioned gracefully, acknowledging the author with quiet authority and blending seamlessly into the overall sophisticated aesthetic.\n\nThe overall design strikes a perfect balance: the bold modernity of the vivid yellow is softened and elevated by the classical restraint and subtle artistry of the delicate line-art and typography. It's a cover that feels fresh and inviting while deeply respecting the classical origins and pastoral themes of Cervantes' work. The visual contrast between the brilliant background and the understated, elegant foreground elements creates a captivating depth and immediate visual interest.\n\n---"
             }
         },
         {
@@ -29,7 +29,7 @@
                 "outputFormat": "JPEG",
                 "images": [],
                 "imageResources": [
-                    "3cc09453-d4fb-48c1-b71a-5850ccc787ba"
+                    "186131a9-4b67-4ccb-8648-244de9b7b2ac"
                 ]
             }
         },
@@ -48,7 +48,7 @@
                 "outputFormat": "JPEG",
                 "images": [],
                 "imageResources": [
-                    "9fb5b3a2-581b-415f-8d14-2b30a84a7f87"
+                    "f1263ca7-2b18-45f3-b796-49de3fea30fc"
                 ]
             }
         },
@@ -70,8 +70,8 @@
                 "model": "gemini-3-pro-image-preview",
                 "preset": "1K",
                 "imageResources": [
-                    "0ccafc1b-f545-4712-a9e2-4e0739ead50c",
-                    "a02f9ea2-0363-48bf-8fc7-d9109e261e24"
+                    "df7191f6-30aa-4a22-9673-811b5f8560fd",
+                    "8cb431d2-d0b1-4743-96a9-be78db561d2c"
                 ]
             }
         },
@@ -83,7 +83,7 @@
                 "y": 1128
             },
             "data": {
-                "prompt": "Display the book in\nAn old-fashioned European coffee house. Ornate d\u00e9cor, classic wooden chairs, warm golden light, nostalgic atmosphere.",
+                "prompt": "Display the book in\nAn old-fashioned European coffee house. Ornate décor, classic wooden chairs, warm golden light, nostalgic atmosphere.",
                 "isLoading": false,
                 "imageCount": 2,
                 "aspectRatio": "1:1",
@@ -91,8 +91,8 @@
                 "images": [],
                 "enhancePrompt": false,
                 "imageResources": [
-                    "5a43e6e5-6bdc-4df4-b3f4-04e59528c01e",
-                    "87ecbf06-960e-4d2d-a146-987d000c9aef"
+                    "e01ce24e-97ea-4e82-9427-afb1255734cf",
+                    "0dbc548e-5e18-444d-8bd6-575557f12ba4"
                 ],
                 "model": "gemini-3-pro-image-preview",
                 "preset": "1K"
@@ -102,11 +102,11 @@
             "id": "note528974",
             "type": "NOTE",
             "position": {
-                "x": 144,
-                "y": 1992
+                "x": 288,
+                "y": 1368
             },
             "data": {
-                "prompt": "\u201cLa Galatea\u201d is a pastoral novel written by Miguel de Cervantes, best known later for Don Quixote. It was his first published book, released in 1585.\n\n\ud83d\udcd6 La Galatea \u2014 Overview\n\nFull title: La Galatea\nAuthor: Miguel de Cervantes\nGenre: Pastoral romance\nPublication year: 1585\nLanguage: Spanish",
+                "prompt": "“La Galatea” is a pastoral novel written by Miguel de Cervantes, best known later for Don Quixote. It was his first published book, released in 1585.\n\n📖 La Galatea — Overview\n\nFull title: La Galatea\nAuthor: Miguel de Cervantes\nGenre: Pastoral romance\nPublication year: 1585\nLanguage: Spanish",
                 "isLoading": false
             }
         }

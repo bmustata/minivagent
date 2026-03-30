@@ -11,6 +11,11 @@ import { listGraphs, GraphResource } from '../services/graphService'
 import { Sun, Moon, Image as ImageIcon, Type, StickyNote, X, ZoomIn, ZoomOut, Maximize2, Minimize2, Info, Code, ChevronDown, Play, Loader2, ScanEye, Box, Sparkles, MessageSquare, RotateCcw, Columns2, Github } from 'lucide-react'
 import { APP_CONFIG } from '../config'
 import { generateText, extractTextFromImage, generateImages, planGraphFromPrompt } from '../services/generateService'
+import { ImageGenPropsPanel } from './nodes/ImageGenPropsPanel'
+import { TextGenPropsPanel } from './nodes/TextGenPropsPanel'
+import { ComparePropsPanel } from './nodes/ComparePropsPanel'
+import { ImageSourcePropsPanel } from './nodes/ImageSourcePropsPanel'
+import { ImageToTextPropsPanel } from './nodes/ImageToTextPropsPanel'
 import { getBase64ImageSize, getImageTypeFromUrl, resourceToUrl } from '../utils/imageUtils'
 import { generateNodeId, generateEdgeId } from '../utils/idGenerator'
 
@@ -49,7 +54,9 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
     const [zoom, setZoom] = useState(0.8) // Start slightly zoomed out
 
     const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
+    const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([])
     const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null)
+    const [selectionRect, setSelectionRect] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null)
     const [connectionDraft, setConnectionDraft] = useState<{ sourceId: string; sourceHandle: string; currentPos: { x: number; y: number } } | null>(null)
     const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null)
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
@@ -69,6 +76,18 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
     const [showInstructions, setShowInstructions] = useState(false)
     const [enlargeInstructions, setEnlargeInstructions] = useState(false)
 
+    // Graph dropdown
+    const [showGraphDropdown, setShowGraphDropdown] = useState(false)
+    const graphDropdownHideTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+    const openGraphDropdown = () => {
+        if (graphDropdownHideTimer.current) clearTimeout(graphDropdownHideTimer.current)
+        setShowGraphDropdown(true)
+    }
+    const closeGraphDropdown = () => {
+        graphDropdownHideTimer.current = setTimeout(() => setShowGraphDropdown(false), 300)
+    }
+
     // Assistant / Chat State
     const [showAssistant, setShowAssistant] = useState(false)
     const [assistantPrompt, setAssistantPrompt] = useState('')
@@ -80,6 +99,12 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
     const lastTouchRef = useRef<{ x: number; y: number; dist: number } | null>(null)
     const isPanningRef = useRef(false)
     const lastMouseRef = useRef<{ x: number; y: number } | null>(null)
+    const isSelectingRef = useRef(false)
+    const selectionStartRef = useRef<{ x: number; y: number } | null>(null)
+    const selectionRectRef = useRef<{ x1: number; y1: number; x2: number; y2: number } | null>(null)
+    const selectedNodeIdsRef = useRef<string[]>([])
+    const multiDragInitialPositionsRef = useRef<Record<string, { x: number; y: number }>>({})
+    const dragStartWorldRef = useRef<{ x: number; y: number } | null>(null)
 
     // Ref for nodes to allow access to latest state in async execution loops
     const nodesRef = useRef(nodes)
@@ -94,6 +119,9 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
     useEffect(() => {
         nodesRef.current = nodes
     }, [nodes])
+    useEffect(() => {
+        selectedNodeIdsRef.current = selectedNodeIds
+    }, [selectedNodeIds])
 
     // --- Helpers ---
 
@@ -462,15 +490,49 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
 
     // --- Graph Management Handlers ---
 
+    const fitNodesToView = (nodesToFit: Node[]) => {
+        if (nodesToFit.length === 0) {
+            setZoom(0.8)
+            setViewport({ x: 0, y: 0 })
+            return
+        }
+        const NODE_W = 320
+        const NODE_H = 220
+        const PADDING = 80
+
+        const minX = Math.min(...nodesToFit.map((n) => n.position.x))
+        const minY = Math.min(...nodesToFit.map((n) => n.position.y))
+        const maxX = Math.max(...nodesToFit.map((n) => n.position.x + NODE_W))
+        const maxY = Math.max(...nodesToFit.map((n) => n.position.y + NODE_H))
+
+        const graphW = maxX - minX
+        const graphH = maxY - minY
+
+        const screenW = window.innerWidth
+        const screenH = window.innerHeight
+
+        const scaleX = (screenW - PADDING * 2) / graphW
+        const scaleY = (screenH - PADDING * 2) / graphH
+        const newZoom = Math.min(Math.max(Math.min(scaleX, scaleY), 0.2), 1.2)
+
+        const centerX = (minX + maxX) / 2
+        const centerY = (minY + maxY) / 2
+
+        setZoom(newZoom)
+        setViewport({
+            x: screenW / 2 - centerX * newZoom,
+            y: screenH / 2 - centerY * newZoom,
+        })
+    }
+
     const handleLoadGraph = (loadedNodes: Node[], loadedEdges: Edge[], graphId: string, graphName: string) => {
         setNodes(JSON.parse(JSON.stringify(loadedNodes)))
         setEdges(JSON.parse(JSON.stringify(loadedEdges)))
         setCurrentGraphId(graphId)
         setCurrentGraphName(graphName)
-        setViewport({ x: 0, y: 0 })
-        setZoom(0.8)
-
-        // Update URL and title with graph ID
+        setSelectedNodeId(null)
+        setSelectedNodeIds([])
+        fitNodesToView(loadedNodes)
         window.history.pushState({}, '', `/graph/${graphId}`)
         document.title = `MiniVAgent — ${graphName || graphId}`
     }
@@ -735,6 +797,10 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
             }
         }
         setNodes((prev) => [...prev, newNode])
+        if (type === NodeType.IMAGE_TO_TEXT) {
+            setSelectedNodeId(id)
+            setSelectedNodeIds([id])
+        }
     }
 
     const updateNodeData = (id: string, newData: Partial<NodeData>) => {
@@ -785,10 +851,22 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
             return
         }
 
-        // If not panning, handle deselection
+        // If not panning, handle deselection and rubber-band start
         if (!isPanningRef.current && (e.target as HTMLElement).classList.contains('touch-none')) {
             setSelectedNodeId(null)
             setSelectedEdgeId(null)
+            setSelectedNodeIds([])
+
+            // Start rubber-band selection on left-click
+            if ('button' in e && e.button === 0) {
+                const client = getClientCoordinates(e)
+                const world = screenToWorld(client.x, client.y)
+                isSelectingRef.current = true
+                selectionStartRef.current = world
+                const rect = { x1: world.x, y1: world.y, x2: world.x, y2: world.y }
+                selectionRectRef.current = rect
+                setSelectionRect(rect)
+            }
         }
     }
 
@@ -826,17 +904,43 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
         setSelectedEdgeId(null)
 
         const node = nodes.find((n) => n.id === id)
-        if (node) {
-            setDraggingNodeId(id)
-            const client = getClientCoordinates(e)
-            const world = screenToWorld(client.x, client.y)
+        if (!node) return
 
-            setDragOffset({
-                x: world.x - node.position.x,
-                y: world.y - node.position.y
-            })
-            setSelectedNodeId(id)
+        const client = getClientCoordinates(e)
+        const world = screenToWorld(client.x, client.y)
+
+        // Shift+click: toggle this node in/out of multi-selection, no drag
+        if ('shiftKey' in e && e.shiftKey) {
+            const newIds = selectedNodeIdsRef.current.includes(id)
+                ? selectedNodeIdsRef.current.filter((nid) => nid !== id)
+                : [...selectedNodeIdsRef.current, id]
+            setSelectedNodeIds(newIds)
+            setSelectedNodeId(newIds.length === 1 ? newIds[0] : null)
+            return
         }
+
+        // If clicking a node already in a multi-selection, drag all selected nodes
+        const alreadyInMulti = selectedNodeIdsRef.current.length > 1 && selectedNodeIdsRef.current.includes(id)
+        if (alreadyInMulti) {
+            const initPos: Record<string, { x: number; y: number }> = {}
+            nodes.forEach((n) => {
+                if (selectedNodeIdsRef.current.includes(n.id)) initPos[n.id] = { ...n.position }
+            })
+            multiDragInitialPositionsRef.current = initPos
+            dragStartWorldRef.current = world
+        } else {
+            setSelectedNodeIds([id])
+            setSelectedNodeId(id)
+            multiDragInitialPositionsRef.current = {}
+            dragStartWorldRef.current = null
+        }
+
+        setDraggingNodeId(id)
+        setDragOffset({
+            x: world.x - node.position.x,
+            y: world.y - node.position.y
+        })
+        if (!alreadyInMulti) setSelectedNodeId(id)
     }
 
     const handleConnectStart = (e: React.MouseEvent | React.TouchEvent, id: string, type: 'source' | 'target', handleId?: string) => {
@@ -896,12 +1000,20 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                 e.preventDefault()
                 duplicateSelectedNode()
             }
+            // Escape: close props panel and clear multi-selection
+            if (e.key === 'Escape') {
+                setSelectedNodeId(null)
+                setSelectedNodeIds([])
+            }
             // Delete: Backspace or Delete
-            if ((e.key === 'Delete' || e.key === 'Backspace') && selectedNodeId) {
+            if ((e.key === 'Delete' || e.key === 'Backspace') && (selectedNodeId || selectedNodeIdsRef.current.length > 0)) {
                 // Check if we are not in an input field
                 const activeTag = document.activeElement?.tagName.toLowerCase()
                 if (activeTag !== 'input' && activeTag !== 'textarea') {
-                    deleteNode(selectedNodeId)
+                    const toDelete = selectedNodeIdsRef.current.length > 0 ? selectedNodeIdsRef.current : (selectedNodeId ? [selectedNodeId] : [])
+                    toDelete.forEach((id) => deleteNode(id))
+                    setSelectedNodeIds([])
+                    setSelectedNodeId(null)
                 }
             }
         }
@@ -965,24 +1077,59 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                 const world = screenToWorld(client.x, client.y)
 
                 const snap = 24
-                const rawX = world.x - dragOffset.x
-                const rawY = world.y - dragOffset.y
-                const snappedX = Math.round(rawX / snap) * snap
-                const snappedY = Math.round(rawY / snap) * snap
+                const isMultiDrag = selectedNodeIdsRef.current.length > 1 && selectedNodeIdsRef.current.includes(draggingNodeId)
 
-                setNodes((prev) =>
-                    prev.map((n) =>
-                        n.id === draggingNodeId
-                            ? {
-                                  ...n,
-                                  position: {
-                                      x: snappedX,
-                                      y: snappedY
-                                  }
-                              }
-                            : n
+                if (isMultiDrag && dragStartWorldRef.current) {
+                    const dx = world.x - dragStartWorldRef.current.x
+                    const dy = world.y - dragStartWorldRef.current.y
+                    setNodes((prev) =>
+                        prev.map((n) => {
+                            if (!selectedNodeIdsRef.current.includes(n.id)) return n
+                            const init = multiDragInitialPositionsRef.current[n.id]
+                            if (!init) return n
+                            return {
+                                ...n,
+                                position: {
+                                    x: Math.round((init.x + dx) / snap) * snap,
+                                    y: Math.round((init.y + dy) / snap) * snap,
+                                }
+                            }
+                        })
                     )
-                )
+                } else {
+                    const rawX = world.x - dragOffset.x
+                    const rawY = world.y - dragOffset.y
+                    const snappedX = Math.round(rawX / snap) * snap
+                    const snappedY = Math.round(rawY / snap) * snap
+
+                    setNodes((prev) =>
+                        prev.map((n) =>
+                            n.id === draggingNodeId
+                                ? {
+                                      ...n,
+                                      position: {
+                                          x: snappedX,
+                                          y: snappedY
+                                      }
+                                  }
+                                : n
+                        )
+                    )
+                }
+            }
+
+            // Update rubber-band selection rect
+            if (isSelectingRef.current && selectionStartRef.current && !('touches' in e)) {
+                const mEvent = e as MouseEvent
+                const world = screenToWorld(mEvent.clientX, mEvent.clientY)
+                const rect = {
+                    x1: selectionStartRef.current.x,
+                    y1: selectionStartRef.current.y,
+                    x2: world.x,
+                    y2: world.y,
+                }
+                selectionRectRef.current = rect
+                setSelectionRect(rect)
             }
 
             if (connectionDraft) {
@@ -1044,6 +1191,37 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
             lastTouchRef.current = null
             isPanningRef.current = false
             lastMouseRef.current = null
+            dragStartWorldRef.current = null
+            multiDragInitialPositionsRef.current = {}
+
+            // Finalize rubber-band selection
+            if (isSelectingRef.current) {
+                const rect = selectionRectRef.current
+                if (rect) {
+                    const minX = Math.min(rect.x1, rect.x2)
+                    const maxX = Math.max(rect.x1, rect.x2)
+                    const minY = Math.min(rect.y1, rect.y2)
+                    const maxY = Math.max(rect.y1, rect.y2)
+                    const threshold = 5
+                    if (maxX - minX > threshold || maxY - minY > threshold) {
+                        const NODE_W = 320
+                        const NODE_H = 220
+                        const hit = nodesRef.current
+                            .filter((n) =>
+                                n.position.x < maxX &&
+                                n.position.x + NODE_W > minX &&
+                                n.position.y < maxY &&
+                                n.position.y + NODE_H > minY
+                            )
+                            .map((n) => n.id)
+                        setSelectedNodeIds(hit)
+                    }
+                }
+                isSelectingRef.current = false
+                selectionStartRef.current = null
+                selectionRectRef.current = null
+                setSelectionRect(null)
+            }
         }
 
         window.addEventListener('mousemove', handleMove)
@@ -1113,6 +1291,19 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                 onDuplicate={handleDuplicateGraph}
                 onDelete={handleDeleteGraph}
             />
+
+            {/* Rubber-band Selection Rectangle */}
+            {selectionRect && (
+                <div
+                    className="absolute z-10 pointer-events-none border border-indigo-500 bg-indigo-500/10 rounded-sm"
+                    style={{
+                        left: Math.min(selectionRect.x1, selectionRect.x2) * zoom + viewport.x,
+                        top: Math.min(selectionRect.y1, selectionRect.y2) * zoom + viewport.y,
+                        width: Math.abs(selectionRect.x2 - selectionRect.x1) * zoom,
+                        height: Math.abs(selectionRect.y2 - selectionRect.y1) * zoom,
+                    }}
+                />
+            )}
 
             {/* Background Grid */}
             <div
@@ -1194,7 +1385,7 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
             >
                 <div className="pointer-events-auto">
                     {nodes.map((node) => (
-                        <NodeContainer key={node.id} node={node} selected={selectedNodeId === node.id} onDelete={deleteNode} onDragStart={handleDragStart} onConnectStart={handleConnectStart} onConnectEnd={handleConnectEnd}>
+                        <NodeContainer key={node.id} node={node} selected={selectedNodeIds.includes(node.id)} onDelete={deleteNode} onSelect={setSelectedNodeId} onDragStart={handleDragStart} onConnectStart={handleConnectStart} onConnectEnd={handleConnectEnd}>
                             {node.type === NodeType.TEXT_GEN && <TextGenNode node={node} updateNodeData={updateNodeData} connectedInputText={getConnectedText(node.id)} onRun={() => executeNode(node.id)} />}
                             {node.type === NodeType.IMAGE_GEN && (
                                 <ImageGenNode
@@ -1262,14 +1453,15 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
             <div className="absolute top-4 left-4 z-50 flex items-center gap-2 pointer-events-none" onMouseDown={(e) => e.stopPropagation()}>
                 <div className="pointer-events-auto flex items-center bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md rounded-lg shadow-lg border border-slate-200 dark:border-zinc-700 p-1 gap-1">
                     {/* Graph Selector */}
-                    <div className="relative group">
+                    <div className="relative" onMouseEnter={openGraphDropdown} onMouseLeave={closeGraphDropdown}>
                         <div className="flex items-center gap-2 px-3 py-1.5 cursor-pointer rounded-md hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors">
                             <div className="font-bold text-lg bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-500 whitespace-nowrap">MiniVAgent</div>
                             <ChevronDown size={14} className="text-slate-400" />
                         </div>
 
                         {/* Dropdown */}
-                        <div className="absolute top-full left-0 mt-1 w-56 max-h-96 overflow-y-auto bg-white dark:bg-zinc-900 rounded-lg shadow-xl border border-slate-200 dark:border-zinc-700 hidden group-hover:block animate-in fade-in zoom-in-95 duration-150">
+                        {showGraphDropdown && <div className="absolute top-full left-0 mt-1 w-56 max-h-96 overflow-y-auto thin-scrollbar bg-white dark:bg-zinc-900 rounded-lg shadow-xl border border-slate-200 dark:border-zinc-700 animate-in fade-in zoom-in-95 duration-150" onWheel={(e) => e.stopPropagation()}>
+                            <div className="px-3 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-zinc-500">Recent files</div>
                             {availableGraphs.length === 0 ? (
                                 <div className="px-3 py-4 text-sm text-slate-500 dark:text-zinc-500 text-center">No graphs available</div>
                             ) : (
@@ -1283,7 +1475,7 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                                     </button>
                                 ))
                             )}
-                        </div>
+                        </div>}
                     </div>
 
                     <div className="h-6 w-[1px] bg-slate-200 dark:bg-zinc-700 mx-1" />
@@ -1321,7 +1513,19 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
             </div>
 
             {/* Top Right Gallery Button */}
-            <div className="absolute top-4 right-4 z-50 pointer-events-auto">
+            <div className="absolute top-4 right-4 z-50 pointer-events-auto flex items-center gap-2">
+                {selectedNodeIds.length > 1 && (
+                    <div className="flex items-center gap-1.5 px-3 py-2 bg-indigo-500/90 backdrop-blur-md rounded-lg shadow-lg text-white text-sm font-semibold select-none">
+                        <span>{selectedNodeIds.length} selected</span>
+                        <button
+                            onClick={() => { setSelectedNodeIds([]); setSelectedNodeId(null) }}
+                            className="ml-1 opacity-70 hover:opacity-100 transition-opacity"
+                            title="Clear selection"
+                        >
+                            <X size={13} />
+                        </button>
+                    </div>
+                )}
                 <button
                     onClick={() => {
                         // Show all images in the workspace for the global gallery
@@ -1374,6 +1578,65 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                     </button>
                 </div>
             </div>
+
+            {/* Node Properties Panel — right side, shown when IMAGE_GEN or TEXT_GEN selected */}
+            {(() => {
+                const selectedNode = nodes.find((n) => n.id === selectedNodeId)
+                if (!selectedNode || selectedNode.type === NodeType.IMAGE_TO_TEXT) return null
+                return (
+                    <div className="absolute right-6 top-1/2 -translate-y-1/2 z-50 pointer-events-auto" onMouseDown={(e) => e.stopPropagation()}>
+                        {selectedNode.type === NodeType.IMAGE_GEN && (
+                            <ImageGenPropsPanel
+                                node={selectedNode}
+                                updateNodeData={updateNodeData}
+                                connectedInputText={getConnectedText(selectedNode.id)}
+                                onClose={() => { setSelectedNodeId(null); setSelectedNodeIds([]) }}
+                                onRun={() => executeNode(selectedNode.id)}
+                            />
+                        )}
+                        {selectedNode.type === NodeType.TEXT_GEN && (
+                            <TextGenPropsPanel
+                                node={selectedNode}
+                                updateNodeData={updateNodeData}
+                                connectedInputText={getConnectedText(selectedNode.id)}
+                                onClose={() => { setSelectedNodeId(null); setSelectedNodeIds([]) }}
+                                onRun={() => executeNode(selectedNode.id)}
+                            />
+                        )}
+                        {selectedNode.type === NodeType.COMPARE && (
+                            <ComparePropsPanel
+                                node={selectedNode}
+                                updateNodeData={updateNodeData}
+                                onClose={() => { setSelectedNodeId(null); setSelectedNodeIds([]) }}
+                            />
+                        )}
+                        {selectedNode.type === NodeType.IMAGE_SOURCE && (
+                            <ImageSourcePropsPanel
+                                node={selectedNode}
+                                updateNodeData={updateNodeData}
+                                onClose={() => { setSelectedNodeId(null); setSelectedNodeIds([]) }}
+                            />
+                        )}
+                    </div>
+                )
+            })()}
+
+            {/* Image-to-Text Properties Panel — left side, enabled by default */}
+            {(() => {
+                const selectedNode = nodes.find((n) => n.id === selectedNodeId)
+                if (!selectedNode || selectedNode.type !== NodeType.IMAGE_TO_TEXT) return null
+                return (
+                    <div className="absolute right-6 top-1/2 -translate-y-1/2 z-50 pointer-events-auto" onMouseDown={(e) => e.stopPropagation()}>
+                        <ImageToTextPropsPanel
+                            node={selectedNode}
+                            updateNodeData={updateNodeData}
+                            connectedInputText={getConnectedText(selectedNode.id)}
+                            onClose={() => { setSelectedNodeId(null); setSelectedNodeIds([]) }}
+                            onRun={() => executeNode(selectedNode.id)}
+                        />
+                    </div>
+                )
+            })()}
 
             {/* Zoom Controls */}
             <div className="absolute bottom-6 left-6 z-50 pointer-events-auto flex flex-col gap-2" onMouseDown={(e) => e.stopPropagation()}>
