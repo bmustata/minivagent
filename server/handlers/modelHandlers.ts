@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express'
-import { MODELS } from '../utils/const.ts'
+import { MODELS } from '../config.ts'
 import { logger } from '../utils/logger.ts'
 
 /**

@@ -1,4 +1,4 @@
-import { MODELS } from './const.ts'
+import { MODELS } from '../config.ts'
 
 type ModelCategory = 'TEXT' | 'IMAGE' | 'VISION' | 'PLANNER'
 

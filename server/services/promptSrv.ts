@@ -1,4 +1,5 @@
-import { ai, MODELS } from '../utils/const.ts'
+import { ai } from '../utils/const.ts'
+import { MODELS } from '../config.ts'
 import { validateModel } from '../utils/modelUtils.ts'
 
 export type PromptType = 'TEXT' | 'IMAGE'

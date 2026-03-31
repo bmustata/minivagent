@@ -4,7 +4,7 @@ import * as path from 'path'
 import { app } from './server.ts'
 import { runResourceCleanup } from './services/resourceCleanupSchedulerSrv.ts'
 import { scheduleCron } from './utils/cronUtils.ts'
-import { MODELS } from './utils/const.ts'
+import { MODELS } from './config.ts'
 import { logger } from './utils/logger.ts'
 
 // Load environment variables from .env.local

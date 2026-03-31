@@ -5,15 +5,79 @@
             "id": "textgen072149",
             "type": "TEXT_GEN",
             "position": {
-                "x": 528,
-                "y": 336
+                "x": -72,
+                "y": 144
             },
             "data": {
                 "prompt": "Generate a book description written by  Miguel de Cervantes.",
                 "isLoading": false,
-                "output": "Hark, ye most discerning and sagacious readers, who seek not merely diversion betwixt the covers of a printed leaf, but rather a reflection of this mad, beautiful, and utterly perplexing world!\n\nIt is I, Miguel de Cervantes Saavedra, a humble (though some might say rather long-winded) chronicler of the human condition, who now presents unto your esteemed gaze a most curious and, dare I say, indispensable collection of my latest meanderings and musings.\n\n**\"The Chronicle of Sundry Sorrows, Sublime Follies, and the Unwavering Spirit of Man (Perchance with a Few Windmills Thrown In)\"**\n\nWithin these very pages, behold a tapestry woven not of gold and silk, but of the very dust of Spain, the tears of despair, and the hearty guffaws of life's absurdities. Herein shall you encounter tales of valiant knights (or those who fancy themselves such), whose swords are as keen as their wits are dulled; of fair maidens (some truly fair, others merely so in the mind's eye of a love-struck poet); of rascally innkeepers, wise hermits, and philosophers who find their greatest truths at the bottom of a wine flagon.\n\nFor what is life, my friends, but a grand narrative, where illusion dances with reality, and the noblest intentions oft lead to the most ignoble tumbles? I have striven, with quill in hand and a sigh in my breast, to capture the very essence of this struggle: the quixotic pursuit of ideals, the bitter taste of betrayal, the sweet balm of true friendship, and the eternal, perplexing quest for honor in a world that seems to have mislaid its very definition.\n\nYou shall laugh, perchance, at the follies so vividly portrayed; you shall sigh, perhaps, at the melancholy that clings to the coat-tails of ambition; and you shall, I pray, ponder deeply the thin veil betwixt sanity and inspired madness, for who truly knows the mind of a madman, or a genius?\n\nWhether these tales be true, or merely true *in spirit*, is a question I leave to your sagacious judgment. For I, the chronicler, merely hold the mirror, albeit one that may be slightly cracked from too many adventures. So, take up this tome, gentle reader, and allow your imagination to gallop freely across the plains of La Mancha, the bustling plazas, and the quiet corners of the human heart.\n\nAnd may you find in its meandering pathways not merely diversion, but perhaps a whisper of that elusive truth we all, in our own peculiar ways, pursue.\n\nYour most humble (and occasionally bewildered) servant,\nMiguel de Cervantes Saavedra."
+                "output": "Hark, gentle reader! Prepare thy discerning eye and ready thy most judicious mind, for I, Miguel de Cervantes Saavedra, most humble servant of the Muses and chronicler of the human spirit's boundless errantry, do present unto your esteemed consideration a work of such singular nature and profound amusement as hath seldom, if ever, before graced the printed page.\n\nHerein shalt thou not find merely a compendium of valiant deeds and amorous sighs, nor a simple recounting of historical truth, which, as we all know, is oft as slippery as an eel in a wet sack. Nay, what I lay before thee is a tapestry woven with threads of mirth and melancholy, wisdom gleaned from folly, and courage born of desperation, all spun from the very marrow of human experience.\n\nBehold within these pages the grand and often perplexing adventures of a soul (whose precise identity I shall, for the nonce, keep secret, lest I spoil the delight of discovery), who, through the unfortunate confluence of an overactive imagination and a woefully inadequate understanding of the world as it truly *is*, sets forth upon a journey both literal and allegorical. Witness the comical collisions of idealism with reality, the noble aspirations that inevitably tumble into slapstick absurdity, and the profound truths that emerge, like unexpected pearls, from the most ridiculous of predicaments.\n\nIs it a satire? Perhaps. Is it a romance? Of a most peculiar sort, I assure thee. Is it a mirror held up to the very nature of madness and sanity, and the delightful blur where the two do meet? Most assuredly, it is all these things and more!\n\nFor what is a book, if not a faithful mirror reflecting not merely the sunlit peaks of heroism, but also the shadowed valleys of our own absurdities? And what is the author’s task, if not to delight the heart whilst also, perchance, to set a man to thinking upon the peculiar whims and grand delusions that govern us all?\n\nWhether thou art a scholar of antiquity or a simple soul seeking diverting solace, whether thy spirit longs for chivalric romance or thy mind delights in the subtle jest, I vow, upon the honour of a gentleman (and a soldier, though a rather aged one), that this tome shall prove a most agreeable companion.\n\nOpen these covers, then, and embark upon a journey where laughter mingles with reflection, and the boundaries betwixt madness and sagacity become delightfully blurred. For verily, it is a work fashioned not merely to amuse, but perchance to set a man to thinking of the very nature of his own illusions.\n\nWith my humble hand and honest heart, I commend it to thee,\n\nMiguel de Cervantes Saavedra,\nAuthor, and your most obedient servant."
+            }
+        },
+        {
+            "id": "note984167",
+            "type": "NOTE",
+            "position": {
+                "x": 480,
+                "y": 48
+            },
+            "data": {
+                "prompt": "Generate a nice book preview.",
+                "isLoading": false
+            }
+        },
+        {
+            "id": "note589795",
+            "type": "NOTE",
+            "position": {
+                "x": 504,
+                "y": 384
+            },
+            "data": {
+                "prompt": "Dark book",
+                "isLoading": false
+            }
+        },
+        {
+            "id": "imagegen680173",
+            "type": "IMAGE_GEN",
+            "position": {
+                "x": 1056,
+                "y": 144
+            },
+            "data": {
+                "prompt": "",
+                "isLoading": false,
+                "imageCount": 1,
+                "aspectRatio": "1:1",
+                "outputFormat": "JPEG",
+                "imageResources": [
+                    "463f4509-925d-44cc-9f23-3d10c396f4a3"
+                ]
             }
         }
     ],
-    "edges": []
+    "edges": [
+        {
+            "id": "e401124",
+            "source": "textgen072149",
+            "sourceHandle": "output",
+            "target": "note589795",
+            "targetHandle": "prompt"
+        },
+        {
+            "id": "e007450",
+            "source": "textgen072149",
+            "sourceHandle": "prompt",
+            "target": "note984167",
+            "targetHandle": "prompt"
+        },
+        {
+            "id": "e090740",
+            "source": "note984167",
+            "sourceHandle": "prompt",
+            "target": "imagegen680173",
+            "targetHandle": "prompt"
+        }
+    ]
 }

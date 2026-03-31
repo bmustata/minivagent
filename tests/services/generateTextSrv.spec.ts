@@ -1,6 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { generateText } from '../../server/services/generateTextSrv'
 
+// Mock config (model registry)
+vi.mock('../../server/config', () => ({
+    MODELS: {
+        TEXT: [{ name: 'Flash Mock', provider: 'gemini', model: 'gemini-2.0-mock', options: {} }],
+        IMAGE: [{ name: 'Imagen Mock', provider: 'gemini', model: 'imagen-3.0-mock', options: {} }],
+        VISION: [{ name: 'Flash Mock', provider: 'gemini', model: 'gemini-2.0-mock', options: {} }]
+    }
+}))
+
 // Mock the AI module
 vi.mock('../../server/utils/const', () => ({
     ai: {
@@ -8,11 +17,7 @@ vi.mock('../../server/utils/const', () => ({
             generateContent: vi.fn()
         }
     },
-    MODELS: {
-        TEXT: [{ name: 'Flash Mock', model: 'gemini-2.0-mock', options: {} }],
-        IMAGE: [{ name: 'Imagen Mock', model: 'imagen-3.0-mock', options: {} }],
-        VISION: [{ name: 'Flash Mock', model: 'gemini-2.0-mock', options: {} }]
-    }
+    MODELS: undefined
 }))
 
 // Mock the prompt service
