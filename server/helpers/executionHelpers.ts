@@ -166,7 +166,10 @@ export async function executeNode(nodeId: string, nodes: GraphNode[], edges: Gra
                 logger.info(`[${jobId}]   ✓ IMAGE_SOURCE has inline image, no resolution needed`)
             }
         } else if (node.type === 'NOTE') {
-            logger.info(`[${jobId}]   ✓ NOTE pass-through (${(node.data.prompt || '').length} chars)`)
+            const connectedText = graphGetConnectedText(nodeId, nodes, edges)
+            const ownText = node.data.prompt || ''
+            node.data.output = connectedText ? (ownText ? `${ownText}\n\n${connectedText}` : connectedText) : ownText
+            logger.info(`[${jobId}]   ✓ NOTE combined text (${node.data.output.length} chars)`)
         }
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Generation failed'

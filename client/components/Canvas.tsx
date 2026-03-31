@@ -175,8 +175,17 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                 } else {
                     if (sourceNode.data.prompt) texts.push(sourceNode.data.prompt)
                 }
+            } else if (sourceNode.type === NodeType.NOTE) {
+                // Compute NOTE's combined output on the fly: own text + connected inputs
+                if (sourceNode.data.output) {
+                    texts.push(sourceNode.data.output)
+                } else {
+                    const noteConnected = getConnectedText(sourceNode.id, currentNodes)
+                    const noteOwn = sourceNode.data.prompt || ''
+                    const combined = noteConnected ? (noteOwn ? `${noteOwn}\n\n${noteConnected}` : noteConnected) : noteOwn
+                    if (combined) texts.push(combined)
+                }
             } else {
-                // Note or other
                 const val = sourceNode.data.output || sourceNode.data.prompt
                 if (val) texts.push(val)
             }
@@ -421,6 +430,13 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                 const update = { output: result, isLoading: false }
                 setNodes((prev) => prev.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, ...update } } : n)))
                 nodesRef.current = nodesRef.current.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, ...update } } : n))
+            } else if (node.type === NodeType.NOTE) {
+                const connectedText = getConnectedText(nodeId, nodesRef.current)
+                const ownText = node.data.prompt || ''
+                const combined = connectedText ? (ownText ? `${ownText}\n\n${connectedText}` : connectedText) : ownText
+                const update = { output: combined, isLoading: false }
+                setNodes((prev) => prev.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, ...update } } : n)))
+                nodesRef.current = nodesRef.current.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, ...update } } : n))
             }
         } catch (error: any) {
             const update = { error: error.message || 'Generation failed', isLoading: false }
@@ -459,7 +475,7 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
             for (const nodeId of sorted) {
                 // Only execute generative nodes
                 const node = nodesRef.current.find((n) => n.id === nodeId)
-                if (node && (node.type === NodeType.TEXT_GEN || node.type === NodeType.IMAGE_GEN || node.type === NodeType.IMAGE_TO_TEXT)) {
+                if (node && (node.type === NodeType.TEXT_GEN || node.type === NodeType.IMAGE_GEN || node.type === NodeType.IMAGE_TO_TEXT || node.type === NodeType.NOTE)) {
                     await executeNode(nodeId)
                 }
             }
@@ -1431,7 +1447,7 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                                     }}
                                 />
                             )}
-                            {node.type === NodeType.NOTE && <NoteNode node={node} updateNodeData={updateNodeData} />}
+                            {node.type === NodeType.NOTE && <NoteNode node={node} updateNodeData={updateNodeData} connectedInputText={getConnectedText(node.id)} />}
                             {node.type === NodeType.COMPARE && (
                                 <CompareNode
                                     node={node}

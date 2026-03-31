@@ -93,6 +93,7 @@ export const NodeContainer: React.FC<NodeContainerProps> = ({ node, selected, on
         inputHandles.push({ id: 'image', label: 'Image Input', top: 100, color: 'bg-pink-400' })
         outputHandles.push({ id: 'output', label: 'RESULT', top: 200, color: 'bg-emerald-400' })
     } else if (node.type === NodeType.NOTE) {
+        inputHandles.push({ id: 'prompt', label: 'Text', top: 45, color: 'bg-orange-400' })
         outputHandles.push({ id: 'prompt', label: 'TEXT', top: 45, color: 'bg-zinc-400' })
     } else if (node.type === NodeType.COMPARE) {
         // Compare Node: 1 multi-image input, 2 passthrough outputs

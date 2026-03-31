@@ -56,7 +56,7 @@ export const renderDynamic = async (req: Request, res: Response): Promise<void> 
 
         for (const nodeId of sorted) {
             const node = nodes.find((n) => n.id === nodeId)
-            if (node && (node.type === 'TEXT_GEN' || node.type === 'IMAGE_GEN' || node.type === 'IMAGE_TO_TEXT')) {
+            if (node && (node.type === 'TEXT_GEN' || node.type === 'IMAGE_GEN' || node.type === 'IMAGE_TO_TEXT' || node.type === 'NOTE')) {
                 await executeNode(nodeId, nodes, edges, jobId)
             }
         }
@@ -120,7 +120,7 @@ export const renderRun = async (req: Request, res: Response): Promise<void> => {
         // Execute nodes in topological order
         for (const nodeId of sorted) {
             const node = nodes.find((n) => n.id === nodeId)
-            if (node && (node.type === 'TEXT_GEN' || node.type === 'IMAGE_GEN' || node.type === 'IMAGE_TO_TEXT')) {
+            if (node && (node.type === 'TEXT_GEN' || node.type === 'IMAGE_GEN' || node.type === 'IMAGE_TO_TEXT' || node.type === 'NOTE')) {
                 await executeNode(nodeId, nodes, edges, jobId)
             }
         }
@@ -209,7 +209,7 @@ export const renderRunStream = async (req: Request, res: Response): Promise<void
 
             send(SSE.NODE_START, { nodeId, type: node.type })
 
-            if (node.type === 'TEXT_GEN' || node.type === 'IMAGE_GEN' || node.type === 'IMAGE_TO_TEXT') {
+            if (node.type === 'TEXT_GEN' || node.type === 'IMAGE_GEN' || node.type === 'IMAGE_TO_TEXT' || node.type === 'NOTE') {
                 await executeNode(nodeId, nodes, edges, jobId)
             }
 
@@ -305,8 +305,8 @@ function buildNodeResult(n: GraphNode): { id: string; type: string; data: Record
         outputAssets.push({ type: 'text', value: n.data.output })
     }
 
-    if (n.type === 'NOTE' && n.data.prompt) {
-        outputAssets.push({ type: 'text', value: n.data.prompt })
+    if (n.type === 'NOTE' && (n.data.output || n.data.prompt)) {
+        outputAssets.push({ type: 'text', value: n.data.output || n.data.prompt })
     }
 
     if (n.type === 'IMAGE_GEN' && n.data.images) {
@@ -332,7 +332,7 @@ function buildNodeResult(n: GraphNode): { id: string; type: string; data: Record
               : n.type === 'IMAGE_TO_TEXT'
                 ? { prompt: n.data.prompt, model: n.data.model }
                 : n.type === 'NOTE'
-                  ? { prompt: n.data.prompt }
+                  ? { prompt: n.data.prompt, output: n.data.output }
                   : {}
 
     return { id: n.id, type: n.type, data, outputAssets, error: n.data.error }

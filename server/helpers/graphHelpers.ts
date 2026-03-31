@@ -31,6 +31,16 @@ export function graphGetConnectedText(nodeId: string, nodes: GraphNode[], edges:
             } else {
                 if (sourceNode.data.prompt) texts.push(sourceNode.data.prompt)
             }
+        } else if (sourceNode.type === 'NOTE') {
+            // Compute NOTE's combined output on the fly: own text + connected inputs
+            if (sourceNode.data.output) {
+                texts.push(sourceNode.data.output)
+            } else {
+                const noteConnected = graphGetConnectedText(sourceNode.id, nodes, edges)
+                const noteOwn = sourceNode.data.prompt || ''
+                const combined = noteConnected ? (noteOwn ? `${noteOwn}\n\n${noteConnected}` : noteConnected) : noteOwn
+                if (combined) texts.push(combined)
+            }
         } else {
             const val = sourceNode.data.output || sourceNode.data.prompt
             if (val) texts.push(val)
