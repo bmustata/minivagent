@@ -10,9 +10,13 @@ import { logger } from '../utils/logger.ts'
 export const getModels = async (req: Request, res: Response) => {
     try {
         const totalModels = MODELS.TEXT.length + MODELS.IMAGE.length + MODELS.VISION.length + MODELS.PLANNER.length
+
+        const providers = Object.fromEntries(Object.entries(MODELS).map(([category, models]) => [category, [...new Set(models.map((m) => m.provider))]]))
+
         res.json({
             success: true,
-            models: MODELS
+            models: MODELS,
+            providers
         })
         logger.info(`GET /api/models - ✓ returned ${totalModels} models`)
     } catch (error) {

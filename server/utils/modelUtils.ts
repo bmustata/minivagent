@@ -27,3 +27,11 @@ export const validateModel = (modelId: string | undefined, category: ModelCatego
 export const getModelConfig = (modelId: string, category: ModelCategory) => {
     return MODELS[category].find((m) => m.model === modelId)
 }
+
+/**
+ * Get the provider for a validated model identifier in a category
+ */
+export const getModelProvider = (modelId: string, category: ModelCategory): string => {
+    const config = MODELS[category].find((m) => m.model === modelId)
+    return config?.provider ?? 'gemini'
+}

@@ -1,7 +1,7 @@
-import { ai } from '../utils/const.ts'
-import { MODELS } from '../config.ts'
 import { enhancePrompt } from './promptSrv.ts'
-import { validateModel } from '../utils/modelUtils.ts'
+import { validateModel, getModelProvider } from '../utils/modelUtils.ts'
+import { geminiGenerateText } from './gemini/generateTextSrv.ts'
+import { openaiGenerateText } from './openai/generateTextSrv.ts'
 
 export interface GenerateTextOptions {
     prompt: string
@@ -15,6 +15,9 @@ export interface GenerateTextResult {
 
 /**
  * Generate text using AI model
+ * @param options.prompt - The text prompt to generate content from
+ * @param options.shouldEnhance - Whether to enhance the prompt before generation
+ * @param options.model - The model ID to use; falls back to the TEXT category default if omitted
  */
 export const generateText = async (options: GenerateTextOptions): Promise<GenerateTextResult> => {
     const { prompt, shouldEnhance, model } = options
@@ -29,11 +32,15 @@ export const generateText = async (options: GenerateTextOptions): Promise<Genera
     }
 
     const validatedModel = validateModel(model, 'TEXT')
+    const provider = getModelProvider(validatedModel, 'TEXT')
 
-    const response = await ai.models.generateContent({
-        model: validatedModel,
-        contents: finalPrompt
-    })
-
-    return { text: response.text || 'No response generated.' }
+    if (provider === 'openai') {
+        const text = await openaiGenerateText(finalPrompt, validatedModel)
+        return { text }
+    } else if (provider === 'gemini') {
+        const text = await geminiGenerateText(finalPrompt, validatedModel)
+        return { text }
+    } else {
+        throw new Error(`Unknown provider: "${provider}"`)
+    }
 }
