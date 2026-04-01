@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Play, Loader2, Link as LinkIcon, Sparkles } from 'lucide-react'
 import { Node, NodeData } from '../../types'
 import { getModels } from '../../services/generateService'
+import { ProviderIcon } from '../../assets/ProviderIcon'
 
 interface TextGenNodeProps {
     node: Node
@@ -12,7 +13,7 @@ interface TextGenNodeProps {
 
 export const TextGenNode: React.FC<TextGenNodeProps> = ({ node, updateNodeData, connectedInputText, onRun }) => {
     const { prompt, isLoading, model, enhancePrompt } = node.data
-    const [availableModels, setAvailableModels] = useState<{ name: string; model: string }[]>([])
+    const [availableModels, setAvailableModels] = useState<{ name: string; model: string; provider: string }[]>([])
 
     useEffect(() => {
         getModels()
@@ -20,9 +21,11 @@ export const TextGenNode: React.FC<TextGenNodeProps> = ({ node, updateNodeData, 
             .catch(() => {})
     }, [])
 
+    const modelEntry = model ? availableModels.find((m) => m.model === model) : availableModels[0]
     const modelLabel = model
         ? (availableModels.find((m) => m.model === model)?.name ?? model)
         : availableModels[0] ? `Default (${availableModels[0].name})` : 'Default'
+    const modelProvider = modelEntry?.provider ?? 'gemini'
 
     const isLinked = !!connectedInputText
     const canRun = !!prompt.trim() || isLinked
@@ -39,7 +42,10 @@ export const TextGenNode: React.FC<TextGenNodeProps> = ({ node, updateNodeData, 
             {/* Model Badge */}
             <div className="flex items-center justify-between">
                 <span className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Model</span>
-                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium truncate max-w-[140px]" title={modelLabel}>{modelLabel}</span>
+                <span className="flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-medium truncate max-w-[140px]" title={modelLabel}>
+                    <ProviderIcon provider={modelProvider} />
+                    {modelLabel}
+                </span>
             </div>
 
             {/* Prompt */}
