@@ -26,12 +26,23 @@ const server = app.listen(PORT, () => {
     logger.info(`| INFO: http://localhost:${PORT}/api/meta       |`)
     logger.info('+----------------------------------------+')
     logger.info(`MiniVAgent server running on http://localhost:${PORT}`)
-    const formatModels = (models: readonly { name: string }[]) => models.map((m, i) => (i === 0 ? `[${m.name}]` : m.name)).join(', ')
-    logger.info('Supported models: (* [default])')
-    logger.info(`  TEXT: ${formatModels(MODELS.TEXT)}`)
-    logger.info(`  IMAGE: ${formatModels(MODELS.IMAGE)}`)
-    logger.info(`  VISION: ${formatModels(MODELS.VISION)}`)
-    logger.info(`  PLANNER: ${formatModels(MODELS.PLANNER)}`)
+    const logModels = (category: string, models: readonly { name: string; provider: string }[]) => {
+        const providers = [...new Set(models.map((m) => m.provider))]
+        logger.info(`  ${category}:`)
+        logger.info(`    [default] ${models[0].name}`)
+        for (const p of providers) {
+            const names = models
+                .filter((m) => m.provider === p)
+                .map((m) => m.name)
+                .join(', ')
+            logger.info(`    ${p}: ${names}`)
+        }
+    }
+    logger.info('Supported models:')
+    logModels('TEXT', MODELS.TEXT)
+    logModels('IMAGE', MODELS.IMAGE)
+    logModels('VISION', MODELS.VISION)
+    logModels('PLANNER', MODELS.PLANNER)
 
     const graphsDir = path.join(process.cwd(), 'data', 'graphs')
     const graphFiles = fs.existsSync(graphsDir) ? fs.readdirSync(graphsDir).filter((f) => f.endsWith('.json')) : []

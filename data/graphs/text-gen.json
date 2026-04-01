@@ -11,49 +11,19 @@
             "data": {
                 "prompt": "Generate a book description written by  Miguel de Cervantes.",
                 "isLoading": false,
-                "output": "Hark, gentle reader! Prepare thy discerning eye and ready thy most judicious mind, for I, Miguel de Cervantes Saavedra, most humble servant of the Muses and chronicler of the human spirit's boundless errantry, do present unto your esteemed consideration a work of such singular nature and profound amusement as hath seldom, if ever, before graced the printed page.\n\nHerein shalt thou not find merely a compendium of valiant deeds and amorous sighs, nor a simple recounting of historical truth, which, as we all know, is oft as slippery as an eel in a wet sack. Nay, what I lay before thee is a tapestry woven with threads of mirth and melancholy, wisdom gleaned from folly, and courage born of desperation, all spun from the very marrow of human experience.\n\nBehold within these pages the grand and often perplexing adventures of a soul (whose precise identity I shall, for the nonce, keep secret, lest I spoil the delight of discovery), who, through the unfortunate confluence of an overactive imagination and a woefully inadequate understanding of the world as it truly *is*, sets forth upon a journey both literal and allegorical. Witness the comical collisions of idealism with reality, the noble aspirations that inevitably tumble into slapstick absurdity, and the profound truths that emerge, like unexpected pearls, from the most ridiculous of predicaments.\n\nIs it a satire? Perhaps. Is it a romance? Of a most peculiar sort, I assure thee. Is it a mirror held up to the very nature of madness and sanity, and the delightful blur where the two do meet? Most assuredly, it is all these things and more!\n\nFor what is a book, if not a faithful mirror reflecting not merely the sunlit peaks of heroism, but also the shadowed valleys of our own absurdities? And what is the author’s task, if not to delight the heart whilst also, perchance, to set a man to thinking upon the peculiar whims and grand delusions that govern us all?\n\nWhether thou art a scholar of antiquity or a simple soul seeking diverting solace, whether thy spirit longs for chivalric romance or thy mind delights in the subtle jest, I vow, upon the honour of a gentleman (and a soldier, though a rather aged one), that this tome shall prove a most agreeable companion.\n\nOpen these covers, then, and embark upon a journey where laughter mingles with reflection, and the boundaries betwixt madness and sagacity become delightfully blurred. For verily, it is a work fashioned not merely to amuse, but perchance to set a man to thinking of the very nature of his own illusions.\n\nWith my humble hand and honest heart, I commend it to thee,\n\nMiguel de Cervantes Saavedra,\nAuthor, and your most obedient servant."
-            }
-        },
-        {
-            "id": "note984167",
-            "type": "NOTE",
-            "position": {
-                "x": 480,
-                "y": 48
-            },
-            "data": {
-                "prompt": "Generate a nice book preview.",
-                "isLoading": false
+                "output": "Of course — here is a book description written in a style inspired by Miguel de Cervantes:\n\nIn this volume the reader shall encounter not merely a tale, but a mirror wherein life itself, with all its follies, honors, misfortunes, and vanities, is faithfully reflected. Here wander men of noble intention and uncertain judgment, ladies of wit and dignity, and those strange accidents by which Fortune, that capricious mistress, delights to raise the low and humble the proud. Between laughter and sorrow, adventure and reflection, this work unfolds as do the roads of Spain: now broad and sunlit, now rough with dust and danger, yet ever worth the traveling. If within these pages there be jest, let it not obscure the truth; if there be sorrow, let it not banish delight. For such is the manner of the world, and such, too, is the manner of this book."
             }
         },
         {
             "id": "note589795",
             "type": "NOTE",
             "position": {
-                "x": 504,
+                "x": 456,
                 "y": 384
             },
             "data": {
                 "prompt": "Dark book",
                 "isLoading": false
-            }
-        },
-        {
-            "id": "imagegen680173",
-            "type": "IMAGE_GEN",
-            "position": {
-                "x": 1056,
-                "y": 144
-            },
-            "data": {
-                "prompt": "",
-                "isLoading": false,
-                "imageCount": 1,
-                "aspectRatio": "1:1",
-                "outputFormat": "JPEG",
-                "imageResources": [
-                    "463f4509-925d-44cc-9f23-3d10c396f4a3"
-                ]
             }
         }
     ],
@@ -63,20 +33,6 @@
             "source": "textgen072149",
             "sourceHandle": "output",
             "target": "note589795",
-            "targetHandle": "prompt"
-        },
-        {
-            "id": "e007450",
-            "source": "textgen072149",
-            "sourceHandle": "prompt",
-            "target": "note984167",
-            "targetHandle": "prompt"
-        },
-        {
-            "id": "e090740",
-            "source": "note984167",
-            "sourceHandle": "prompt",
-            "target": "imagegen680173",
             "targetHandle": "prompt"
         }
     ]

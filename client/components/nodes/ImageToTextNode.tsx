@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react'
 import { Link as LinkIcon, Upload, Globe, Maximize2, Play, Loader2 } from 'lucide-react'
 import { Node, NodeData } from '../../types'
 import { getModels } from '../../services/generateService'
+import { ProviderIcon } from '../../assets/ProviderIcon'
 
 interface ImageToTextNodeProps {
     node: Node
@@ -14,7 +15,7 @@ interface ImageToTextNodeProps {
 
 export const ImageToTextNode: React.FC<ImageToTextNodeProps> = ({ node, updateNodeData, connectedInputImages = [], onRun, onExpand }) => {
     const { imageInput, imageInputType = 'UPLOAD', model, isLoading } = node.data
-    const [availableModels, setAvailableModels] = useState<Array<{ name: string; model: string }>>([])
+    const [availableModels, setAvailableModels] = useState<Array<{ name: string; model: string; provider: string }>>([])
 
     const hasLinkedImages = connectedInputImages.length > 0
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -25,9 +26,11 @@ export const ImageToTextNode: React.FC<ImageToTextNodeProps> = ({ node, updateNo
             .catch(() => {})
     }, [])
 
+    const modelEntry = model ? availableModels.find((m) => m.model === model) : availableModels[0]
     const modelLabel = model
         ? (availableModels.find((m) => m.model === model)?.name ?? model)
         : availableModels[0] ? `Default (${availableModels[0].name})` : 'Default'
+    const modelProvider = modelEntry?.provider ?? 'gemini'
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
@@ -47,7 +50,10 @@ export const ImageToTextNode: React.FC<ImageToTextNodeProps> = ({ node, updateNo
             {/* Model Badge */}
             <div className="flex items-center justify-between">
                 <span className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Model</span>
-                <span className="text-[10px] text-blue-600 dark:text-blue-400 font-medium truncate max-w-[160px]" title={modelLabel}>{modelLabel}</span>
+                <span className="flex items-center gap-1 text-[10px] text-blue-600 dark:text-blue-400 font-medium truncate max-w-[160px]" title={modelLabel}>
+                    <ProviderIcon provider={modelProvider} />
+                    {modelLabel}
+                </span>
             </div>
 
             {/* Image Input Section */}
