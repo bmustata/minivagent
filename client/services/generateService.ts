@@ -3,6 +3,7 @@ const API_BASE = '/api'
 interface ModelInfo {
     name: string
     model: string
+    provider: string
     options: Record<string, unknown>
 }
 
@@ -12,6 +13,12 @@ interface ModelsResponse {
         TEXT: ModelInfo[]
         IMAGE: ModelInfo[]
         VISION: ModelInfo[]
+    }
+    providers: {
+        TEXT: string[]
+        IMAGE: string[]
+        VISION: string[]
+        PLANNER: string[]
     }
 }
 
