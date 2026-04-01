@@ -16,56 +16,367 @@
             }
         },
         {
-            "id": "vision027244",
+            "id": "vision590189",
             "type": "IMAGE_TO_TEXT",
             "position": {
-                "x": 672,
-                "y": 1272
+                "x": 720,
+                "y": 1152
+            },
+            "data": {
+                "prompt": "Extract an image description\nand character description",
+                "isLoading": false,
+                "imageInputType": "UPLOAD",
+                "model": "gpt-5.4",
+                "output": "**Image description:**  \nA close-up portrait of an older man standing outdoors near the sea, likely on or beside a boat. He has a weathered face, piercing blue eyes, and gray hair peeking out from under a dark sailor-style cap. He wears a dark heavy jacket layered over earthy-toned clothing and a scarf, with a worn leather strap crossing his chest. A wooden pipe rests in his mouth. The background is softly blurred, showing pale water and boat rigging, creating a cold, maritime atmosphere.\n\n**Character description:**  \nA rugged, seasoned seafarer or fisherman in late middle age to elderly years. He appears tough, observant, and stoic, with deep facial lines suggesting a lifetime of hard work and exposure to the elements. His practical layered clothing, pipe, and nautical cap give him the look of an old sailor—experienced, self-reliant, and quietly imposing."
+            }
+        },
+        {
+            "id": "textgen826640",
+            "type": "TEXT_GEN",
+            "position": {
+                "x": 1152,
+                "y": 888
+            },
+            "data": {
+                "prompt": "Generate 5 distinct environments for the character, each reflecting a different mood and lighting condition.",
+                "isLoading": false,
+                "output": "### 1. The Eye of the Storm\n**Mood:** Tense, Perilous, Gritty  \n**Lighting:** Dramatic and high-contrast. Flickering, warm orange light from a swinging oil lantern clashes with the deep, cold indigo of a midnight tempest. Sharp flashes of lightning occasionally illuminate the salt spray on his jacket.  \n**Environment:** The man stands on the slick, tilting wooden deck of a schooner. Massive, churning waves tower in the background, their crests white with foam. Ropes snap in the wind, and the air is thick with horizontal rain. His eyes are narrowed against the gale, the ember in his pipe a defiant spark against the overwhelming darkness of the North Atlantic.\n\n====\n\n### 2. The Golden Hour Harbor\n**Mood:** Serene, Nostalgic, Peaceful  \n**Lighting:** Soft, ethereal \"Golden Hour\" light. The sun is low on the horizon, casting a warm, honey-colored glow across his weathered features and catching the fine mist of his breath. Long, soft shadows stretch across the dock.  \n**Environment:** He leans against a rusted iron bollard on a quiet stone pier. Behind him, the sea is a shimmering sheet of liquid gold, and the silhouettes of sleeping fishing boats bob gently in the tide. The air is still, and the only movement is the thin, lazy coil of smoke rising from his pipe, blending with the evening haze.\n\n====\n\n### 3. The Smoke-Filled Tavern\n**Mood:** Intimate, Reflective, Cozy  \n**Lighting:** Low-key, warm interior lighting. The primary light source is the glowing hearth of a nearby fireplace, casting deep amber tones and long, flickering shadows. Dust motes and pipe smoke dance in the dim beams of a singular tallow candle on the table.  \n**Environment:** The man is tucked into a dark, wood-paneled booth of a seaside pub. The walls are adorned with yellowed nautical charts and dried starfish. The atmosphere is heavy with the smell of old oak, salt-cured tobacco, and ale. Here, his stoicism softens slightly into a quiet, solitary contemplation of the flickering flames.\n\n====\n\n### 4. The Frozen Inlet\n**Mood:** Desolate, Stark, Enduring  \n**Lighting:** Flat, diffused, and cold. An overcast sky creates a \"blue-hour\" effect even during the day, with no harsh shadows. The light is pale and monochromatic, emphasizing the icy whites and deep charcoal grays of the landscape.  \n**Environment:** He stands on a shoreline littered with jagged, ice-coated rocks and chunks of frozen sea foam. In the background, a mist-shrouded glacier looms over a graveyard of ancient, rib-like shipwrecks trapped in the ice. His heavy jacket is dusted with frost, and his piercing blue eyes are the only vibrant color in a world bleached of warmth.\n\n====\n\n### 5. The Noon-Day Docks\n**Mood:** Industrious, Practical, Harsh  \n**Lighting:** Bright, direct midday sun. The light is unforgiving, highlighting every deep line and wrinkle on his face and the rough texture of his canvas clothing. Sharp, black shadows fall beneath his cap and the brim of his pipe.  \n**Environment:** A bustling, sun-bleached fish market. He is surrounded by the vibrant chaos of the trade—stacks of splintered wooden crates, shimmering heaps of silver Atlantic cod, and tangles of emerald-green fishing nets drying in the heat. The background is a blur of white-painted hulls and the glint of sun hitting the turquoise harbor water.",
+                "model": "gemini-3-flash-preview",
+                "includeSplitSeparator": true,
+                "enhancePrompt": false
+            }
+        },
+        {
+            "id": "node375008",
+            "type": "SPLIT_TEXT",
+            "position": {
+                "x": 1632,
+                "y": 672
             },
             "data": {
                 "prompt": "",
                 "isLoading": false,
-                "imageInputType": "UPLOAD",
-                "model": "gemini-3-flash-preview",
-                "output": "This is a highly detailed, vertical portrait of an elderly man who appears to be a seasoned mariner or fisherman. He is the central focus of the image, captured from the chest up against a soft, blurred coastal background.\n\n**The Subject:**\nThe man has a rugged, weather-worn face with deep wrinkles and piercing light-blue eyes that look directly at the viewer with a stoic and contemplative expression. He has thick, salt-and-pepper hair peeking out from under his hat, and a full, well-groomed grey beard and mustache. A classic wooden smoking pipe with a dark brown bowl and black stem is clenched in his teeth.\n\n**Attire:**\nHe is dressed in heavy, practical layers suitable for a maritime environment:\n*   **Hat:** He wears a dark grey or charcoal-colored fiddler cap (also known as a mariner's cap) made of textured fabric.\n*   **Jacket:** He is wearing a dark, weathered outdoor jacket with various details like zippers, buttons, and multiple layers of fabric. \n*   **Accessories:** Around his neck is a thick, olive-green scarf. A heavy, worn brown leather strap with metallic buckles and rivets crosses over his shoulder, possibly for a bag or tool. A thick, tan-colored drawstring or rope is also visible on his right side.\n\n**Background and Composition:**\nThe background is out of focus, showing a muted teal sea and the faint, blurry silhouettes of what appear to be wooden dock pilings or ship masts under an overcast, grey sky. The lighting is soft and natural, highlighting the intricate textures of the man’s skin, the fibers of his clothing, and the grain of the wooden pipe. \n\nThe overall mood is serious and atmospheric, conveying a sense of a life lived at sea."
+                "splitSeparator": "====",
+                "splitOutputs": [
+                    "### 1. The Eye of the Storm\n**Mood:** Tense, Perilous, Gritty  \n**Lighting:** Dramatic and high-contrast. Flickering, warm orange light from a swinging oil lantern clashes with the deep, cold indigo of a midnight tempest. Sharp flashes of lightning occasionally illuminate the salt spray on his jacket.  \n**Environment:** The man stands on the slick, tilting wooden deck of a schooner. Massive, churning waves tower in the background, their crests white with foam. Ropes snap in the wind, and the air is thick with horizontal rain. His eyes are narrowed against the gale, the ember in his pipe a defiant spark against the overwhelming darkness of the North Atlantic.",
+                    "### 2. The Golden Hour Harbor\n**Mood:** Serene, Nostalgic, Peaceful  \n**Lighting:** Soft, ethereal \"Golden Hour\" light. The sun is low on the horizon, casting a warm, honey-colored glow across his weathered features and catching the fine mist of his breath. Long, soft shadows stretch across the dock.  \n**Environment:** He leans against a rusted iron bollard on a quiet stone pier. Behind him, the sea is a shimmering sheet of liquid gold, and the silhouettes of sleeping fishing boats bob gently in the tide. The air is still, and the only movement is the thin, lazy coil of smoke rising from his pipe, blending with the evening haze.",
+                    "### 3. The Smoke-Filled Tavern\n**Mood:** Intimate, Reflective, Cozy  \n**Lighting:** Low-key, warm interior lighting. The primary light source is the glowing hearth of a nearby fireplace, casting deep amber tones and long, flickering shadows. Dust motes and pipe smoke dance in the dim beams of a singular tallow candle on the table.  \n**Environment:** The man is tucked into a dark, wood-paneled booth of a seaside pub. The walls are adorned with yellowed nautical charts and dried starfish. The atmosphere is heavy with the smell of old oak, salt-cured tobacco, and ale. Here, his stoicism softens slightly into a quiet, solitary contemplation of the flickering flames.",
+                    "### 4. The Frozen Inlet\n**Mood:** Desolate, Stark, Enduring  \n**Lighting:** Flat, diffused, and cold. An overcast sky creates a \"blue-hour\" effect even during the day, with no harsh shadows. The light is pale and monochromatic, emphasizing the icy whites and deep charcoal grays of the landscape.  \n**Environment:** He stands on a shoreline littered with jagged, ice-coated rocks and chunks of frozen sea foam. In the background, a mist-shrouded glacier looms over a graveyard of ancient, rib-like shipwrecks trapped in the ice. His heavy jacket is dusted with frost, and his piercing blue eyes are the only vibrant color in a world bleached of warmth.",
+                    "### 5. The Noon-Day Docks\n**Mood:** Industrious, Practical, Harsh  \n**Lighting:** Bright, direct midday sun. The light is unforgiving, highlighting every deep line and wrinkle on his face and the rough texture of his canvas clothing. Sharp, black shadows fall beneath his cap and the brim of his pipe.  \n**Environment:** A bustling, sun-bleached fish market. He is surrounded by the vibrant chaos of the trade—stacks of splintered wooden crates, shimmering heaps of silver Atlantic cod, and tangles of emerald-green fishing nets drying in the heat. The background is a blur of white-painted hulls and the glint of sun hitting the turquoise harbor water."
+                ],
+                "splitPage": 0
             }
         },
         {
-            "id": "imagegen673883",
+            "id": "imagegen648529",
             "type": "IMAGE_GEN",
             "position": {
-                "x": 864,
-                "y": 504
+                "x": 2328,
+                "y": -48
             },
             "data": {
-                "prompt": "Generate multiple views for the character\n\nNo text description \n\nBackground under the images / view gray",
+                "prompt": "",
                 "isLoading": false,
-                "imageCount": 3,
+                "imageCount": 1,
                 "aspectRatio": "1:1",
                 "outputFormat": "JPEG",
                 "model": "gemini-3.1-flash-image-preview",
                 "preset": "1K",
                 "imageResources": [
-                    "cb3edaa5-0b00-4ee8-be39-ca8144a3952b",
-                    "1ad6febd-e475-41bb-b093-d40da790e4da",
-                    "b4d1c2c9-e64d-4a8f-b739-d71ea12738b6"
+                    "f7b579f4-ebca-4f57-9ed1-894562b92b68"
+                ]
+            }
+        },
+        {
+            "id": "imagegen794189",
+            "type": "IMAGE_GEN",
+            "position": {
+                "x": 2328,
+                "y": 336
+            },
+            "data": {
+                "prompt": "",
+                "isLoading": false,
+                "imageCount": 1,
+                "aspectRatio": "1:1",
+                "outputFormat": "JPEG",
+                "model": "gemini-3.1-flash-image-preview",
+                "preset": "1K",
+                "imageResources": [
+                    "6e14499a-ba7f-47e5-9cf8-5390e650e4b2"
+                ]
+            }
+        },
+        {
+            "id": "imagegen812459",
+            "type": "IMAGE_GEN",
+            "position": {
+                "x": 2328,
+                "y": 720
+            },
+            "data": {
+                "prompt": "",
+                "isLoading": false,
+                "imageCount": 1,
+                "aspectRatio": "1:1",
+                "outputFormat": "JPEG",
+                "model": "gemini-3.1-flash-image-preview",
+                "preset": "1K",
+                "imageResources": [
+                    "d91a8300-aa90-4fa6-a314-83903e1550dd"
+                ]
+            }
+        },
+        {
+            "id": "imagegen440988",
+            "type": "IMAGE_GEN",
+            "position": {
+                "x": 2328,
+                "y": 1104
+            },
+            "data": {
+                "prompt": "",
+                "isLoading": false,
+                "imageCount": 1,
+                "aspectRatio": "1:1",
+                "outputFormat": "JPEG",
+                "model": "gemini-3.1-flash-image-preview",
+                "preset": "1K",
+                "imageResources": [
+                    "80417f55-3de2-4ba9-af48-131d11578f77"
+                ]
+            }
+        },
+        {
+            "id": "imagegen135467",
+            "type": "IMAGE_GEN",
+            "position": {
+                "x": 2328,
+                "y": 1512
+            },
+            "data": {
+                "prompt": "",
+                "isLoading": false,
+                "imageCount": 1,
+                "aspectRatio": "1:1",
+                "outputFormat": "JPEG",
+                "model": "gemini-3.1-flash-image-preview",
+                "preset": "1K",
+                "imageResources": [
+                    "cfb6690c-51b3-4be1-ae71-f7a3b1fb8afa"
+                ]
+            }
+        },
+        {
+            "id": "textgen481104",
+            "type": "TEXT_GEN",
+            "position": {
+                "x": 2904,
+                "y": 2160
+            },
+            "data": {
+                "prompt": "Generate 5 distinct environments for the character, each reflecting a different mood and lighting condition.\n\nAlso add a whale and ship",
+                "isLoading": false,
+                "output": "**Environment 1: The Eye of the Storm**  \n**Mood:** Perilous, intense, and epic.  \n**Lighting:** Dramatic high-contrast lighting; flashes of jagged white lightning illuminate the scene against a backdrop of deep charcoal and midnight-blue clouds.  \n**Description:** The sailor stands on the slick, rain-drenched deck of a tossing wooden schooner. Massive, white-capped swells rise like mountains around the vessel. In the heart of a crashing wave just yards away, the colossal silhouette of a Blue Whale breaches, its skin glistening like wet slate under the electric sky. The wind whips the smoke from the man’s pipe into grey ribbons, and his blue eyes are wide and focused, reflecting the raw power of the churning Atlantic.  \n====  \n**Environment 2: Golden Hour Melancholy**  \n**Mood:** Serene, nostalgic, and peaceful.  \n**Lighting:** Soft, warm, honey-colored light from a low-hanging sun. Long shadows stretch across the deck, and the water is a shimmering sheet of liquid gold.  \n**Description:** The man leans against the mahogany railing of a stationary, classic fishing trawler. The air is still, and the only sound is the gentle lap of water against the hull. In the distance, the majestic fluke of a Humpback whale breaks the surface, dripping with golden droplets as it dives into the depths. The warm light catches the deep lines on the sailor's face and the amber glow of the tobacco in his pipe, casting a look of quiet reflection over his weathered features.  \n====  \n**Environment 3: The Arctic Desolation**  \n**Mood:** Harsh, lonely, and stoic.  \n**Lighting:** Flat, pale, and clinical winter light. Desaturated tones of icy blue, stark white, and slate grey dominate the palette.  \n**Description:** The sailor is positioned on the bow of a steel-hulled icebreaker, surrounded by a labyrinth of floating ice floes. His breath and the smoke from his pipe form thick white clouds in the frigid air. Beside the ship, a massive Bowhead whale surfaces in a small lead of open water, its blowhole emitting a powerful puff of steam that mirrors the man's own breath. The environment is silent and frozen, emphasizing the man's rugged endurance against the elements.  \n====  \n**Environment 4: The Bioluminescent Night**  \n**Mood:** Mystical, surreal, and filled with wonder.  \n**Lighting:** Ethereal neon-blue light radiating from the water, contrasted against a pitch-black sky filled with brilliant stars.  \n**Description:** The man stands on the deck of a silent, darkened sailing ship. As the hull cuts through the water, it wakes a shimmering trail of bioluminescent algae. Beneath the surface, a massive Right Whale glides alongside the ship, its enormous body outlined in a ghostly, glowing blue aura. The cool, magical light reflects in the sailor’s piercing blue eyes, making them glow with an otherworldly intensity as he watches the leviathan pass in the silence of the midnight sea.  \n====  \n**Environment 5: The Shrouded Ghost-Coast**  \n**Mood:** Suspenseful, muffled, and mysterious.  \n**Lighting:** Heavily diffused, monochromatic grey light. Visibility is low, with shapes appearing as soft-edged silhouettes through a thick, damp fog.  \n**Description:** The sailor is stationed at the stern of an old, rusted freighter moving slowly through a dense sea mist. The rigging of the ship is encrusted with salt and moisture, disappearing into the grey overhead. Suddenly, the massive, dark hump of a grey whale breaks the surface just feet away, appearing like a smooth wet stone rising from the vapor. The man remains motionless, his hand gripped tight on a leather strap, the glowing ember of his pipe the only spot of color in a world swallowed by the haze.",
+                "model": "gemini-3-flash-preview",
+                "includeSplitSeparator": true,
+                "enhancePrompt": false
+            }
+        },
+        {
+            "id": "node944577",
+            "type": "SPLIT_TEXT",
+            "position": {
+                "x": 3384,
+                "y": 2160
+            },
+            "data": {
+                "prompt": "",
+                "isLoading": false,
+                "splitSeparator": "====",
+                "splitPage": 0,
+                "splitOutputs": [
+                    "**Environment 1: The Eye of the Storm**  \n**Mood:** Perilous, intense, and epic.  \n**Lighting:** Dramatic high-contrast lighting; flashes of jagged white lightning illuminate the scene against a backdrop of deep charcoal and midnight-blue clouds.  \n**Description:** The sailor stands on the slick, rain-drenched deck of a tossing wooden schooner. Massive, white-capped swells rise like mountains around the vessel. In the heart of a crashing wave just yards away, the colossal silhouette of a Blue Whale breaches, its skin glistening like wet slate under the electric sky. The wind whips the smoke from the man’s pipe into grey ribbons, and his blue eyes are wide and focused, reflecting the raw power of the churning Atlantic.",
+                    "**Environment 2: Golden Hour Melancholy**  \n**Mood:** Serene, nostalgic, and peaceful.  \n**Lighting:** Soft, warm, honey-colored light from a low-hanging sun. Long shadows stretch across the deck, and the water is a shimmering sheet of liquid gold.  \n**Description:** The man leans against the mahogany railing of a stationary, classic fishing trawler. The air is still, and the only sound is the gentle lap of water against the hull. In the distance, the majestic fluke of a Humpback whale breaks the surface, dripping with golden droplets as it dives into the depths. The warm light catches the deep lines on the sailor's face and the amber glow of the tobacco in his pipe, casting a look of quiet reflection over his weathered features.",
+                    "**Environment 3: The Arctic Desolation**  \n**Mood:** Harsh, lonely, and stoic.  \n**Lighting:** Flat, pale, and clinical winter light. Desaturated tones of icy blue, stark white, and slate grey dominate the palette.  \n**Description:** The sailor is positioned on the bow of a steel-hulled icebreaker, surrounded by a labyrinth of floating ice floes. His breath and the smoke from his pipe form thick white clouds in the frigid air. Beside the ship, a massive Bowhead whale surfaces in a small lead of open water, its blowhole emitting a powerful puff of steam that mirrors the man's own breath. The environment is silent and frozen, emphasizing the man's rugged endurance against the elements.",
+                    "**Environment 4: The Bioluminescent Night**  \n**Mood:** Mystical, surreal, and filled with wonder.  \n**Lighting:** Ethereal neon-blue light radiating from the water, contrasted against a pitch-black sky filled with brilliant stars.  \n**Description:** The man stands on the deck of a silent, darkened sailing ship. As the hull cuts through the water, it wakes a shimmering trail of bioluminescent algae. Beneath the surface, a massive Right Whale glides alongside the ship, its enormous body outlined in a ghostly, glowing blue aura. The cool, magical light reflects in the sailor’s piercing blue eyes, making them glow with an otherworldly intensity as he watches the leviathan pass in the silence of the midnight sea.",
+                    "**Environment 5: The Shrouded Ghost-Coast**  \n**Mood:** Suspenseful, muffled, and mysterious.  \n**Lighting:** Heavily diffused, monochromatic grey light. Visibility is low, with shapes appearing as soft-edged silhouettes through a thick, damp fog.  \n**Description:** The sailor is stationed at the stern of an old, rusted freighter moving slowly through a dense sea mist. The rigging of the ship is encrusted with salt and moisture, disappearing into the grey overhead. Suddenly, the massive, dark hump of a grey whale breaks the surface just feet away, appearing like a smooth wet stone rising from the vapor. The man remains motionless, his hand gripped tight on a leather strap, the glowing ember of his pipe the only spot of color in a world swallowed by the haze."
+                ]
+            }
+        },
+        {
+            "id": "imagegen229600",
+            "type": "IMAGE_GEN",
+            "position": {
+                "x": 4128,
+                "y": 1608
+            },
+            "data": {
+                "prompt": "",
+                "isLoading": false,
+                "imageCount": 1,
+                "aspectRatio": "1:1",
+                "outputFormat": "JPEG",
+                "model": "gemini-3.1-flash-image-preview",
+                "preset": "1K",
+                "imageResources": [
+                    "4a849da0-222c-4f13-ad49-6a2e27cda31e"
+                ]
+            }
+        },
+        {
+            "id": "imagegen485522",
+            "type": "IMAGE_GEN",
+            "position": {
+                "x": 4128,
+                "y": 2040
+            },
+            "data": {
+                "prompt": "",
+                "isLoading": false,
+                "imageCount": 1,
+                "aspectRatio": "1:1",
+                "outputFormat": "JPEG",
+                "model": "gemini-3.1-flash-image-preview",
+                "preset": "1K",
+                "imageResources": [
+                    "dc1257a4-b2d9-4c89-b36b-0ce8fcd348cb"
                 ]
             }
         }
     ],
     "edges": [
         {
-            "id": "e158275",
+            "id": "e927634",
             "source": "imgsrc025306",
             "sourceHandle": "image",
-            "target": "vision027244",
+            "target": "vision590189",
             "targetHandle": "image"
         },
         {
-            "id": "e044764",
+            "id": "e507349",
+            "source": "vision590189",
+            "sourceHandle": "output",
+            "target": "textgen826640",
+            "targetHandle": "prompt"
+        },
+        {
+            "id": "e732318",
+            "source": "textgen826640",
+            "sourceHandle": "output",
+            "target": "node375008",
+            "targetHandle": "prompt"
+        },
+        {
+            "id": "e345106",
+            "source": "node375008",
+            "sourceHandle": "split-0",
+            "target": "imagegen648529",
+            "targetHandle": "prompt"
+        },
+        {
+            "id": "e906680",
             "source": "imgsrc025306",
             "sourceHandle": "image",
-            "target": "imagegen673883",
+            "target": "imagegen648529",
+            "targetHandle": "image"
+        },
+        {
+            "id": "e127292",
+            "source": "imgsrc025306",
+            "sourceHandle": "image",
+            "target": "imagegen794189",
+            "targetHandle": "image"
+        },
+        {
+            "id": "e145268",
+            "source": "imgsrc025306",
+            "sourceHandle": "image",
+            "target": "imagegen440988",
+            "targetHandle": "image"
+        },
+        {
+            "id": "e860291",
+            "source": "imgsrc025306",
+            "sourceHandle": "image",
+            "target": "imagegen135467",
+            "targetHandle": "image"
+        },
+        {
+            "id": "e451329",
+            "source": "imgsrc025306",
+            "sourceHandle": "image",
+            "target": "imagegen812459",
+            "targetHandle": "image"
+        },
+        {
+            "id": "e186027",
+            "source": "node375008",
+            "sourceHandle": "split-1",
+            "target": "imagegen794189",
+            "targetHandle": "prompt"
+        },
+        {
+            "id": "e283802",
+            "source": "node375008",
+            "sourceHandle": "split-2",
+            "target": "imagegen812459",
+            "targetHandle": "prompt"
+        },
+        {
+            "id": "e511808",
+            "source": "node375008",
+            "sourceHandle": "split-3",
+            "target": "imagegen440988",
+            "targetHandle": "prompt"
+        },
+        {
+            "id": "e602569",
+            "source": "node375008",
+            "sourceHandle": "split-4",
+            "target": "imagegen135467",
+            "targetHandle": "prompt"
+        },
+        {
+            "id": "e137788",
+            "source": "vision590189",
+            "sourceHandle": "output",
+            "target": "textgen481104",
+            "targetHandle": "prompt"
+        },
+        {
+            "id": "e351751",
+            "source": "textgen481104",
+            "sourceHandle": "output",
+            "target": "node944577",
+            "targetHandle": "prompt"
+        },
+        {
+            "id": "e830713",
+            "source": "node944577",
+            "sourceHandle": "split-0",
+            "target": "imagegen229600",
+            "targetHandle": "prompt"
+        },
+        {
+            "id": "e825167",
+            "source": "node944577",
+            "sourceHandle": "split-1",
+            "target": "imagegen485522",
+            "targetHandle": "prompt"
+        },
+        {
+            "id": "e816336",
+            "source": "imgsrc025306",
+            "sourceHandle": "image",
+            "target": "imagegen229600",
+            "targetHandle": "image"
+        },
+        {
+            "id": "e435778",
+            "source": "imgsrc025306",
+            "sourceHandle": "image",
+            "target": "imagegen485522",
             "targetHandle": "image"
         }
     ]

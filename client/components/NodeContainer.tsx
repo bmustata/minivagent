@@ -1,5 +1,5 @@
 import React from 'react'
-import { X, StickyNote, Type, Image as ImageIcon, ScanEye, Box, Columns2 } from 'lucide-react'
+import { X, StickyNote, Type, Image as ImageIcon, ScanEye, Box, Columns2, Scissors } from 'lucide-react'
 import { Node, NodeType } from '../types'
 
 interface NodeContainerProps {
@@ -56,6 +56,11 @@ export const NodeContainer: React.FC<NodeContainerProps> = ({ node, selected, on
             headerIcon = <Columns2 size={14} />
             title = 'Compare'
             break
+        case NodeType.SPLIT_TEXT:
+            headerColor = 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+            headerIcon = <Scissors size={14} />
+            title = 'Split Text'
+            break
     }
 
     // Configure Handles
@@ -100,6 +105,12 @@ export const NodeContainer: React.FC<NodeContainerProps> = ({ node, selected, on
         inputHandles.push({ id: 'image', label: 'Images', top: 80, color: 'bg-pink-400' })
         outputHandles.push({ id: 'image-0', label: 'IMG 1', top: 100, color: 'bg-teal-400' })
         outputHandles.push({ id: 'image-1', label: 'IMG 2', top: 160, color: 'bg-teal-400' })
+    } else if (node.type === NodeType.SPLIT_TEXT) {
+        inputHandles.push({ id: 'prompt', label: 'Text', top: 45, color: 'bg-orange-400' })
+        const count = node.data.splitOutputs?.length ?? 2
+        for (let i = 0; i < count; i++) {
+            outputHandles.push({ id: `split-${i}`, label: `PART ${i + 1}`, top: 45 + i * 30, color: 'bg-emerald-400' })
+        }
     }
 
     return (

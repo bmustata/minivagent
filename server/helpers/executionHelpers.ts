@@ -170,6 +170,19 @@ export async function executeNode(nodeId: string, nodes: GraphNode[], edges: Gra
             const ownText = node.data.prompt || ''
             node.data.output = connectedText ? (ownText ? `${ownText}\n\n${connectedText}` : connectedText) : ownText
             logger.info(`[${jobId}]   ✓ NOTE combined text (${node.data.output.length} chars)`)
+        } else if (node.type === 'SPLIT_TEXT') {
+            const connectedText = graphGetConnectedText(nodeId, nodes, edges)
+            const combinedText = connectedText || node.data.prompt || ''
+            if (!combinedText.trim()) throw new Error('No input text provided.')
+            const rawSep = node.data.splitSeparator ?? '===='
+            const separator = rawSep.replace(/\\n/g, '\n')
+            const parts = combinedText
+                .split(separator)
+                .map((s: string) => s.trim())
+                .filter((s: string) => s.length > 0)
+            if (parts.length === 0) throw new Error('Split produced no results with that separator.')
+            node.data.splitOutputs = parts
+            logger.info(`[${jobId}]   ✓ Split text into ${parts.length} part(s)`)
         }
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Generation failed'
