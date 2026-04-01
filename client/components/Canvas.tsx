@@ -1324,10 +1324,13 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
             {/* Background Grid */}
             <div
                 className="absolute inset-0 pointer-events-none pattern-grid text-slate-300 dark:text-zinc-700 opacity-60"
-                style={{
-                    transform: `translate(${viewport.x}px, ${viewport.y}px) scale(${zoom})`,
-                    transformOrigin: '0 0'
-                }}
+                style={(() => {
+                    const gridSize = Math.max(24, 24 * zoom)
+                    return {
+                        backgroundPosition: `${viewport.x % gridSize}px ${viewport.y % gridSize}px`,
+                        backgroundSize: `${gridSize}px ${gridSize}px`,
+                    }
+                })()}
             />
 
             {/* SVG Layer for Edges */}
