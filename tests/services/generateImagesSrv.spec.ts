@@ -2,6 +2,18 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { generateImagesBase64 } from '../../server/services/generateImagesSrv'
 import { Modality } from '@google/genai'
 
+// Mock config (model registry)
+vi.mock('../../server/config', () => ({
+    MODELS: {
+        TEXT: [{ name: 'Flash Mock', provider: 'gemini', model: 'gemini-2.0-mock', options: {} }],
+        IMAGE: [
+            { name: 'Imagen Mock', provider: 'gemini', model: 'imagen-3.0-mock', options: {} },
+            { name: 'Imagen Pro Mock', provider: 'gemini', model: 'imagen-3.0-pro-mock', options: { presets: ['1K', '2K', '4K'] } }
+        ],
+        VISION: [{ name: 'Flash Mock', provider: 'gemini', model: 'gemini-2.0-mock', options: {} }]
+    }
+}))
+
 // Mock the AI module
 vi.mock('../../server/utils/const', () => ({
     ai: {
@@ -9,14 +21,7 @@ vi.mock('../../server/utils/const', () => ({
             generateContent: vi.fn()
         }
     },
-    MODELS: {
-        TEXT: [{ name: 'Flash Mock', model: 'gemini-2.0-mock', options: {} }],
-        IMAGE: [
-            { name: 'Imagen Mock', model: 'imagen-3.0-mock', options: {} },
-            { name: 'Imagen Pro Mock', model: 'imagen-3.0-pro-mock', options: { presets: ['1K', '2K', '4K'] } }
-        ],
-        VISION: [{ name: 'Flash Mock', model: 'gemini-2.0-mock', options: {} }]
-    },
+    MODELS: undefined,
     IMAGE_ASPECT_RATIOS: ['1:1', '16:9', '9:16', '4:3', '3:4']
 }))
 

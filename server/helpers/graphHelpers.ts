@@ -41,6 +41,13 @@ export function graphGetConnectedText(nodeId: string, nodes: GraphNode[], edges:
                 const combined = noteConnected ? (noteOwn ? `${noteOwn}\n\n${noteConnected}` : noteConnected) : noteOwn
                 if (combined) texts.push(combined)
             }
+        } else if (sourceNode.type === 'SPLIT_TEXT') {
+            if (edge.sourceHandle && edge.sourceHandle.startsWith('split-')) {
+                const index = parseInt(edge.sourceHandle.split('-')[1], 10)
+                if (!isNaN(index) && sourceNode.data.splitOutputs?.[index]) {
+                    texts.push(sourceNode.data.splitOutputs[index])
+                }
+            }
         } else {
             const val = sourceNode.data.output || sourceNode.data.prompt
             if (val) texts.push(val)

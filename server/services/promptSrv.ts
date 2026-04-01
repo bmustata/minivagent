@@ -1,5 +1,6 @@
-import { ai, MODELS } from '../utils/const.ts'
-import { validateModel } from '../utils/modelUtils.ts'
+import { validateModel, getModelProvider } from '../utils/modelUtils.ts'
+import { geminiEnhancePrompt } from './gemini/promptSrv.ts'
+import { openaiEnhancePrompt } from './openai/promptSrv.ts'
 
 export type PromptType = 'TEXT' | 'IMAGE'
 
@@ -15,17 +16,21 @@ Return ONLY the enhanced prompt, nothing else.`
 
 /**
  * Enhance a prompt using AI
+ * @param prompt - The prompt text to enhance
+ * @param type - Enhancement mode: 'TEXT' or 'IMAGE'
+ * @param model - Model ID to use; falls back to TEXT default if omitted
  */
 export const enhancePrompt = async (prompt: string, type: PromptType = 'TEXT', model?: string): Promise<string> => {
     const systemInstruction = type === 'IMAGE' ? SYSTEM_INSTRUCTION_IMAGE : SYSTEM_INSTRUCTION_TEXT
 
     const validatedModel = validateModel(model, 'TEXT')
+    const provider = getModelProvider(validatedModel, 'TEXT')
 
-    const response = await ai.models.generateContent({
-        model: validatedModel,
-        contents: prompt,
-        config: { systemInstruction }
-    })
-
-    return response.text?.trim() || prompt
+    if (provider === 'openai') {
+        return openaiEnhancePrompt(prompt, systemInstruction, validatedModel)
+    } else if (provider === 'gemini') {
+        return geminiEnhancePrompt(prompt, systemInstruction, validatedModel)
+    } else {
+        throw new Error(`Unknown provider: "${provider}"`)
+    }
 }

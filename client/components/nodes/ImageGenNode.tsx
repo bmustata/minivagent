@@ -3,6 +3,7 @@ import { Play, Loader2, Maximize2, ImageOff } from 'lucide-react'
 import { Node, NodeData } from '../../types'
 import { getModels } from '../../services/generateService'
 import { resourceToUrl } from '../../utils/imageUtils'
+import { ProviderIcon } from '../../assets/ProviderIcon'
 
 interface ImageGenNodeProps {
     node: Node
@@ -17,7 +18,7 @@ export const ImageGenNode: React.FC<ImageGenNodeProps> = ({ node, connectedInput
     const { prompt, imageResources, isLoading, error, imageCount = 1, model } = node.data
     const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({})
     const [inputThumbError, setInputThumbError] = useState(false)
-    const [availableModels, setAvailableModels] = useState<Array<{ name: string; model: string }>>([]);
+    const [availableModels, setAvailableModels] = useState<Array<{ name: string; model: string; provider: string }>>([]);
 
     useEffect(() => {
         getModels()
@@ -30,9 +31,11 @@ export const ImageGenNode: React.FC<ImageGenNodeProps> = ({ node, connectedInput
         setInputThumbError(false)
     }, [connectedInputImages[0]])
 
+    const modelEntry = model ? availableModels.find((m) => m.model === model) : availableModels[0]
     const modelLabel = model
         ? (availableModels.find((m) => m.model === model)?.name ?? model)
         : availableModels[0] ? `Default (${availableModels[0].name})` : 'Default'
+    const modelProvider = modelEntry?.provider ?? 'gemini'
 
     const hasImages = connectedInputImages.length > 0
     const canRun = !!prompt.trim() || !!connectedInputText || hasImages
@@ -42,7 +45,10 @@ export const ImageGenNode: React.FC<ImageGenNodeProps> = ({ node, connectedInput
             {/* Model Badge */}
             <div className="flex items-center justify-between">
                 <span className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Model</span>
-                <span className="text-[10px] text-purple-600 dark:text-purple-400 font-medium truncate max-w-[140px]" title={modelLabel}>{modelLabel}</span>
+                <span className="flex items-center gap-1 text-[10px] text-purple-600 dark:text-purple-400 font-medium truncate max-w-[140px]" title={modelLabel}>
+                    <ProviderIcon provider={modelProvider} />
+                    {modelLabel}
+                </span>
             </div>
 
             {/* Image Input Status — only shown when connected */}

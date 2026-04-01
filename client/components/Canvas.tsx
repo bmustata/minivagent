@@ -2,13 +2,13 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Node, Edge, NodeType, NodeData } from '../types'
 import { NodeContainer } from './NodeContainer'
-import { TextGenNode, ImageGenNode, ImageSourceNode, NoteNode, ImageToTextNode, CompareNode } from './nodes'
+import { TextGenNode, ImageGenNode, ImageSourceNode, NoteNode, ImageToTextNode, CompareNode, SplitTextNode } from './nodes'
 import { ConfigModal } from './ConfigModal'
 import { GalleryModal, GalleryImage } from './GalleryModal'
 import { GraphManager } from './GraphManager'
 import { GraphTitle } from './GraphTitle'
 import { listGraphs, GraphResource } from '../services/graphService'
-import { Sun, Moon, Image as ImageIcon, Type, StickyNote, X, ZoomIn, ZoomOut, Maximize2, Minimize2, Info, Code, ChevronDown, Play, Loader2, ScanEye, Box, Sparkles, MessageSquare, RotateCcw, Columns2, Github } from 'lucide-react'
+import { Sun, Moon, Image as ImageIcon, Type, StickyNote, X, ZoomIn, ZoomOut, Maximize2, Minimize2, Info, Code, ChevronDown, Play, Loader2, ScanEye, Box, Sparkles, MessageSquare, RotateCcw, Columns2, Github, Scissors } from 'lucide-react'
 import { APP_CONFIG } from '../config'
 import { generateText, extractTextFromImage, generateImages, planGraphFromPrompt } from '../services/generateService'
 import { ImageGenPropsPanel } from './nodes/ImageGenPropsPanel'
@@ -184,6 +184,13 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                     const noteOwn = sourceNode.data.prompt || ''
                     const combined = noteConnected ? (noteOwn ? `${noteOwn}\n\n${noteConnected}` : noteConnected) : noteOwn
                     if (combined) texts.push(combined)
+                }
+            } else if (sourceNode.type === NodeType.SPLIT_TEXT) {
+                if (edge.sourceHandle && edge.sourceHandle.startsWith('split-')) {
+                    const index = parseInt(edge.sourceHandle.split('-')[1], 10)
+                    if (!isNaN(index) && sourceNode.data.splitOutputs && sourceNode.data.splitOutputs[index]) {
+                        texts.push(sourceNode.data.splitOutputs[index])
+                    }
                 }
             } else {
                 const val = sourceNode.data.output || sourceNode.data.prompt
@@ -365,6 +372,10 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
 
                 if (!finalPrompt.trim()) throw new Error('No input prompt provided.')
 
+                if (node.data.includeSplitSeparator) {
+                    finalPrompt = `${finalPrompt}\n\nUse ==== to separate the descriptions / section / variations`
+                }
+
                 const result = await generateText(finalPrompt, node.data.enhancePrompt, node.data.model)
 
                 // Update state and Ref for consistency
@@ -437,6 +448,17 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                 const update = { output: combined, isLoading: false }
                 setNodes((prev) => prev.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, ...update } } : n)))
                 nodesRef.current = nodesRef.current.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, ...update } } : n))
+            } else if (node.type === NodeType.SPLIT_TEXT) {
+                const connectedText = getConnectedText(nodeId, nodesRef.current)
+                const combinedText = connectedText || node.data.prompt || ''
+                if (!combinedText.trim()) throw new Error('No input text provided.')
+                const rawSep = node.data.splitSeparator ?? '===='
+                const separator = rawSep.replace(/\\n/g, '\n')
+                const parts = combinedText.split(separator).map((s) => s.trim()).filter((s) => s.length > 0)
+                if (parts.length === 0) throw new Error('Split produced no results with that separator.')
+                const update = { splitOutputs: parts, isLoading: false }
+                setNodes((prev) => prev.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, ...update } } : n)))
+                nodesRef.current = nodesRef.current.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, ...update } } : n))
             }
         } catch (error: any) {
             const update = { error: error.message || 'Generation failed', isLoading: false }
@@ -475,7 +497,7 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
             for (const nodeId of sorted) {
                 // Only execute generative nodes
                 const node = nodesRef.current.find((n) => n.id === nodeId)
-                if (node && (node.type === NodeType.TEXT_GEN || node.type === NodeType.IMAGE_GEN || node.type === NodeType.IMAGE_TO_TEXT || node.type === NodeType.NOTE)) {
+                if (node && (node.type === NodeType.TEXT_GEN || node.type === NodeType.IMAGE_GEN || node.type === NodeType.IMAGE_TO_TEXT || node.type === NodeType.NOTE || node.type === NodeType.SPLIT_TEXT)) {
                     await executeNode(nodeId)
                 }
             }
@@ -494,7 +516,8 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                     imageResources: undefined,
                     enhancedOutput: undefined,
                     error: undefined,
-                    isLoading: false
+                    isLoading: false,
+                    splitOutputs: undefined
                 }
             }))
         setNodes(reset)
@@ -809,7 +832,8 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                 imageCount: type === NodeType.IMAGE_GEN ? 1 : undefined,
                 aspectRatio: type === NodeType.IMAGE_GEN ? '1:1' : undefined,
                 outputFormat: type === NodeType.IMAGE_GEN ? 'JPEG' : undefined,
-                imageInputType: type === NodeType.IMAGE_TO_TEXT || type === NodeType.IMAGE_SOURCE ? 'UPLOAD' : undefined
+                imageInputType: type === NodeType.IMAGE_TO_TEXT || type === NodeType.IMAGE_SOURCE ? 'UPLOAD' : undefined,
+                splitSeparator: type === NodeType.SPLIT_TEXT ? '====' : undefined
             }
         }
         setNodes((prev) => [...prev, newNode])
@@ -821,6 +845,15 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
 
     const updateNodeData = (id: string, newData: Partial<NodeData>) => {
         setNodes((prev) => prev.map((n) => (n.id === id ? { ...n, data: { ...n.data, ...newData } } : n)))
+        if (newData.splitOutputs !== undefined) {
+            const newCount = newData.splitOutputs.length
+            setEdges((prev) => prev.filter((e) => {
+                if (e.source !== id) return true
+                if (!e.sourceHandle?.startsWith('split-')) return true
+                const idx = parseInt(e.sourceHandle.split('-')[1], 10)
+                return !isNaN(idx) && idx < newCount
+            }))
+        }
     }
 
     const deleteNode = (id: string) => {
@@ -1290,6 +1323,13 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
             if (handleId === 'image-0') offsetY = 100
             else if (handleId === 'image-1') offsetY = 160
             else offsetY = 100
+        } else if (node.type === NodeType.SPLIT_TEXT) {
+            if (handleId?.startsWith('split-')) {
+                const idx = parseInt(handleId.split('-')[1], 10)
+                offsetY = 45 + idx * 30
+            } else {
+                offsetY = 45
+            }
         } else {
             offsetY = 45
         }
@@ -1324,10 +1364,13 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
             {/* Background Grid */}
             <div
                 className="absolute inset-0 pointer-events-none pattern-grid text-slate-300 dark:text-zinc-700 opacity-60"
-                style={{
-                    transform: `translate(${viewport.x}px, ${viewport.y}px) scale(${zoom})`,
-                    transformOrigin: '0 0'
-                }}
+                style={(() => {
+                    const gridSize = Math.max(24, 24 * zoom)
+                    return {
+                        backgroundPosition: `${viewport.x % gridSize}px ${viewport.y % gridSize}px`,
+                        backgroundSize: `${gridSize}px ${gridSize}px`,
+                    }
+                })()}
             />
 
             {/* SVG Layer for Edges */}
@@ -1448,6 +1491,14 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                                 />
                             )}
                             {node.type === NodeType.NOTE && <NoteNode node={node} updateNodeData={updateNodeData} connectedInputText={getConnectedText(node.id)} />}
+                            {node.type === NodeType.SPLIT_TEXT && (
+                                <SplitTextNode
+                                    node={node}
+                                    updateNodeData={updateNodeData}
+                                    connectedInputText={getConnectedText(node.id)}
+                                    onRun={() => executeNode(node.id)}
+                                />
+                            )}
                             {node.type === NodeType.COMPARE && (
                                 <CompareNode
                                     node={node}
@@ -1586,6 +1637,11 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                     <button onClick={() => addNode(NodeType.COMPARE)} className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors text-slate-600 dark:text-zinc-400">
                         <Columns2 size={20} />
                         <span className="text-[10px] font-semibold uppercase">Compare</span>
+                    </button>
+                    <div className="w-[1px] h-8 bg-slate-200 dark:bg-zinc-800 mx-1" />
+                    <button onClick={() => addNode(NodeType.SPLIT_TEXT)} className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors text-slate-600 dark:text-zinc-400">
+                        <Scissors size={20} />
+                        <span className="text-[10px] font-semibold uppercase">Split</span>
                     </button>
                     <div className="w-[1px] h-8 bg-slate-200 dark:bg-zinc-800 mx-1" />
                     <button onClick={() => addNode(NodeType.NOTE)} className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors text-slate-600 dark:text-zinc-400">

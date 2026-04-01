@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { X, Sparkles, Link as LinkIcon, Play, Loader2 } from 'lucide-react'
 import { Node, NodeData } from '../../types'
 import { getModels } from '../../services/generateService'
+import { ProviderIcon } from '../../assets/ProviderIcon'
 
 interface ImageGenPropsPanelProps {
     node: Node
@@ -17,14 +18,19 @@ const OUTPUT_FORMATS = ['PNG', 'JPEG']
 export const ImageGenPropsPanel: React.FC<ImageGenPropsPanelProps> = ({ node, updateNodeData, connectedInputText, onClose, onRun }) => {
     const { prompt, enhancePrompt, enhancedOutput, model, preset, imageCount = 1, aspectRatio = '1:1', outputFormat = 'PNG', isLoading } = node.data
 
-    const [availableModels, setAvailableModels] = useState<Array<{ name: string; model: string; options: any }>>([])
+    const [availableModels, setAvailableModels] = useState<Array<{ name: string; model: string; provider: string; options: any }>>([])
+    const [providers, setProviders] = useState<string[]>([])
+    const [selectedProvider, setSelectedProvider] = useState<string>('')
     const [modelsLoading, setModelsLoading] = useState(true)
+    const [showModelDropdown, setShowModelDropdown] = useState(false)
+    const dropdownRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         const fetchModels = async () => {
             try {
                 const response = await getModels()
                 setAvailableModels(response.models.IMAGE)
+                setProviders(response.providers?.IMAGE ?? [])
             } catch {
                 // silently fail — Canvas.tsx shows toast on node-level errors
             } finally {
@@ -35,6 +41,17 @@ export const ImageGenPropsPanel: React.FC<ImageGenPropsPanelProps> = ({ node, up
     }, [])
 
     const isLinkedText = !!connectedInputText
+
+    useEffect(() => {
+        if (!showModelDropdown) return
+        const handler = (e: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+                setShowModelDropdown(false)
+            }
+        }
+        document.addEventListener('mousedown', handler, true)
+        return () => document.removeEventListener('mousedown', handler, true)
+    }, [showModelDropdown])
 
     const handleWheel = (e: React.WheelEvent) => {
         const target = e.currentTarget as HTMLElement
@@ -67,28 +84,100 @@ export const ImageGenPropsPanel: React.FC<ImageGenPropsPanelProps> = ({ node, up
                 {/* Model Selector */}
                 <div>
                     <label className="text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1 block">Model</label>
-                    <select
-                        value={model || ''}
-                        onChange={(e) => {
-                            const sel = availableModels.find((m) => m.model === e.target.value)
-                            const updates: Partial<NodeData> = { model: e.target.value || undefined }
-                            if (sel?.options?.presets?.length) {
-                                updates.preset = sel.options.presets[0]
-                            } else {
-                                updates.preset = undefined
-                            }
-                            updateNodeData(node.id, updates)
-                        }}
-                        disabled={modelsLoading}
-                        className="w-full text-xs p-1.5 rounded-md bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-purple-500/50 disabled:opacity-50"
-                    >
-                        <option value="">{availableModels[0] ? `Default (${availableModels[0].name})` : 'Default'}</option>
-                        {availableModels.map((m) => (
-                            <option key={m.model} value={m.model}>
-                                {m.name}
-                            </option>
-                        ))}
-                    </select>
+                    {providers.length > 1 && (
+                        <div className="flex gap-1 mb-1.5 flex-wrap">
+                            <button
+                                onClick={() => setSelectedProvider('')}
+                                className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium border transition-colors ${
+                                    selectedProvider === ''
+                                        ? 'bg-purple-50 border-purple-300 text-purple-700 dark:bg-purple-900/30 dark:border-purple-700 dark:text-purple-300'
+                                        : 'bg-transparent border-slate-200 text-slate-400 hover:bg-slate-100 dark:border-zinc-700 dark:text-zinc-500 dark:hover:bg-zinc-800'
+                                }`}
+                            >
+                                All
+                            </button>
+                            {providers.map((p) => (
+                                <button
+                                    key={p}
+                                    onClick={() => setSelectedProvider(selectedProvider === p ? '' : p)}
+                                    className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium border transition-colors capitalize ${
+                                        selectedProvider === p
+                                            ? 'bg-purple-50 border-purple-300 text-purple-700 dark:bg-purple-900/30 dark:border-purple-700 dark:text-purple-300'
+                                            : 'bg-transparent border-slate-200 text-slate-400 hover:bg-slate-100 dark:border-zinc-700 dark:text-zinc-500 dark:hover:bg-zinc-800'
+                                    }`}
+                                >
+                                    <ProviderIcon provider={p} />
+                                    {p}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                    {(() => {
+                        const filtered = availableModels.filter((m) => !selectedProvider || m.provider === selectedProvider)
+                        const selected = availableModels.find((m) => m.model === model) ?? null
+                        return (
+                            <div className="relative" ref={dropdownRef}>
+                                <button
+                                    disabled={modelsLoading}
+                                    onClick={() => setShowModelDropdown((v) => !v)}
+                                    className="w-full flex items-center gap-1.5 text-xs p-1.5 rounded-md bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-purple-500/50 disabled:opacity-50 text-left"
+                                >
+                                    {selected ? (
+                                        <>
+                                            <ProviderIcon provider={selected.provider} />
+                                            <span className="flex-1 truncate">{selected.name}</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            {availableModels[0] && <ProviderIcon provider={availableModels[0].provider} />}
+                                            <span className="flex-1 truncate text-slate-400 dark:text-zinc-500">
+                                                {availableModels[0] ? `Default (${availableModels[0].name})` : 'Default'}
+                                            </span>
+                                        </>
+                                    )}
+                                    <svg width="10" height="10" viewBox="0 0 10 10" className="shrink-0 text-slate-400" fill="currentColor"><path d="M2 3.5l3 3 3-3" stroke="currentColor" strokeWidth="1.2" fill="none" strokeLinecap="round"/></svg>
+                                </button>
+                                {showModelDropdown && (
+                                    <div
+                                        className="absolute z-50 top-full left-0 right-0 mt-1 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-md shadow-lg max-h-48 overflow-y-auto custom-scrollbar"
+                                        onMouseDown={(e) => e.stopPropagation()}
+                                        onWheel={(e) => e.stopPropagation()}
+                                    >
+                                        <button
+                                            className="w-full flex items-center gap-1.5 px-2 py-1.5 text-xs hover:bg-slate-50 dark:hover:bg-zinc-800 text-left text-slate-400 dark:text-zinc-500"
+                                            onClick={() => {
+                                                const sel = availableModels[0]
+                                                const updates: Partial<NodeData> = { model: undefined }
+                                                updates.preset = sel?.options?.presets?.length ? sel.options.presets[0] : undefined
+                                                updateNodeData(node.id, updates)
+                                                setShowModelDropdown(false)
+                                            }}
+                                        >
+                                            {availableModels[0] && <ProviderIcon provider={availableModels[0].provider} />}
+                                            <span>{availableModels[0] ? `Default (${availableModels[0].name})` : 'Default'}</span>
+                                        </button>
+                                        {filtered.map((m) => (
+                                            <button
+                                                key={m.model}
+                                                className={`w-full flex items-center gap-1.5 px-2 py-1.5 text-xs hover:bg-slate-50 dark:hover:bg-zinc-800 text-left ${
+                                                    model === m.model ? 'text-purple-600 dark:text-purple-400 font-medium' : 'text-slate-700 dark:text-zinc-200'
+                                                }`}
+                                                onClick={() => {
+                                                    const updates: Partial<NodeData> = { model: m.model }
+                                                    updates.preset = m.options?.presets?.length ? m.options.presets[0] : undefined
+                                                    updateNodeData(node.id, updates)
+                                                    setShowModelDropdown(false)
+                                                }}
+                                            >
+                                                <ProviderIcon provider={m.provider} />
+                                                <span className="truncate">{m.name}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )
+                    })()}
                 </div>
 
                 {/* Preset Selector — conditional on model */}

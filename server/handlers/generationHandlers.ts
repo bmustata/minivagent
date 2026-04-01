@@ -13,15 +13,16 @@ const RESOURCES_DIR = path.join(process.cwd(), 'data', 'resources')
  * POST /api/enhance-prompt
  * @param {string} prompt - The prompt to enhance
  * @param {string} type - The type of enhancement (TEXT, IMAGE, etc.)
+ * @param {string} model - The model to use; provider is resolved automatically from config
  */
 export const enhancePrompt = async (req: Request, res: Response): Promise<void> => {
     try {
         const timer = startTimer()
-        const { prompt, type } = req.body
-        logger.info(`POST /api/enhance-prompt - type: ${type}, prompt length: ${prompt?.length}`)
+        const { prompt, type, model } = req.body
+        logger.info(`POST /api/enhance-prompt - type: ${type}, model: ${model || 'default'}, prompt length: ${prompt?.length}`)
         logger.info(`--- PROMPT START\n${truncatePromptForLog(prompt)}\n--- PROMPT END`)
 
-        const enhancedPrompt = await generationService.enhancePrompt(prompt, type || 'TEXT')
+        const enhancedPrompt = await generationService.enhancePrompt(prompt, type || 'TEXT', model)
 
         logger.info(`POST /api/enhance-prompt - ✓ enhanced length: ${enhancedPrompt?.length}, time: ${timer.stop()}`)
         res.json({ enhancedPrompt })
@@ -38,7 +39,7 @@ export const enhancePrompt = async (req: Request, res: Response): Promise<void> 
  * POST /api/generate-text
  * @param {string} prompt - The prompt for text generation
  * @param {boolean} shouldEnhance - Whether to enhance the prompt before generation
- * @param {string} model - The model to use for generation
+ * @param {string} model - The model to use for generation; provider is resolved automatically from config
  */
 export const generateText = async (req: Request, res: Response): Promise<void> => {
     try {

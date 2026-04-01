@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react'
-import { Play, Loader2, Link as LinkIcon, Sparkles } from 'lucide-react'
+import { Play, Loader2, Link as LinkIcon, Sparkles, Scissors, Copy, Eye } from 'lucide-react'
+import { TextPreviewModal } from '../TextPreviewModal'
 import { Node, NodeData } from '../../types'
 import { getModels } from '../../services/generateService'
+import { ProviderIcon } from '../../assets/ProviderIcon'
 
 interface TextGenNodeProps {
     node: Node
@@ -11,8 +13,10 @@ interface TextGenNodeProps {
 }
 
 export const TextGenNode: React.FC<TextGenNodeProps> = ({ node, updateNodeData, connectedInputText, onRun }) => {
-    const { prompt, isLoading, model, enhancePrompt } = node.data
-    const [availableModels, setAvailableModels] = useState<{ name: string; model: string }[]>([])
+    const { prompt, output, isLoading, model, enhancePrompt, includeSplitSeparator } = node.data
+    const [availableModels, setAvailableModels] = useState<{ name: string; model: string; provider: string }[]>([])
+    const [showPreview, setShowPreview] = useState(false)
+    const [copied, setCopied] = useState(false)
 
     useEffect(() => {
         getModels()
@@ -20,12 +24,22 @@ export const TextGenNode: React.FC<TextGenNodeProps> = ({ node, updateNodeData, 
             .catch(() => {})
     }, [])
 
+    const modelEntry = model ? availableModels.find((m) => m.model === model) : availableModels[0]
     const modelLabel = model
         ? (availableModels.find((m) => m.model === model)?.name ?? model)
         : availableModels[0] ? `Default (${availableModels[0].name})` : 'Default'
+    const modelProvider = modelEntry?.provider ?? 'gemini'
 
     const isLinked = !!connectedInputText
     const canRun = !!prompt.trim() || isLinked
+
+    const handleCopy = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        if (!output) return
+        navigator.clipboard.writeText(output)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 1500)
+    }
 
     const handleWheel = (e: React.WheelEvent) => {
         const target = e.currentTarget as HTMLElement
@@ -39,7 +53,10 @@ export const TextGenNode: React.FC<TextGenNodeProps> = ({ node, updateNodeData, 
             {/* Model Badge */}
             <div className="flex items-center justify-between">
                 <span className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Model</span>
-                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium truncate max-w-[140px]" title={modelLabel}>{modelLabel}</span>
+                <span className="flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-medium truncate max-w-[140px]" title={modelLabel}>
+                    <ProviderIcon provider={modelProvider} />
+                    {modelLabel}
+                </span>
             </div>
 
             {/* Prompt */}
@@ -49,6 +66,18 @@ export const TextGenNode: React.FC<TextGenNodeProps> = ({ node, updateNodeData, 
                         {isLinked ? 'Input & Instructions' : 'Input Prompt'}
                     </label>
                     <div className="flex items-center gap-1.5">
+                        <button
+                            onClick={(e) => { e.stopPropagation(); updateNodeData(node.id, { includeSplitSeparator: !includeSplitSeparator }) }}
+                            title={includeSplitSeparator ? 'Split separator hint ON' : 'Split separator hint OFF'}
+                            className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium transition-all border ${
+                                includeSplitSeparator
+                                    ? 'bg-green-50 border-green-200 text-green-600 dark:bg-green-900/30 dark:border-green-800 dark:text-green-300'
+                                    : 'bg-transparent border-transparent text-slate-300 dark:text-zinc-600 hover:text-slate-500 dark:hover:text-zinc-400'
+                            }`}
+                        >
+                            <Scissors size={9} />
+                            Split
+                        </button>
                         <button
                             onClick={(e) => { e.stopPropagation(); updateNodeData(node.id, { enhancePrompt: !enhancePrompt }) }}
                             title={enhancePrompt ? 'Prompt Enhancement ON' : 'Prompt Enhancement OFF'}
@@ -83,6 +112,22 @@ export const TextGenNode: React.FC<TextGenNodeProps> = ({ node, updateNodeData, 
                     onWheel={handleWheel}
                     placeholder={isLinked ? 'Add instructions for the connected input...' : 'Enter text prompt here...'}
                 />
+                {enhancePrompt && (
+                    <div className="mt-1.5 flex items-start gap-1 px-2 py-1 rounded bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+                        <Sparkles size={9} className="mt-0.5 shrink-0 text-yellow-500" />
+                        <span className="text-[9px] text-yellow-700 dark:text-yellow-300 leading-tight">
+                            Prompt will be enhanced by AI before generation
+                        </span>
+                    </div>
+                )}
+                {includeSplitSeparator && (
+                    <div className="mt-1.5 flex items-start gap-1 px-2 py-1 rounded bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+                        <Scissors size={9} className="mt-0.5 shrink-0 text-yellow-500" />
+                        <span className="text-[9px] text-yellow-700 dark:text-yellow-300 leading-tight">
+                            Use ==== to separate the descriptions / section / variations
+                        </span>
+                    </div>
+                )}
             </div>
 
             <button
@@ -93,6 +138,8 @@ export const TextGenNode: React.FC<TextGenNodeProps> = ({ node, updateNodeData, 
                 {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} fill="currentColor" />}
                 Generate
             </button>
+
+            <TextPreviewModal isOpen={showPreview} onClose={() => setShowPreview(false)} text={output || ''} title="Text Generator Preview" />
         </div>
     )
 }

@@ -1,5 +1,6 @@
-import { ai, MODELS } from '../utils/const.ts'
-import { validateModel } from '../utils/modelUtils.ts'
+import { validateModel, getModelProvider } from '../utils/modelUtils.ts'
+import { geminiExtractTextFromImage } from './gemini/visionSrv.ts'
+import { openaiExtractTextFromImage } from './openai/visionSrv.ts'
 
 export interface ExtractTextFromImageOptions {
     prompt?: string
@@ -11,20 +12,6 @@ export interface ExtractTextFromImageResult {
     text: string
 }
 
-/**
- * Parse base64 image data URL
- */
-const parseImageDataUrl = (img: string): { mimeType: string; data: string } | null => {
-    const match = img.match(/^data:(.*?);base64,(.*)$/)
-    if (match) {
-        return { mimeType: match[1], data: match[2] }
-    }
-    return null
-}
-
-/**
- * Extract text from images using vision model
- */
 export const extractTextFromImage = async (options: ExtractTextFromImageOptions): Promise<ExtractTextFromImageResult> => {
     const { prompt, images, model } = options
 
@@ -32,28 +19,19 @@ export const extractTextFromImage = async (options: ExtractTextFromImageOptions)
         throw new Error('At least one image is required.')
     }
 
-    const parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> = []
+    const finalPrompt = prompt || 'Describe this image in detail'
+    const validatedModel = validateModel(model, 'VISION')
+    const provider = getModelProvider(validatedModel, 'VISION')
 
-    // Add images first
-    for (const img of images) {
-        if (img) {
-            const parsed = parseImageDataUrl(img)
-            if (parsed) {
-                parts.push({ inlineData: parsed })
-            }
-        }
+    let text: string
+
+    if (provider === 'openai') {
+        text = await openaiExtractTextFromImage(images, finalPrompt, validatedModel)
+    } else if (provider === 'gemini') {
+        text = await geminiExtractTextFromImage(images, finalPrompt, validatedModel)
+    } else {
+        throw new Error(`Unknown provider: "${provider}"`)
     }
 
-    // Add prompt/question about the image
-    const finalPrompt = prompt || 'Describe this image in detail'
-    parts.push({ text: finalPrompt })
-
-    const validatedModel = validateModel(model, 'VISION')
-
-    const response = await ai.models.generateContent({
-        model: validatedModel,
-        contents: { parts }
-    })
-
-    return { text: response.text || 'No response generated.' }
+    return { text }
 }

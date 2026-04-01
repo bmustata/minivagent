@@ -82,18 +82,43 @@ export const ImageSourceNode: React.FC<ImageSourceNodeProps> = ({ node, updateNo
     const [isCropping, setIsCropping] = useState(false)
     const [cropArea, setCropArea] = useState<CropArea>({ x: 10, y: 10, width: 80, height: 80 })
     const [selectedRatio, setSelectedRatio] = useState<string>('Free')
+    const [isDragOver, setIsDragOver] = useState(false)
+
+    const loadFile = (file: File) => {
+        const reader = new FileReader()
+        reader.onload = (event) => {
+            if (event.target?.result) {
+                updateNodeData(node.id, { imageInput: event.target.result as string, imageInputType: 'UPLOAD' })
+            }
+        }
+        reader.readAsDataURL(file)
+    }
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
-        if (file) {
-            const reader = new FileReader()
-            reader.onload = (event) => {
-                if (event.target?.result) {
-                    updateNodeData(node.id, { imageInput: event.target.result as string })
-                }
-            }
-            reader.readAsDataURL(file)
-        }
+        if (file) loadFile(file)
+    }
+
+    const handleDragOver = (e: React.DragEvent) => {
+        if (imageInputType !== 'UPLOAD') return
+        e.preventDefault()
+        e.stopPropagation()
+        setIsDragOver(true)
+    }
+
+    const handleDragLeave = (e: React.DragEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setIsDragOver(false)
+    }
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setIsDragOver(false)
+        if (imageInputType !== 'UPLOAD') return
+        const file = e.dataTransfer.files?.[0]
+        if (file && file.type.startsWith('image/')) loadFile(file)
     }
 
     const handleRotate = async (degrees: number) => {
@@ -224,7 +249,15 @@ export const ImageSourceNode: React.FC<ImageSourceNodeProps> = ({ node, updateNo
             {/* Content Area */}
             <div
                 ref={containerRef}
-                className="relative w-full min-h-[160px] bg-slate-100 dark:bg-zinc-800 rounded-lg border border-slate-200 dark:border-zinc-700 group select-none overflow-hidden"
+                className={`relative w-full min-h-[160px] bg-slate-100 dark:bg-zinc-800 rounded-lg border group select-none overflow-hidden transition-colors ${
+                    isDragOver
+                        ? 'border-cyan-400 dark:border-cyan-500 bg-cyan-50 dark:bg-cyan-900/20'
+                        : 'border-slate-200 dark:border-zinc-700'
+                }`}
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
             >
                 {imageInput ? (
                     <>
@@ -269,6 +302,11 @@ export const ImageSourceNode: React.FC<ImageSourceNodeProps> = ({ node, updateNo
                                     />
                                 ))}
                             </div>
+                        ) : isDragOver && imageInputType === 'UPLOAD' ? (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 pointer-events-none">
+                                <Upload size={24} className="mb-1" />
+                                <span className="text-xs font-semibold">Drop to replace</span>
+                            </div>
                         ) : (
                             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                 <button onClick={() => onExpand(imageInput)} className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/40 text-white transition-colors" title="Expand Preview">
@@ -289,8 +327,10 @@ export const ImageSourceNode: React.FC<ImageSourceNodeProps> = ({ node, updateNo
                                 onClick={() => fileInputRef.current?.click()}
                                 className="flex flex-col items-center cursor-pointer p-4 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg transition-colors w-full h-full justify-center"
                             >
-                                <Upload size={24} className="mb-2" />
-                                <span className="text-xs font-medium">Click to Upload</span>
+                                <Upload size={24} className={`mb-2 ${isDragOver ? 'text-cyan-500' : ''}`} />
+                                <span className="text-xs font-medium">
+                                    {isDragOver ? 'Drop to upload' : 'Click or drag & drop'}
+                                </span>
                             </div>
                         ) : (
                             <div className="flex flex-col items-center p-4 w-full">

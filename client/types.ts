@@ -4,7 +4,8 @@ export enum NodeType {
     IMAGE_SOURCE = 'IMAGE_SOURCE',
     NOTE = 'NOTE',
     IMAGE_TO_TEXT = 'IMAGE_TO_TEXT',
-    COMPARE = 'COMPARE'
+    COMPARE = 'COMPARE',
+    SPLIT_TEXT = 'SPLIT_TEXT'
 }
 
 export interface ImageMetadata {
@@ -33,6 +34,12 @@ export interface NodeData {
 
     // For Compare node
     compareMode?: 'slider' | 'toggle'
+
+    // For Split Text node
+    splitSeparator?: string // Default: '===='
+    splitOutputs?: string[] // Array of split result parts
+    splitPage?: number // Currently selected page index
+    includeSplitSeparator?: boolean // For TEXT_GEN: append ==== separator instruction to prompt
 }
 
 export interface Node {

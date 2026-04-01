@@ -16,11 +16,15 @@ export interface NodeData {
     imageInput?: string
     imageInputType?: 'UPLOAD' | 'URL'
     imageResources?: string[] // UUID references to data/resources/
+    splitSeparator?: string // For SPLIT_TEXT node
+    splitOutputs?: string[] // For SPLIT_TEXT node
+    splitPage?: number // Currently selected page index for SPLIT_TEXT
+    includeSplitSeparator?: boolean // For TEXT_GEN: append ==== separator instruction to prompt
 }
 
 export interface GraphNode {
     id: string
-    type: 'TEXT_GEN' | 'IMAGE_GEN' | 'IMAGE_SOURCE' | 'NOTE' | 'IMAGE_TO_TEXT'
+    type: 'TEXT_GEN' | 'IMAGE_GEN' | 'IMAGE_SOURCE' | 'NOTE' | 'IMAGE_TO_TEXT' | 'SPLIT_TEXT'
     position: { x: number; y: number }
     data: NodeData
 }
