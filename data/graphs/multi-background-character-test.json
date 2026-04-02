@@ -82,7 +82,9 @@
                 "outputFormat": "JPEG",
                 "model": "gemini-3.1-flash-image-preview",
                 "preset": "1K",
-                "imageResources": ["f7b579f4-ebca-4f57-9ed1-894562b92b68"]
+                "imageResources": [
+                    "f7b579f4-ebca-4f57-9ed1-894562b92b68"
+                ]
             }
         },
         {
@@ -100,7 +102,9 @@
                 "outputFormat": "JPEG",
                 "model": "gemini-3.1-flash-image-preview",
                 "preset": "1K",
-                "imageResources": ["6e14499a-ba7f-47e5-9cf8-5390e650e4b2"]
+                "imageResources": [
+                    "6e14499a-ba7f-47e5-9cf8-5390e650e4b2"
+                ]
             }
         },
         {
@@ -118,7 +122,9 @@
                 "outputFormat": "JPEG",
                 "model": "gemini-3.1-flash-image-preview",
                 "preset": "1K",
-                "imageResources": ["d91a8300-aa90-4fa6-a314-83903e1550dd"]
+                "imageResources": [
+                    "d91a8300-aa90-4fa6-a314-83903e1550dd"
+                ]
             }
         },
         {
@@ -136,7 +142,9 @@
                 "outputFormat": "JPEG",
                 "model": "gemini-3.1-flash-image-preview",
                 "preset": "1K",
-                "imageResources": ["80417f55-3de2-4ba9-af48-131d11578f77"]
+                "imageResources": [
+                    "80417f55-3de2-4ba9-af48-131d11578f77"
+                ]
             }
         },
         {
@@ -154,7 +162,9 @@
                 "outputFormat": "JPEG",
                 "model": "gemini-3.1-flash-image-preview",
                 "preset": "1K",
-                "imageResources": ["cfb6690c-51b3-4be1-ae71-f7a3b1fb8afa"]
+                "imageResources": [
+                    "cfb6690c-51b3-4be1-ae71-f7a3b1fb8afa"
+                ]
             }
         },
         {
@@ -209,7 +219,9 @@
                 "outputFormat": "JPEG",
                 "model": "gemini-3.1-flash-image-preview",
                 "preset": "1K",
-                "imageResources": ["4a849da0-222c-4f13-ad49-6a2e27cda31e"]
+                "imageResources": [
+                    "4a849da0-222c-4f13-ad49-6a2e27cda31e"
+                ]
             }
         },
         {
@@ -227,7 +239,9 @@
                 "outputFormat": "JPEG",
                 "model": "gemini-3.1-flash-image-preview",
                 "preset": "1K",
-                "imageResources": ["dc1257a4-b2d9-4c89-b36b-0ce8fcd348cb"]
+                "imageResources": [
+                    "dc1257a4-b2d9-4c89-b36b-0ce8fcd348cb"
+                ]
             }
         }
     ],
