@@ -1,6 +1,6 @@
 # MiniVAgent: Digital Alchemy Lab
 
-MiniVAgent is a node-based workflow application powered by Nano Banana Pro for building AI-driven image and text pipelines. Create flexible generation flows by connecting nodes on a visual canvas, leveraging Google Gemini models and other modern AI tools.
+MiniVAgent is a node-based workflow application powered by Nano Banana Pro for building AI-driven image and text pipelines. Create flexible generation flows by connecting nodes on a visual canvas, leveraging Google Gemini models, OpenAI models, and other modern AI tools.
 
 MiniVAgent is released under the [Apache 2.0 License](LICENSE) and encourages all types of contributions. No contribution is too small, and we want to thank all our community contributors.
 
@@ -101,7 +101,13 @@ Nodes are executed in dependency order by `renderHandlers.ts` calling `executeNo
 - Finds edges with `targetHandle === 'image'`
 - For `IMAGE_GEN` sources: reads `data.images[index]` from `image-N` handle
 - For `IMAGE_SOURCE` sources: reads `data.imageInput`
+- For `COMPARE` sources: reads `data.images[index]` from `image-N` handle
 - Results sorted by source node Y position
+
+**Text resolution from `SPLIT_TEXT`** (`graphGetConnectedText`):
+
+- Source handle must start with `split-` (e.g. `split-0`, `split-1`)
+- Reads `data.splitOutputs[index]` for the matching part index
 
 **Prompt merging rules:**
 
@@ -109,5 +115,17 @@ Nodes are executed in dependency order by `renderHandlers.ts` calling `executeNo
 TEXT_GEN : finalPrompt = node.prompt + "\n\n--- Context ---\n" + connectedText
 IMAGE_GEN: finalPrompt = node.prompt + " " + connectedText
 ```
+
+**Node execution behaviour by type:**
+
+| Type            | What `executeNode` does                                                                                             |
+| --------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `TEXT_GEN`      | Generates text; optionally enhances prompt; appends split-separator instruction when `includeSplitSeparator` is set |
+| `IMAGE_GEN`     | Generates images; resolves reference images; saves results as resources                                             |
+| `IMAGE_TO_TEXT` | Runs vision model on resolved images; writes to `data.output`                                                       |
+| `IMAGE_SOURCE`  | Resolves HTTP/HTTPS URLs to base64; passes through inline `data:` URIs                                              |
+| `NOTE`          | Concatenates own text with connected text; writes to `data.output`                                                  |
+| `SPLIT_TEXT`    | Splits combined text by `data.splitSeparator` (default `====`); writes parts to `data.splitOutputs`                 |
+| `COMPARE`       | Passthrough — no server execution; comparison is client-side only                                                   |
 
 ---

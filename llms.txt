@@ -4,7 +4,9 @@
 
 MiniVAgent is a node-based workflow application powered by Nano Banana Pro for building AI-driven image and text pipelines. Create flexible generation flows by connecting nodes on a visual canvas, leveraging Google Gemini models and other modern AI tools.
 
-![MiniVAgent Screenshot](docs/screenshots/mini-v-agent-v1.png)
+![MiniVAgent Screenshot](docs/screenshots/minivagent-v1.1.jpg)
+
+![MiniVAgent Character](docs/screenshots/minivagent-v1.1-character.jpg)
 
 ## Architecture
 
@@ -24,7 +26,7 @@ Helper   (server/helpers/)   — Graph traversal, image saving, shared utilities
 
 - **Backend:** Node.js, Express, TypeScript
 - **Frontend:** React, TypeScript, Vite
-- **AI Provider:** Google Gemini API (text, image, vision, planning)
+- **AI Provider:** Google Gemini API (text, image, vision, planning); OpenAI API (optional — text, image)
 - **Storage:** Local filesystem (graphs as JSON, resources as images)
 
 ## Project Structure
@@ -35,11 +37,13 @@ See [docs/project-structure.md](docs/project-structure.md) for a full breakdown 
 
 | Type           | Purpose                        | Inputs              | Outputs            |
 |----------------|--------------------------------|---------------------|--------------------|
-| `TEXT_GEN`     | AI text generation             | `prompt`            | `prompt`, `output` |
-| `IMAGE_GEN`    | AI image generation            | `prompt`, `image`   | `image-0`…`image-3`|
-| `IMAGE_SOURCE` | Upload or URL image input      | —                   | `image`            |
-| `IMAGE_TO_TEXT`| Vision / image analysis        | `prompt`, `image`   | `output`           |
-| `NOTE`         | Static text / documentation    | —                   | `prompt`           |
+| `TEXT_GEN`     | AI text generation             | `prompt`            | `prompt`, `output`  |
+| `IMAGE_GEN`    | AI image generation            | `prompt`, `image`   | `image-0`…`image-3` |
+| `IMAGE_SOURCE` | Upload or URL image input      | —                   | `image`             |
+| `IMAGE_TO_TEXT`| Vision / image analysis        | `prompt`, `image`   | `output`            |
+| `NOTE`         | Static text / documentation    | —                   | `prompt`            |
+| `COMPARE`      | Side-by-side image comparison  | `image` (×2)        | `image-0`, `image-1`|
+| `SPLIT_TEXT`   | Split text by separator        | `prompt`            | `split-0`…`split-N` |
 
 ## Graph Execution
 
@@ -95,7 +99,8 @@ See [docs/api-endpoints.md](docs/api-endpoints.md) for the full list of availabl
 ### Prerequisites
 
 - Node.js v18+
-- Google Gemini API key
+- Google Gemini API key (required)
+- OpenAI API key (optional — for GPT text and image models)
 
 ### Install & Run
 
