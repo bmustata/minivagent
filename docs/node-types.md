@@ -4,15 +4,17 @@ This document describes all supported node types in minivagent and their propert
 
 ## Overview
 
-minivagent supports 5 node types for building AI workflows:
+minivagent supports 7 node types for building AI workflows:
 
-| Node Type     | Purpose                          | Input Handles | Output Handles     |
-| ------------- | -------------------------------- | ------------- | ------------------ |
-| TEXT_GEN      | Generate or process text         | prompt        | prompt, output     |
-| IMAGE_GEN     | Generate images from prompts     | prompt, image | image-0 to image-3 |
-| IMAGE_SOURCE  | Provide input images             | -             | image              |
-| IMAGE_TO_TEXT | Describe/analyze images (Vision) | prompt, image | output             |
-| NOTE          | Documentation/notes              | -             | prompt             |
+| Node Type     | Purpose                            | Input Handles | Output Handles     |
+| ------------- | ---------------------------------- | ------------- | ------------------ |
+| TEXT_GEN      | Generate or process text           | prompt        | prompt, output     |
+| IMAGE_GEN     | Generate images from prompts       | prompt, image | image-0 to image-3 |
+| IMAGE_SOURCE  | Provide input images               | —             | image              |
+| IMAGE_TO_TEXT | Describe/analyze images (Vision)   | prompt, image | output             |
+| NOTE          | Documentation/notes                | —             | prompt             |
+| COMPARE       | Side-by-side image comparison      | image (×2)    | image-0, image-1   |
+| SPLIT_TEXT    | Split text into parts by separator | prompt        | split-0 … split-N  |
 
 Each node type supports model selection from available AI providers. Models can be selected via the node's dropdown menu in the UI or specified in the graph JSON configuration.
 
@@ -37,13 +39,14 @@ See [Supported Models](supported-models.md) for available models and their optio
 
 ```typescript
 {
-  prompt: string;          // The text prompt or instructions
-  output?: string;         // Generated text response
-  enhancedOutput?: string; // AI-enhanced version of prompt (if enabled)
-  enhancePrompt?: boolean; // Enable AI prompt optimization
-  model?: string;          // Selected model name (optional)
-  isLoading: boolean;      // Execution state
-  error?: string;          // Error message if generation fails
+  prompt: string;                  // The text prompt or instructions
+  output?: string;                 // Generated text response
+  enhancedOutput?: string;         // AI-enhanced version of prompt (if enabled)
+  enhancePrompt?: boolean;         // Enable AI prompt optimization
+  includeSplitSeparator?: boolean; // Append ==== separator instruction to prompt
+  model?: string;                  // Selected model name (optional)
+  isLoading: boolean;              // Execution state
+  error?: string;                  // Error message if generation fails
 }
 ```
 
@@ -53,6 +56,7 @@ See [Supported Models](supported-models.md) for available models and their optio
 - Process and transform text from upstream nodes
 - Create prompts for image generation nodes
 - Chain multiple text transformations together
+- Generate structured multi-part output (enable **Split** toggle to append `====` separator instruction)
 
 **Example Configuration:**
 
@@ -254,13 +258,14 @@ See [Supported Models](supported-models.md) for available models and their optio
 
 **Output Handles:**
 
-- `prompt` - Outputs the note text (can be used as input to other nodes)
+- `prompt` - Outputs the note text combined with any connected upstream text
 
 **Properties:**
 
 ```typescript
 {
-    prompt: string // The note content
+    prompt: string    // The note content
+    output?: string   // Combined output: own text + connected text (runtime)
     isLoading: boolean // Always false for notes
 }
 ```
@@ -288,6 +293,119 @@ See [Supported Models](supported-models.md) for available models and their optio
 
 ---
 
+## COMPARE (Image Comparison)
+
+**Purpose:** Display two images side-by-side for visual comparison. Passthrough node — no server-side execution.
+
+**Input Handles:**
+
+- `image` (×2) — Accepts two image inputs from IMAGE_GEN or IMAGE_SOURCE nodes
+
+**Output Handles:**
+
+- `image-0` — Passes through the first image
+- `image-1` — Passes through the second image
+
+**Properties:**
+
+```typescript
+{
+    prompt: string               // Unused
+    compareMode?: 'slider' | 'toggle' // Comparison display mode
+    isLoading: boolean
+}
+```
+
+**Features:**
+
+- **Slider mode**: drag a divider to reveal each image
+- **Toggle mode**: switch between images with a click
+- Fullscreen mode with keyboard navigation (←/→ arrows, Escape)
+
+**Use Cases:**
+
+- Compare two generated image variations
+- A/B test different prompts or models
+- Compare original vs. modified images
+
+**Example Configuration:**
+
+```json
+{
+    "id": "compare847201",
+    "type": "COMPARE",
+    "position": { "x": 800, "y": 200 },
+    "data": {
+        "compareMode": "slider",
+        "prompt": "",
+        "isLoading": false
+    }
+}
+```
+
+---
+
+## SPLIT_TEXT (Text Splitter)
+
+**Purpose:** Split incoming text into named parts using a configurable separator.
+
+**Input Handles:**
+
+- `prompt` - Accepts text from TEXT_GEN, NOTE, or any other text-outputting node
+
+**Output Handles:**
+
+- `split-0`, `split-1`, … `split-N` — One handle per resulting part (dynamic, based on split results)
+
+**Properties:**
+
+```typescript
+{
+    prompt: string           // Direct text input (if not connected)
+    splitSeparator?: string  // Separator string (default: '====')
+    splitOutputs?: string[]  // Array of resulting parts (runtime)
+    splitPage?: number       // Currently selected page index in the UI
+    isLoading: boolean
+    error?: string
+}
+```
+
+**Separator Presets:**
+
+| Preset   | Value        |
+| -------- | ------------ |
+| `====`   | `====`       |
+| `---`    | `---`        |
+| new line | `\n`         |
+| `,`      | `,`          |
+| `;`      | `;`          |
+| custom   | user-defined |
+
+**Use Cases:**
+
+- Split TEXT_GEN output into multiple image prompts (one per scene/variation)
+- Distribute parts to separate IMAGE_GEN nodes for batch generation
+- Break structured AI output into individually addressable sections
+
+**Tip:** Enable the **Split** toggle on a TEXT_GEN node to automatically append an instruction asking the model to use `====` as a separator.
+
+**Example Configuration:**
+
+```json
+{
+    "id": "split192847",
+    "type": "SPLIT_TEXT",
+    "position": { "x": 600, "y": 400 },
+    "data": {
+        "splitSeparator": "====",
+        "prompt": "",
+        "isLoading": false
+    }
+}
+```
+
+---
+
 ## Node Connections
 
 ### Handle Naming Convention
@@ -298,6 +416,7 @@ See [Supported Models](supported-models.md) for available models and their optio
 - `output` - Generated text result
 - `image` - Single image output
 - `image-0`, `image-1`, `image-2`, `image-3` - Multiple image outputs
+- `split-0`, `split-1`, … `split-N` - Individual parts from SPLIT_TEXT
 
 **Target Handles (Input):**
 
@@ -319,6 +438,8 @@ See [Supported Models](supported-models.md) for available models and their optio
     - IMAGE_SOURCE → IMAGE_TO_TEXT (image description)
     - IMAGE_GEN → IMAGE_TO_TEXT (describe generated images)
     - NOTE → TEXT_GEN → IMAGE_GEN (static prompt chain)
+    - TEXT_GEN → SPLIT_TEXT → IMAGE_GEN ×N (multi-part batch generation)
+    - IMAGE_GEN × 2 → COMPARE (side-by-side comparison)
 
 ### Example Connection Patterns
 
@@ -338,4 +459,19 @@ IMAGE_SOURCE (reference) → IMAGE_GEN (create variations)
 
 ```
 IMAGE_SOURCE (photo) → IMAGE_TO_TEXT (describe) → TEXT_GEN (expand description)
+```
+
+**Multi-Scene Batch Generation:**
+
+```
+NOTE (scenes list) → TEXT_GEN [Split ON] → SPLIT_TEXT → IMAGE_GEN (scene 1)
+                                                       → IMAGE_GEN (scene 2)
+                                                       → IMAGE_GEN (scene 3)
+```
+
+**A/B Image Comparison:**
+
+```
+IMAGE_GEN (prompt A) → COMPARE
+IMAGE_GEN (prompt B) → COMPARE
 ```
