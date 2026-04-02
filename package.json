@@ -3,7 +3,7 @@
     "description": "A node-based generative AI workspace",
     "license": "Apache-2.0",
     "private": true,
-    "version": "1.0.0",
+    "version": "1.1.0",
     "type": "module",
     "bin": {
         "minivagent": "agent/index.js"
