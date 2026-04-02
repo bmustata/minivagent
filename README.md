@@ -4,14 +4,16 @@ MiniVAgent is a node-based workflow application powered by Nano Banana Pro for b
 
 [![Known Vulnerabilities](https://snyk.io/test/github/bmustata/minivagent/badge.svg)](https://snyk.io/test/github/bmustata/minivagent)
 
-![MiniVAgent Screenshot](docs/screenshots/mini-v-agent-v1.png)
+![MiniVAgent Screenshot](docs/screenshots/minivagent-v1.1.jpg)
+
+![MiniVAgent Character](docs/screenshots/minivagent-v1.1-character.jpg)
 
 ### Features
 
 - **Visual Node Editor**: Drag-and-drop interface for building AI workflows
 - **Multiple Node Types**:
-    - Text Generation (`gemini-2.5`, `gemini-3`)
-    - Image Generation (Nano Banana, Nano Banana Pro, Nano Banana 2, Imagen 4)
+    - Text Generation (Gemini Flash 2.5, Gemini Flash 3, GPT-5.4)
+    - Image Generation (Nano Banana 1, Nano Banana Pro, Nano Banana 2, Imagen 4, GPT Image 1 / 1.5)
     - Vision/Image-to-Text Analysis
     - Image Source (URL or Upload)
     - Note/Documentation Nodes
@@ -26,30 +28,29 @@ MiniVAgent is a node-based workflow application powered by Nano Banana Pro for b
 ### Prerequisites
 
 - Node.js (v18 or higher)
-- An AI model API key (currently supports Gemini)
+- A Gemini API key (required) or OpenAI API key (optional)
 
-### Installation
+### Quick Start
 
-1. Clone or download this repository
+1. Clone the repository and install dependencies:
 
     ```bash
     git clone https://github.com/bmustata/minivagent.git
     cd minivagent
-    ```
-
-2. Install dependencies:
-
-    ```bash
     npm install
+    npm run dev
     ```
 
-3. Create a `.env.local` file in the root directory:
+2. Create a `.env.local` file in the root directory:
 
     ```
-    GEMINI_API_KEY=your_api_key_here
+    GEMINI_API_KEY=your_gemini_api_key_here  # Required for base functionality
+    OPENAI_API_KEY=your_openai_api_key_here  # Optional
     ```
 
-    Get your API key from [https://aistudio.google.com/api-keys](https://aistudio.google.com/api-keys).
+    Get your Gemini API key from [https://aistudio.google.com/api-keys](https://aistudio.google.com/api-keys).
+
+    Get your OpenAI API key from [https://platform.openai.com/api-keys](https://platform.openai.com/api-keys).
 
     > **⚠️ Security Warning:** Never commit `.env.local` or any file containing your API key to version control. It is already included in `.gitignore`.
     > Keep your key private — anyone with access to it can make requests billed to your account.
@@ -96,6 +97,23 @@ Then open http://localhost:3201 in your browser.
 - [Supported Models](docs/supported-models.md)
 - [Graph ID Conventions](docs/graph-id-conventions.md)
 - [Project Structure](docs/project-structure.md)
+
+## Node Types
+
+<table>
+<thead>
+<tr style="background-color:#f0f0f0"><th>Type</th><th>Purpose</th></tr>
+</thead>
+<tbody>
+<tr style="background-color:#ffffff"><td>Text Generator</td><td>Generate or transform text using AI; supports prompt enhancement (Gemini, OpenAI)</td></tr>
+<tr style="background-color:#f7f7f7"><td>Image Generator</td><td>Generate images from text prompts and optional reference images; supports aspect ratio, output format (JPEG/PNG) (Gemini, OpenAI)</td></tr>
+<tr style="background-color:#ffffff"><td>Vision / Image-to-Text</td><td>Analyze or describe images using AI (Gemini, OpenAI)</td></tr>
+<tr style="background-color:#f7f7f7"><td>Image Source</td><td>Load or upload a reference image (URL or file upload)</td></tr>
+<tr style="background-color:#ffffff"><td>Note</td><td>Add documentation, prompts, or plain text that can feed into other nodes</td></tr>
+<tr style="background-color:#f7f7f7"><td>Compare</td><td>Side-by-side comparison of two images with passthrough outputs</td></tr>
+<tr style="background-color:#ffffff"><td>Split Text</td><td>Split text into parts by a separator — ideal for creating multiple variations of scenes, products, descriptions, and more</td></tr>
+</tbody>
+</table>
 
 ## Important Limitations
 
