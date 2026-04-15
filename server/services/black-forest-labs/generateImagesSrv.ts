@@ -14,6 +14,7 @@ const REF_IMAGE_FIELD: Record<string, { field: string; isArray: boolean }> = {
     'black-forest-labs/flux-dev': { field: 'image', isArray: false },
     'black-forest-labs/flux-1.1-pro': { field: 'image_prompt', isArray: false },
     'black-forest-labs/flux-2-dev': { field: 'input_images', isArray: true },
+    'black-forest-labs/flux-2-pro': { field: 'input_images', isArray: true },
     'black-forest-labs/flux-2-klein-4b': { field: 'images', isArray: true },
     'black-forest-labs/flux-2-max': { field: 'input_images', isArray: true }
 }
