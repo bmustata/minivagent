@@ -26,7 +26,7 @@ export const MODELS = {
             provider: 'gemini',
             model: 'gemini-3.1-flash-image-preview',
             options: {
-                presets: ['0.5K', '1K', '2K', '4K']
+                presets: ['512', '1K', '2K', '4K']
             }
         },
         { name: 'Imagen 4', provider: 'gemini', model: 'imagen-4.0-generate-001', options: { imagegen, presets: ['1K', '2K'] } },
