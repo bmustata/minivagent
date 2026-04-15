@@ -33,7 +33,10 @@ export const MODELS = {
         { name: 'Imagen 4 Fast', provider: 'gemini', model: 'imagen-4.0-fast-generate-001', options: { imagegen } },
         { name: 'Imagen 4 Ultra', provider: 'gemini', model: 'imagen-4.0-ultra-generate-001', options: { imagegen, presets: ['1K', '2K'] } },
         { name: 'GPT Image 1', provider: 'openai', model: 'gpt-image-1-mini', options: {} },
-        { name: 'GPT Image 1.5', provider: 'openai', model: 'gpt-image-1.5', options: {} }
+        { name: 'GPT Image 1.5', provider: 'openai', model: 'gpt-image-1.5', options: {} },
+        { name: 'Flux Schnell', provider: 'black-forest-labs', model: 'black-forest-labs/flux-schnell', options: {} },
+        { name: 'Flux Dev', provider: 'black-forest-labs', model: 'black-forest-labs/flux-dev', options: {} },
+        { name: 'Flux 1.1 Pro', provider: 'black-forest-labs', model: 'black-forest-labs/flux-1.1-pro', options: {} }
     ],
     VISION: [
         { name: 'Gemini Flash 2.5', provider: 'gemini', model: 'gemini-2.5-flash', options: {} },

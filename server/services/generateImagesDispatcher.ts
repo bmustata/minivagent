@@ -4,6 +4,7 @@ import { isValidAspectRatio, getValidAspectRatios } from '../utils/imageUtils.ts
 import { saveResource } from './resourcesSrv.ts'
 import { geminiGenerateImages } from './gemini/generateImagesSrv.ts'
 import { openaiGenerateImages } from './openai/generateImagesSrv.ts'
+import { bflGenerateImages } from './black-forest-labs/generateImagesSrv.ts'
 
 export interface GenerateImagesOptions {
     prompt?: string
@@ -88,6 +89,8 @@ export const generateImagesBase64 = async (options: GenerateImagesOptions): Prom
         images = await openaiGenerateImages({ promptToSend, count, aspectRatio, outputFormat, validatedModel })
     } else if (provider === 'gemini') {
         images = await geminiGenerateImages({ promptToSend, count, referenceImages, aspectRatio, outputFormat, preset, validatedModel })
+    } else if (provider === 'black-forest-labs') {
+        images = await bflGenerateImages({ promptToSend, count, aspectRatio, outputFormat, validatedModel })
     } else {
         throw new Error(`Unknown provider: "${provider}"`)
     }

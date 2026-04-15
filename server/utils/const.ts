@@ -2,6 +2,7 @@ import dotenv from 'dotenv'
 import { resolve } from 'path'
 import { GoogleGenAI } from '@google/genai'
 import OpenAI from 'openai'
+import Replicate from 'replicate'
 import { logger } from './logger.ts'
 
 // Load env files in priority order: process.env > .env.local > .env
@@ -34,6 +35,15 @@ if (OPENAI_API_KEY) {
     logger.info('ℹ OPENAI_API_KEY not set — OpenAI models will be unavailable')
 }
 export const openai = OPENAI_API_KEY ? new OpenAI({ apiKey: OPENAI_API_KEY }) : null
+
+// Initialize Replicate (optional — only required when Black Forest Labs models are used)
+const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN
+if (REPLICATE_API_TOKEN) {
+    logger.info(`✓ REPLICATE_API_TOKEN found (length: ${REPLICATE_API_TOKEN.length})`)
+} else {
+    logger.info('ℹ REPLICATE_API_TOKEN not set — Black Forest Labs models will be unavailable')
+}
+export const replicate = REPLICATE_API_TOKEN ? new Replicate({ auth: REPLICATE_API_TOKEN }) : null
 
 // Valid aspect ratios for image generation
 export const IMAGE_ASPECT_RATIOS = ['1:1', '16:9', '9:16', '4:3', '3:4'] as const
