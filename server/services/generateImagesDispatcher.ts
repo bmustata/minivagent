@@ -1,4 +1,4 @@
-import { enhancePrompt } from './promptSrv.ts'
+import { enhancePrompt } from './promptDispatcher.ts'
 import { validateModel, getModelProvider } from '../utils/modelUtils.ts'
 import { isValidAspectRatio, getValidAspectRatios } from '../utils/imageUtils.ts'
 import { saveResource } from './resourcesSrv.ts'
@@ -24,6 +24,26 @@ export interface GenerateImagesResult {
 export interface GenerateImagesWithResourcesResult {
     imageResources: string[]
     enhancedPrompt?: string
+}
+
+/**
+ * Generate images and save them as resources.
+ * Returns ResourceItem metadata for each saved image.
+ */
+export const generateImages = async (options: GenerateImagesOptions, resourcesDir: string): Promise<GenerateImagesWithResourcesResult> => {
+    const base64Result = await generateImagesBase64(options)
+
+    const imageResources: string[] = []
+    for (const dataUrl of base64Result.images) {
+        const match = dataUrl.match(/^data:.*;base64,(.+)$/)
+        if (match) {
+            const buffer = Buffer.from(match[1], 'base64')
+            const resource = await saveResource(resourcesDir, buffer)
+            imageResources.push(resource.id)
+        }
+    }
+
+    return { imageResources, enhancedPrompt: base64Result.enhancedPrompt }
 }
 
 /**
@@ -77,24 +97,4 @@ export const generateImagesBase64 = async (options: GenerateImagesOptions): Prom
     }
 
     return { images, enhancedPrompt: enhancedPromptText }
-}
-
-/**
- * Generate images and save them as resources.
- * Returns ResourceItem metadata for each saved image.
- */
-export const generateImages = async (options: GenerateImagesOptions, resourcesDir: string): Promise<GenerateImagesWithResourcesResult> => {
-    const base64Result = await generateImagesBase64(options)
-
-    const imageResources: string[] = []
-    for (const dataUrl of base64Result.images) {
-        const match = dataUrl.match(/^data:.*;base64,(.+)$/)
-        if (match) {
-            const buffer = Buffer.from(match[1], 'base64')
-            const resource = await saveResource(resourcesDir, buffer)
-            imageResources.push(resource.id)
-        }
-    }
-
-    return { imageResources, enhancedPrompt: base64Result.enhancedPrompt }
 }
