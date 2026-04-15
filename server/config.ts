@@ -36,7 +36,10 @@ export const MODELS = {
         { name: 'GPT Image 1.5', provider: 'openai', model: 'gpt-image-1.5', options: {} },
         { name: 'Flux Schnell', provider: 'black-forest-labs', model: 'black-forest-labs/flux-schnell', options: {} },
         { name: 'Flux Dev', provider: 'black-forest-labs', model: 'black-forest-labs/flux-dev', options: {} },
-        { name: 'Flux 1.1 Pro', provider: 'black-forest-labs', model: 'black-forest-labs/flux-1.1-pro', options: {} }
+        { name: 'Flux 1.1 Pro', provider: 'black-forest-labs', model: 'black-forest-labs/flux-1.1-pro', options: {} },
+        { name: 'Flux 2 Dev', provider: 'black-forest-labs', model: 'black-forest-labs/flux-2-dev', options: {} },
+        { name: 'Flux 2 Klein 4B', provider: 'black-forest-labs', model: 'black-forest-labs/flux-2-klein-4b', options: {} },
+        { name: 'Flux 2 Max', provider: 'black-forest-labs', model: 'black-forest-labs/flux-2-max', options: {} }
     ],
     VISION: [
         { name: 'Gemini Flash 2.5', provider: 'gemini', model: 'gemini-2.5-flash', options: {} },
