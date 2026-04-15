@@ -19,6 +19,17 @@ const REF_IMAGE_FIELD: Record<string, { field: string; isArray: boolean }> = {
     'black-forest-labs/flux-2-max': { field: 'input_images', isArray: true }
 }
 
+// Safety config per model — safety_tolerance (max permissive) or disable_safety_checker: true
+const SAFETY_INPUT: Record<string, Record<string, unknown>> = {
+    'black-forest-labs/flux-schnell': { disable_safety_checker: true },
+    'black-forest-labs/flux-dev': { disable_safety_checker: true },
+    'black-forest-labs/flux-1.1-pro': { safety_tolerance: 6 },
+    'black-forest-labs/flux-2-dev': { disable_safety_checker: true },
+    'black-forest-labs/flux-2-pro': { safety_tolerance: 5 },
+    'black-forest-labs/flux-2-klein-4b': { disable_safety_checker: true },
+    'black-forest-labs/flux-2-max': { safety_tolerance: 5 }
+}
+
 const dataUriToBuffer = (dataUri: string): Buffer => {
     const match = dataUri.match(/^data:.*?;base64,(.+)$/)
     if (!match) throw new Error('Invalid data URI for reference image')
@@ -57,7 +68,8 @@ export const bflGenerateImages = async (options: BFLGenerateImagesOptions): Prom
                     num_outputs: 1,
                     output_format: format,
                     ...(aspectRatio ? { aspect_ratio: aspectRatio } : {}),
-                    ...buildRefImageInput()
+                    ...buildRefImageInput(),
+                    ...(SAFETY_INPUT[validatedModel] ?? {})
                 }
             })
         )
