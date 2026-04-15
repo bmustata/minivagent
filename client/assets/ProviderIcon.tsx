@@ -18,7 +18,7 @@ export const ProviderIcon: React.FC<{ provider: string; size?: number }> = ({ pr
     if (provider === 'black-forest-labs') {
         return (
             <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 3a7 7 0 1 1 0 14A7 7 0 0 1 12 5zm-1 3v4H8l4 4 4-4h-3V8h-2z" />
+                <path d="M17 3H7L2 12h5l-3 9 13-11h-6z" />
             </svg>
         )
     }
