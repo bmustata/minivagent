@@ -1,4 +1,4 @@
-import { enhancePrompt } from './promptSrv.ts'
+import { enhancePrompt } from './promptDispatcher.ts'
 import { validateModel, getModelProvider } from '../utils/modelUtils.ts'
 import { geminiGenerateText } from './gemini/generateTextSrv.ts'
 import { openaiGenerateText } from './openai/generateTextSrv.ts'

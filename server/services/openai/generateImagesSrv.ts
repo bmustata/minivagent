@@ -2,11 +2,11 @@ import sharp from 'sharp'
 import { openai } from '../../utils/const.ts'
 
 export interface OpenAIGenerateImagesOptions {
-    promptToSend: string
-    count: number
-    aspectRatio?: string
-    outputFormat?: string
-    validatedModel: string
+    promptToSend: string // Final prompt after enhancement/merging. e.g. "A photorealistic sunset over the ocean"
+    count: number // Number of images to generate (N parallel requests). e.g. 2
+    aspectRatio?: string // Mapped to OpenAI size string via ASPECT_RATIO_TO_SIZE. e.g. "16:9" → "1536x1024"
+    outputFormat?: string // Desired format, normalised to 'png' | 'jpeg'. e.g. "JPEG"
+    validatedModel: string // OpenAI model identifier. e.g. "gpt-image-1.5"
 }
 
 const normalizeOutputFormat = (format?: string): 'png' | 'jpeg' | undefined => {

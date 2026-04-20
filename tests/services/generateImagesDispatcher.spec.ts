@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { generateImagesBase64 } from '../../server/services/generateImagesSrv'
+import { generateImagesBase64 } from '../../server/services/generateImagesDispatcher'
 import { Modality } from '@google/genai'
 
 // Mock config (model registry)
@@ -26,12 +26,12 @@ vi.mock('../../server/utils/const', () => ({
 }))
 
 // Mock the prompt service
-vi.mock('../../server/services/promptSrv', () => ({
+vi.mock('../../server/services/promptDispatcher', () => ({
     enhancePrompt: vi.fn()
 }))
 
 import { ai } from '../../server/utils/const'
-import { enhancePrompt } from '../../server/services/promptSrv'
+import { enhancePrompt } from '../../server/services/promptDispatcher'
 
 // Sample base64 image data
 const SAMPLE_PNG_BASE64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
@@ -57,7 +57,7 @@ const createMockImageResponse = (mimeType = 'image/png', data = SAMPLE_PNG_BASE6
     ]
 })
 
-describe('generateImagesSrv', () => {
+describe('generateImagesDispatcher', () => {
     beforeEach(() => {
         vi.clearAllMocks()
     })

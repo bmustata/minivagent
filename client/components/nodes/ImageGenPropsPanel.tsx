@@ -180,10 +180,12 @@ export const ImageGenPropsPanel: React.FC<ImageGenPropsPanelProps> = ({ node, up
                     })()}
                 </div>
 
-                {/* Preset Selector — conditional on model */}
+                {/* Preset / Resolution Selector — conditional on model */}
                 {presets && presets.length > 0 && (
                     <div>
-                        <label className="text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1 block">Preset</label>
+                        <label className="text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1 block">
+                            {selectedModel?.provider === 'black-forest-labs' ? 'Resolution' : 'Preset'}
+                        </label>
                         <select
                             value={preset || presets[0]}
                             onChange={(e) => updateNodeData(node.id, { preset: e.target.value })}
@@ -191,7 +193,7 @@ export const ImageGenPropsPanel: React.FC<ImageGenPropsPanelProps> = ({ node, up
                         >
                             {presets.map((p) => (
                                 <option key={p} value={p}>
-                                    {p}
+                                    {selectedModel?.provider === 'black-forest-labs' ? `${p} (${p.replace('0.5K', '0.5').replace('K', '')} MP)` : p}
                                 </option>
                             ))}
                         </select>

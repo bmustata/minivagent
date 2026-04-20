@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { enhancePrompt } from '../../server/services/promptSrv'
+import { enhancePrompt } from '../../server/services/promptDispatcher'
 
 // Mock the AI module
 vi.mock('../../server/utils/const', () => ({
@@ -16,7 +16,7 @@ vi.mock('../../server/utils/const', () => ({
 
 import { ai } from '../../server/utils/const'
 
-describe('promptSrv', () => {
+describe('promptDispatcher', () => {
     describe('enhancePrompt', () => {
         it('should enhance text prompt and return a string', async () => {
             // Mock the AI response

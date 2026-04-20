@@ -552,7 +552,9 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
 
         const scaleX = (screenW - PADDING * 2) / graphW
         const scaleY = (screenH - PADDING * 2) / graphH
-        const newZoom = Math.min(Math.max(Math.min(scaleX, scaleY), 0.2), 1.2)
+        const fittedZoom = Math.min(Math.max(Math.min(scaleX, scaleY), 0.2), 1.2)
+        // Zoom out a bit more for small graphs (< 10 nodes) so they don't feel too close
+        const newZoom = nodesToFit.length < 10 ? fittedZoom * 0.8 : fittedZoom
 
         const centerX = (minX + maxX) / 2
         const centerY = (minY + maxY) / 2

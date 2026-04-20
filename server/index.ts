@@ -5,6 +5,7 @@ import { app } from './server.ts'
 import { runResourceCleanup } from './services/resourceCleanupSchedulerSrv.ts'
 import { scheduleCron } from './utils/cronUtils.ts'
 import { MODELS } from './config.ts'
+import { openai, replicate } from './utils/const.ts'
 import { logger } from './utils/logger.ts'
 
 // Load environment variables from .env.local
@@ -27,11 +28,16 @@ const server = app.listen(PORT, () => {
     logger.info('+----------------------------------------+')
     logger.info(`MiniVAgent server running on http://localhost:${PORT}`)
     const logModels = (category: string, models: readonly { name: string; provider: string }[]) => {
-        const providers = [...new Set(models.map((m) => m.provider))]
+        // Skip models whose provider has no API client (missing env token)
+        const unavailableProviders = new Set<string>()
+        if (!openai) unavailableProviders.add('openai')
+        if (!replicate) unavailableProviders.add('black-forest-labs')
+        const available = models.filter((m) => !unavailableProviders.has(m.provider))
+        const providers = [...new Set(available.map((m) => m.provider))]
         logger.info(`  ${category}:`)
-        logger.info(`    [default] ${models[0].name}`)
+        logger.info(`    [default] ${available[0].name}`)
         for (const p of providers) {
-            const names = models
+            const names = available
                 .filter((m) => m.provider === p)
                 .map((m) => m.name)
                 .join(', ')

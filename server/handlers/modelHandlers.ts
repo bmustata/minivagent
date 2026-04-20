@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express'
 import { MODELS } from '../config.ts'
+import { openai, replicate } from '../utils/const.ts'
 import { logger } from '../utils/logger.ts'
 
 /**
@@ -9,13 +10,21 @@ import { logger } from '../utils/logger.ts'
  */
 export const getModels = async (req: Request, res: Response) => {
     try {
-        const totalModels = MODELS.TEXT.length + MODELS.IMAGE.length + MODELS.VISION.length + MODELS.PLANNER.length
+        const unavailableProviders = new Set<string>()
+        if (!openai) unavailableProviders.add('openai')
+        if (!replicate) unavailableProviders.add('black-forest-labs')
 
-        const providers = Object.fromEntries(Object.entries(MODELS).map(([category, models]) => [category, [...new Set(models.map((m) => m.provider))]]))
+        // Remove models whose provider has no API client configured (missing env token)
+        const filteredModels = Object.fromEntries(
+            Object.entries(MODELS).map(([category, models]) => [category, (models as readonly { name: string; provider: string; model: string; options: object }[]).filter((m) => !unavailableProviders.has(m.provider))])
+        )
+
+        const totalModels = Object.values(filteredModels).reduce((sum, arr) => sum + arr.length, 0)
+        const providers = Object.fromEntries(Object.entries(filteredModels).map(([category, models]) => [category, [...new Set(models.map((m) => m.provider))]]))
 
         res.json({
             success: true,
-            models: MODELS,
+            models: filteredModels,
             providers
         })
         logger.info(`GET /api/models - ✓ returned ${totalModels} models`)

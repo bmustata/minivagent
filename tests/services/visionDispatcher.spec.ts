@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { extractTextFromImage } from '../../server/services/visionSrv'
+import { extractTextFromImage } from '../../server/services/visionDispatcher'
 
 // Mock config (model registry)
 vi.mock('../../server/config', () => ({
@@ -26,7 +26,7 @@ import { ai } from '../../server/utils/const'
 const SAMPLE_IMAGE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
 const SAMPLE_JPEG_IMAGE = 'data:image/jpeg;base64,/9j/4AAQSkZJRg=='
 
-describe('visionSrv', () => {
+describe('visionDispatcher', () => {
     describe('extractTextFromImage', () => {
         it('should extract text from a single image with default prompt', async () => {
             vi.mocked(ai.models.generateContent).mockResolvedValue({

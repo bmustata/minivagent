@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { generateText } from '../../server/services/generateTextSrv'
+import { generateText } from '../../server/services/generateTextDispatcher'
 
 // Mock config (model registry)
 vi.mock('../../server/config', () => ({
@@ -21,14 +21,14 @@ vi.mock('../../server/utils/const', () => ({
 }))
 
 // Mock the prompt service
-vi.mock('../../server/services/promptSrv', () => ({
+vi.mock('../../server/services/promptDispatcher', () => ({
     enhancePrompt: vi.fn()
 }))
 
 import { ai } from '../../server/utils/const'
-import { enhancePrompt } from '../../server/services/promptSrv'
+import { enhancePrompt } from '../../server/services/promptDispatcher'
 
-describe('generateTextSrv', () => {
+describe('generateTextDispatcher', () => {
     beforeEach(() => {
         vi.clearAllMocks()
     })
