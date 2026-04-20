@@ -1,12 +1,24 @@
 import { replicate } from '../../utils/const.ts'
 
 export interface BFLGenerateImagesOptions {
-    promptToSend: string
-    count: number
-    referenceImages?: string[]
-    aspectRatio?: string
-    outputFormat?: string
-    validatedModel: string
+    promptToSend: string // Final prompt after enhancement/merging. e.g. "A photorealistic sunset over the ocean"
+    count: number // Number of images to generate (N parallel requests). e.g. 2
+    referenceImages?: string[] // Base64 data URIs for image-to-image / multi-reference editing. e.g. ["data:image/jpeg;base64,..."]
+    aspectRatio?: string // Passed directly to the Replicate API. e.g. "16:9"
+    outputFormat?: string // Desired format, normalised to 'png' | 'jpg' | 'webp'. e.g. "PNG"
+    preset?: string // App-level label mapped to a Replicate resolution string. e.g. "2K" → "2 MP"
+    validatedModel: string // Fully-qualified Replicate model identifier. e.g. "black-forest-labs/flux-2-pro"
+}
+
+// Models that accept a `resolution` string param (e.g. "1 MP", "2 MP", "4 MP")
+const RESOLUTION_MODELS = new Set(['black-forest-labs/flux-2-pro', 'black-forest-labs/flux-2-max'])
+
+// Maps app preset label → Replicate resolution string
+const PRESET_TO_RESOLUTION: Record<string, string> = {
+    '0.5K': '0.5 MP',
+    '1K': '1 MP',
+    '2K': '2 MP',
+    '4K': '4 MP'
 }
 
 // Maps model identifier → API input field name for reference images
@@ -45,7 +57,7 @@ const normalizeOutputFormat = (format?: string): 'png' | 'jpg' | 'webp' => {
 }
 
 export const bflGenerateImages = async (options: BFLGenerateImagesOptions): Promise<string[]> => {
-    const { promptToSend, count, referenceImages = [], aspectRatio, outputFormat, validatedModel } = options
+    const { promptToSend, count, referenceImages = [], aspectRatio, outputFormat, preset, validatedModel } = options
 
     if (!promptToSend.trim()) throw new Error('Prompt is required for Black Forest Labs models.')
 
@@ -68,6 +80,7 @@ export const bflGenerateImages = async (options: BFLGenerateImagesOptions): Prom
                     num_outputs: 1,
                     output_format: format,
                     ...(aspectRatio ? { aspect_ratio: aspectRatio } : {}),
+                    ...(preset && RESOLUTION_MODELS.has(validatedModel) && PRESET_TO_RESOLUTION[preset] ? { resolution: PRESET_TO_RESOLUTION[preset] } : {}),
                     ...buildRefImageInput(),
                     ...(SAFETY_INPUT[validatedModel] ?? {})
                 }
