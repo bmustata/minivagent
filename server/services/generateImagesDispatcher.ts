@@ -5,6 +5,7 @@ import { saveResource } from './resourcesSrv.ts'
 import { geminiGenerateImages } from './gemini/generateImagesSrv.ts'
 import { openaiGenerateImages } from './openai/generateImagesSrv.ts'
 import { bflGenerateImages } from './black-forest-labs/generateImagesSrv.ts'
+import { bytedanceGenerateImages } from './bytedance/generateImagesSrv.ts'
 
 export interface GenerateImagesOptions {
     prompt?: string
@@ -91,6 +92,8 @@ export const generateImagesBase64 = async (options: GenerateImagesOptions): Prom
         images = await geminiGenerateImages({ promptToSend, count, referenceImages, aspectRatio, outputFormat, preset, validatedModel })
     } else if (provider === 'black-forest-labs') {
         images = await bflGenerateImages({ promptToSend, count, referenceImages, aspectRatio, outputFormat, preset, validatedModel })
+    } else if (provider === 'bytedance') {
+        images = await bytedanceGenerateImages({ promptToSend, count, referenceImages, aspectRatio, outputFormat, preset, validatedModel })
     } else {
         throw new Error(`Unknown provider: "${provider}"`)
     }

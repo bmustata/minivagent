@@ -6,13 +6,13 @@ import { isImagenModel } from '../../utils/imageUtils.ts'
 import { logger } from '../../utils/logger.ts'
 
 export interface GeminiGenerateImagesOptions {
-    promptToSend: string
-    count: number
-    referenceImages: string[]
-    aspectRatio?: string
-    outputFormat?: string
-    preset?: string
-    validatedModel: string
+    promptToSend: string // Final prompt after enhancement/merging. e.g. "A photorealistic sunset over the ocean"
+    count: number // Number of images to generate. e.g. 2
+    referenceImages: string[] // Base64 data URIs for image-to-image editing (ignored by Imagen models). e.g. ["data:image/jpeg;base64,..."]
+    aspectRatio?: string // Passed to the Gemini/Imagen API. e.g. "16:9"
+    outputFormat?: string // Desired format, normalised to 'png' | 'jpeg'. e.g. "PNG"
+    preset?: string // App-level label mapped to imageSize (Gemini) or imageSize (Imagen). e.g. "2K"
+    validatedModel: string // Gemini or Imagen model identifier. e.g. "imagen-4.0-generate-001"
 }
 
 const normalizeMimeType = (mimeType?: string): 'image/png' | 'image/jpeg' => {

@@ -40,7 +40,9 @@ export const MODELS = {
         { name: 'Flux 2 Klein 4B', provider: 'black-forest-labs', model: 'black-forest-labs/flux-2-klein-4b', options: { referenceImages: 5 } },
         { name: 'Flux 2 Dev', provider: 'black-forest-labs', model: 'black-forest-labs/flux-2-dev', options: { referenceImages: 5 } },
         { name: 'Flux 2 Pro', provider: 'black-forest-labs', model: 'black-forest-labs/flux-2-pro', options: { referenceImages: 8, safetyTolerance: 5, presets: ['1K', '2K', '4K', '0.5K'] } },
-        { name: 'Flux 2 Max', provider: 'black-forest-labs', model: 'black-forest-labs/flux-2-max', options: { referenceImages: 8, safetyTolerance: 5, presets: ['1K', '2K', '4K', '0.5K'] } }
+        { name: 'Flux 2 Max', provider: 'black-forest-labs', model: 'black-forest-labs/flux-2-max', options: { referenceImages: 8, safetyTolerance: 5, presets: ['1K', '2K', '4K', '0.5K'] } },
+        { name: 'Seedream 5 Lite', provider: 'bytedance', model: 'bytedance/seedream-5-lite', options: { referenceImages: 14, presets: ['2K', '3K'] } },
+        { name: 'Seedream 4.5', provider: 'bytedance', model: 'bytedance/seedream-4.5', options: { referenceImages: 14, presets: ['2K', '4K'] } }
     ],
     VISION: [
         { name: 'Gemini Flash 2.5', provider: 'gemini', model: 'gemini-2.5-flash', options: {} },
