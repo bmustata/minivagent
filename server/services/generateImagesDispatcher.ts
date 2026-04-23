@@ -87,7 +87,7 @@ export const generateImagesBase64 = async (options: GenerateImagesOptions): Prom
     let images: string[]
 
     if (provider === 'openai') {
-        images = await openaiGenerateImages({ promptToSend, count, aspectRatio, outputFormat, validatedModel })
+        images = await openaiGenerateImages({ promptToSend, count, referenceImages, aspectRatio, outputFormat, preset, validatedModel })
     } else if (provider === 'gemini') {
         images = await geminiGenerateImages({ promptToSend, count, referenceImages, aspectRatio, outputFormat, preset, validatedModel })
     } else if (provider === 'black-forest-labs') {
