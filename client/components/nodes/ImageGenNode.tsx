@@ -38,7 +38,7 @@ export const ImageGenNode: React.FC<ImageGenNodeProps> = ({ node, connectedInput
     const modelProvider = modelEntry?.provider ?? 'gemini'
 
     const hasImages = connectedInputImages.length > 0
-    const canRun = !!prompt.trim() || !!connectedInputText || hasImages
+    const canRun = !!prompt?.trim() || !!connectedInputText || hasImages
 
     return (
         <div className="flex flex-col gap-3">

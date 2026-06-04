@@ -312,7 +312,7 @@ export const ImageGenPropsPanel: React.FC<ImageGenPropsPanelProps> = ({ node, up
             <div className="px-3 pb-3 flex justify-end">
                 <button
                     onClick={onRun}
-                    disabled={isLoading || (!prompt.trim() && !connectedInputText)}
+                    disabled={isLoading || (!prompt?.trim() && !connectedInputText)}
                     className="flex items-center gap-1.5 px-3 py-1 bg-purple-600 hover:bg-purple-500 disabled:bg-slate-300 dark:disabled:bg-zinc-700 text-white text-xs font-medium rounded-md transition-colors"
                 >
                     {isLoading ? <Loader2 size={12} className="animate-spin" /> : <Play size={12} fill="currentColor" />}
