@@ -56,7 +56,7 @@ export const MODELS = {
         { name: 'GPT-5.4 Nano', provider: 'openai', model: 'gpt-5.4-nano', options: {} }
     ],
     PLANNER: [
-        { name: 'Gemini Flash 2.5', provider: 'gemini', model: 'gemini-2.5-flash', options: {} },
-        { name: 'Gemini Flash 3.5', provider: 'gemini', model: 'gemini-3.5-flash', options: {} }
+        { name: 'Gemini Flash 3.5', provider: 'gemini', model: 'gemini-3.5-flash', options: {} },
+        { name: 'Gemini Flash 2.5', provider: 'gemini', model: 'gemini-2.5-flash', options: {} }
     ]
 } as const
