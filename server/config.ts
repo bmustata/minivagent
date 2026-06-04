@@ -2,6 +2,7 @@ const imagegen = true
 
 // Model constants — the first entry in each category is the default model
 // Comment out or remove any entry below to disable that provider / model across the app
+// Supported providers: gemini, openai, black-forest-labs, bytedance
 export const MODELS = {
     TEXT: [
         { name: 'Gemini Flash 2.5', provider: 'gemini', model: 'gemini-2.5-flash', options: {} },
