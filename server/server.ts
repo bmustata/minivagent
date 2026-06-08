@@ -7,6 +7,7 @@ import { listGraphs, getGraph, createGraph, updateGraph, deleteGraph } from './h
 import { getModels } from './handlers/modelHandlers.ts'
 import { getApiMeta, getApiMetaLlms } from './handlers/metaHandlers.ts'
 import { listResourcesHandler, addResourceHandler, getResourceInfoHandler, getResourceHandler, removeResourceHandler, uploadMiddleware } from './handlers/resourceHandlers.ts'
+import { createSession, addMessage, deleteSession, getSession } from './handlers/agentHandlers.ts'
 
 // Create Express app
 export const app = express()
@@ -60,6 +61,12 @@ app.post('/api/resources', ...uploadMiddleware, addResourceHandler)
 app.get('/api/resources/:resourceId/info', getResourceInfoHandler)
 app.get('/api/resources/:resourceId', getResourceHandler)
 app.delete('/api/resources/:resourceId', removeResourceHandler)
+
+// Agent Routes
+app.post('/api/agent/session', createSession)
+app.get('/api/agent/session/:id', getSession)
+app.post('/api/agent/session/:id', addMessage)
+app.delete('/api/agent/session/:id', deleteSession)
 
 // Serve static files from dist directory at root path (for production)
 const distPath = path.join(process.cwd(), 'dist')
