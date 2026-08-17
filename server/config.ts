@@ -10,7 +10,7 @@ export const MODELS = {
         { name: 'Gemini Flash 3', provider: 'gemini', model: 'gemini-3-flash-preview', options: {} },
         { name: 'Gemini Flash 3.5', provider: 'gemini', model: 'gemini-3.5-flash', options: {} },
         { name: 'Gemini Flash 3.1 Lite', provider: 'gemini', model: 'gemini-3.1-flash-lite-preview', options: {} },
-        { name: 'GPT-5.6', provider: 'openai', model: 'gpt-5.6', options: {} },
+        { name: 'GPT-5.6 Sol', provider: 'openai', model: 'gpt-5.6-sol', options: {} },
         { name: 'GPT-5.6 Terra', provider: 'openai', model: 'gpt-5.6-terra', options: {} },
         { name: 'GPT-5.6 Luna', provider: 'openai', model: 'gpt-5.6-luna', options: {} },
         { name: 'GPT-5.4', provider: 'openai', model: 'gpt-5.4', options: {} },
@@ -18,8 +18,8 @@ export const MODELS = {
         { name: 'GPT-5.4 Nano', provider: 'openai', model: 'gpt-5.4-nano', options: {} }
     ],
     IMAGE: [
-        { name: 'Nano Banana 2 Lite (gemini-3.1-flash-lite)', provider: 'gemini', model: 'gemini-3.1-flash-lite-image', options: { imagegen } },
         { name: 'Nano Banana 2 (gemini-3.1-flash)', provider: 'gemini', model: 'gemini-3.1-flash-image', options: { presets: ['512', '1K', '2K', '4K'] } },
+        { name: 'Nano Banana 2 Lite (gemini-3.1-flash-lite)', provider: 'gemini', model: 'gemini-3.1-flash-lite-image', options: { imagegen } },
         { name: 'Nano Banana Pro (gemini-3-pro)', provider: 'gemini', model: 'gemini-3-pro-image', options: { presets: ['1K', '2K', '4K'] } },
         { name: 'Nano Banana (gemini-2.5-flash)', provider: 'gemini', model: 'gemini-2.5-flash-image', options: {} },
         { name: 'GPT Image 1', provider: 'openai', model: 'gpt-image-1-mini', options: { referenceImages: 16 } },
@@ -40,7 +40,7 @@ export const MODELS = {
         { name: 'Gemini Flash 2.5', provider: 'gemini', model: 'gemini-2.5-flash', options: {} },
         { name: 'Gemini Flash 3', provider: 'gemini', model: 'gemini-3-flash-preview', options: {} },
         { name: 'Gemini Flash 3.5', provider: 'gemini', model: 'gemini-3.5-flash', options: {} },
-        { name: 'GPT-5.6', provider: 'openai', model: 'gpt-5.6', options: {} },
+        { name: 'GPT-5.6 Sol', provider: 'openai', model: 'gpt-5.6-sol', options: {} },
         { name: 'GPT-5.6 Terra', provider: 'openai', model: 'gpt-5.6-terra', options: {} },
         { name: 'GPT-5.6 Luna', provider: 'openai', model: 'gpt-5.6-luna', options: {} },
         { name: 'GPT-5.4', provider: 'openai', model: 'gpt-5.4', options: {} },
