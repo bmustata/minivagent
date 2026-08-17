@@ -6,10 +6,10 @@ const imagegen = true
 export const MODELS = {
     TEXT: [
         { name: 'Gemini Flash 3.7', provider: 'gemini', model: 'gemini-3.7-flash', options: {} },
-        { name: 'Gemini Flash 2.5', provider: 'gemini', model: 'gemini-2.5-flash', options: {} },
-        { name: 'Gemini Flash 3', provider: 'gemini', model: 'gemini-3-flash-preview', options: {} },
         { name: 'Gemini Flash 3.5', provider: 'gemini', model: 'gemini-3.5-flash', options: {} },
         { name: 'Gemini Flash 3.1 Lite', provider: 'gemini', model: 'gemini-3.1-flash-lite-preview', options: {} },
+        { name: 'Gemini Flash 3', provider: 'gemini', model: 'gemini-3-flash-preview', options: {} },
+        { name: 'Gemini Flash 2.5', provider: 'gemini', model: 'gemini-2.5-flash', options: {} },
         { name: 'GPT-5.6 Sol', provider: 'openai', model: 'gpt-5.6-sol', options: {} },
         { name: 'GPT-5.6 Terra', provider: 'openai', model: 'gpt-5.6-terra', options: {} },
         { name: 'GPT-5.6 Luna', provider: 'openai', model: 'gpt-5.6-luna', options: {} },
@@ -37,9 +37,9 @@ export const MODELS = {
     ],
     VISION: [
         { name: 'Gemini Flash 3.7', provider: 'gemini', model: 'gemini-3.7-flash', options: {} },
-        { name: 'Gemini Flash 2.5', provider: 'gemini', model: 'gemini-2.5-flash', options: {} },
-        { name: 'Gemini Flash 3', provider: 'gemini', model: 'gemini-3-flash-preview', options: {} },
         { name: 'Gemini Flash 3.5', provider: 'gemini', model: 'gemini-3.5-flash', options: {} },
+        { name: 'Gemini Flash 3', provider: 'gemini', model: 'gemini-3-flash-preview', options: {} },
+        { name: 'Gemini Flash 2.5', provider: 'gemini', model: 'gemini-2.5-flash', options: {} },
         { name: 'GPT-5.6 Sol', provider: 'openai', model: 'gpt-5.6-sol', options: {} },
         { name: 'GPT-5.6 Terra', provider: 'openai', model: 'gpt-5.6-terra', options: {} },
         { name: 'GPT-5.6 Luna', provider: 'openai', model: 'gpt-5.6-luna', options: {} },
