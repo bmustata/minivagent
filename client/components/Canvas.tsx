@@ -4,12 +4,11 @@ import { Node, Edge, NodeType, NodeData } from '../types'
 import { NodeContainer } from './NodeContainer'
 import { TextGenNode, ImageGenNode, ImageSourceNode, NoteNode, ImageToTextNode, CompareNode, SplitTextNode } from './nodes'
 import { ConfigModal } from './ConfigModal'
-import { AgentChatPanel } from './AgentChatPanel'
 import { GalleryModal, GalleryImage } from './GalleryModal'
 import { GraphManager } from './GraphManager'
 import { GraphTitle } from './GraphTitle'
 import { listGraphs, GraphResource } from '../services/graphService'
-import { Sun, Moon, Image as ImageIcon, Type, StickyNote, X, ZoomIn, ZoomOut, Maximize2, Minimize2, Info, Code, ChevronDown, Play, Loader2, ScanEye, Box, Sparkles, MessageSquare, RotateCcw, Columns2, Github, Scissors, Bot } from 'lucide-react'
+import { Sun, Moon, Image as ImageIcon, Type, StickyNote, X, ZoomIn, ZoomOut, Maximize2, Minimize2, Info, Code, ChevronDown, Play, Loader2, ScanEye, Box, Sparkles, MessageSquare, RotateCcw, Columns2, Github, Scissors } from 'lucide-react'
 import { APP_CONFIG } from '../config'
 import { generateText, extractTextFromImage, generateImages, planGraphFromPrompt } from '../services/generateService'
 import { ImageGenPropsPanel } from './nodes/ImageGenPropsPanel'
@@ -93,9 +92,6 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
     const [showAssistant, setShowAssistant] = useState(false)
     const [assistantPrompt, setAssistantPrompt] = useState('')
     const [isAnalyzing, setIsAnalyzing] = useState(false)
-
-    // Agent Chat State
-    const [showAgentChat, setShowAgentChat] = useState(false)
 
     // Refs for gesture handling to avoid closure staleness during rapid events
     const viewportRef = useRef(viewport)
@@ -1730,37 +1726,6 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
 
             {/* Assistant & Instructions Panel Container */}
             <div className="absolute bottom-6 right-6 z-50 pointer-events-auto flex items-end gap-2" onMouseDown={(e) => e.stopPropagation()}>
-                {/* Agent Chat Column */}
-                <div className="flex flex-col items-end">
-                    {showAgentChat && (
-                        <AgentChatPanel
-                            nodes={nodes}
-                            edges={edges}
-                            graphId={currentGraphId}
-                            onGraphPlan={(plan) => {
-                                // Agent returns the full graph — replace nodes/edges entirely
-                                const newNodes: Node[] = (plan.nodes as any[]).map((planNode: any) => ({
-                                    ...planNode,
-                                    data: { ...planNode.data, isLoading: false }
-                                }))
-                                const newEdges: Edge[] = plan.edges as Edge[]
-                                setNodes(newNodes)
-                                setEdges(newEdges)
-                            }}
-                            onClose={() => setShowAgentChat(false)}
-                        />
-                    )}
-                    {!showAgentChat && (
-                        <button
-                            onClick={() => setShowAgentChat(true)}
-                            className="flex items-center justify-center w-10 h-10 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md rounded-full shadow-lg border border-slate-200 dark:border-zinc-700 text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-zinc-800 transition-colors"
-                            title="Open Agent Chat"
-                        >
-                            <Bot size={20} />
-                        </button>
-                    )}
-                </div>
-
                 {/* Assistant Column */}
                 <div className="flex flex-col items-end">
                     {showAssistant && (
