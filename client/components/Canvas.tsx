@@ -8,7 +8,7 @@ import { GalleryModal, GalleryImage } from './GalleryModal'
 import { GraphManager } from './GraphManager'
 import { GraphTitle } from './GraphTitle'
 import { listGraphs, GraphResource } from '../services/graphService'
-import { Sun, Moon, Image as ImageIcon, Type, StickyNote, X, ZoomIn, ZoomOut, Maximize2, Minimize2, Info, Code, ChevronDown, Play, Loader2, ScanEye, Box, Sparkles, MessageSquare, RotateCcw, Columns2, Github, Scissors } from 'lucide-react'
+import { Sun, Moon, Image as ImageIcon, Type, StickyNote, X, ZoomIn, ZoomOut, Maximize2, Minimize2, Info, Code, ChevronDown, Play, Loader2, ScanEye, Box, Sparkles, MessageSquare, RotateCcw, Columns2, Github, Scissors, AlignLeft, AlignRight, LayoutGrid, Rows3 } from 'lucide-react'
 import { APP_CONFIG } from '../config'
 import { generateText, extractTextFromImage, generateImages, planGraphFromPrompt } from '../services/generateService'
 import { ImageGenPropsPanel } from './nodes/ImageGenPropsPanel'
@@ -893,6 +893,85 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
         if (selectedEdgeId === id) setSelectedEdgeId(null)
     }
 
+    // --- Multi-node Alignment ---
+
+    const snapVal = (v: number) => Math.round(v / 24) * 24
+
+    const getNodeDimensions = (id: string): { w: number; h: number } => {
+        const el = document.querySelector(`[data-node-id="${id}"]`)
+        if (!el) return { w: 320, h: 200 }
+        const rect = el.getBoundingClientRect()
+        const z = zoomRef.current
+        return { w: rect.width / z, h: rect.height / z }
+    }
+
+    const alignLeft = () => {
+        const sel = nodes.filter((n) => selectedNodeIds.includes(n.id))
+        if (sel.length < 2) return
+        const minX = Math.min(...sel.map((n) => n.position.x))
+        setNodes((prev) => prev.map((n) => selectedNodeIds.includes(n.id) ? { ...n, position: { ...n.position, x: minX } } : n))
+    }
+
+    const alignRight = () => {
+        const sel = nodes.filter((n) => selectedNodeIds.includes(n.id))
+        if (sel.length < 2) return
+        const maxX = Math.max(...sel.map((n) => n.position.x))
+        setNodes((prev) => prev.map((n) => selectedNodeIds.includes(n.id) ? { ...n, position: { ...n.position, x: maxX } } : n))
+    }
+
+    const stackAlign = () => {
+        const sel = nodes.filter((n) => selectedNodeIds.includes(n.id))
+        if (sel.length < 2) return
+        const sorted = [...sel].sort((a, b) => a.position.y !== b.position.y ? a.position.y - b.position.y : a.position.x - b.position.x)
+        const anchorX = snapVal(Math.min(...sel.map((n) => n.position.x)))
+        const anchorY = snapVal(Math.min(...sel.map((n) => n.position.y)))
+        const offset = 30 // px per card in the stack
+        const updates: Record<string, { x: number; y: number }> = {}
+        sorted.forEach((n, i) => {
+            updates[n.id] = { x: anchorX + i * offset, y: anchorY + i * offset }
+        })
+        setNodes((prev) => prev.map((n) => updates[n.id] ? { ...n, position: updates[n.id] } : n))
+    }
+
+    const gridAlign = () => {
+        const sel = nodes.filter((n) => selectedNodeIds.includes(n.id))
+        if (sel.length < 2) return
+        const cols = Math.ceil(Math.sqrt(sel.length))
+        const colW = 368 // 320px node width + 48px gap
+        const rowH = 248 // fixed row height + gap
+        const anchorX = snapVal(Math.min(...sel.map((n) => n.position.x)))
+        const anchorY = snapVal(Math.min(...sel.map((n) => n.position.y)))
+        const sorted = [...sel].sort((a, b) => a.position.y !== b.position.y ? a.position.y - b.position.y : a.position.x - b.position.x)
+        const updates: Record<string, { x: number; y: number }> = {}
+        sorted.forEach((n, i) => {
+            updates[n.id] = { x: anchorX + (i % cols) * colW, y: anchorY + Math.floor(i / cols) * rowH }
+        })
+        setNodes((prev) => prev.map((n) => updates[n.id] ? { ...n, position: updates[n.id] } : n))
+    }
+
+    const autoAlign = () => {
+        const sel = nodes.filter((n) => selectedNodeIds.includes(n.id))
+        if (sel.length < 2) return
+        const cols = Math.ceil(Math.sqrt(sel.length))
+        const gap = 48
+        const anchorX = snapVal(Math.min(...sel.map((n) => n.position.x)))
+        const anchorY = snapVal(Math.min(...sel.map((n) => n.position.y)))
+        const sorted = [...sel].sort((a, b) => a.position.y !== b.position.y ? a.position.y - b.position.y : a.position.x - b.position.x)
+        const numRows = Math.ceil(sorted.length / cols)
+        const rowHeights: number[] = Array.from({ length: numRows }, (_, r) => {
+            const rowNodes = sorted.slice(r * cols, (r + 1) * cols)
+            return Math.max(...rowNodes.map((n) => getNodeDimensions(n.id).h))
+        })
+        const updates: Record<string, { x: number; y: number }> = {}
+        sorted.forEach((n, i) => {
+            const col = i % cols
+            const row = Math.floor(i / cols)
+            const rowOffsetY = rowHeights.slice(0, row).reduce((sum, h) => sum + h + gap, 0)
+            updates[n.id] = { x: snapVal(anchorX + col * (320 + gap)), y: snapVal(anchorY + rowOffsetY) }
+        })
+        setNodes((prev) => prev.map((n) => updates[n.id] ? { ...n, position: updates[n.id] } : n))
+    }
+
     const handleCanvasDown = (e: React.MouseEvent | React.TouchEvent) => {
         // Check if right click (button 2)
         if ('button' in e && e.button === 2) {
@@ -918,6 +997,86 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                 selectionRectRef.current = rect
                 setSelectionRect(rect)
             }
+        }
+    }
+
+    // --- Canvas Image Drop Logic ---
+
+    const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif']
+
+    const handleCanvasDragOver = (e: React.DragEvent) => {
+        e.preventDefault()
+        e.dataTransfer.dropEffect = 'copy'
+    }
+
+    const createImageSourceNodeAtDrop = (
+        worldPos: { x: number; y: number },
+        imageInput: string,
+        imageInputType: 'UPLOAD' | 'URL'
+    ) => {
+        const existingIds = nodesRef.current.map((n) => n.id)
+        const id = generateNodeId(NodeType.IMAGE_SOURCE, existingIds)
+        const snap = 24
+        const snappedX = Math.round((worldPos.x - 160) / snap) * snap
+        const snappedY = Math.round((worldPos.y - 100) / snap) * snap
+        const newNode: Node = {
+            id,
+            type: NodeType.IMAGE_SOURCE,
+            position: { x: snappedX, y: snappedY },
+            data: { prompt: '', isLoading: false, imageInput, imageInputType },
+        }
+        setNodes((prev) => [...prev, newNode])
+    }
+
+    const handleCanvasDrop = (e: React.DragEvent) => {
+        e.preventDefault()
+        const worldPos = screenToWorld(e.clientX, e.clientY)
+        const spacing = 360 // ~node width (320px) + 40px gap, snapped to 24px grid
+
+        const validFiles = Array.from(e.dataTransfer.files).filter((f) => ALLOWED_IMAGE_TYPES.includes(f.type))
+        if (validFiles.length > 0) {
+            validFiles.forEach((file, i) => {
+                const offsetPos = { x: worldPos.x + i * spacing, y: worldPos.y }
+                const reader = new FileReader()
+                reader.onload = (event) => {
+                    const result = event.target?.result
+                    if (result) createImageSourceNodeAtDrop(offsetPos, result as string, 'UPLOAD')
+                }
+                reader.readAsDataURL(file)
+            })
+            return
+        }
+
+        const uriList = e.dataTransfer.getData('text/uri-list')
+        if (uriList) {
+            const urls = uriList
+                .split('\n')
+                .map((l) => l.trim())
+                .filter((l) => l && !l.startsWith('#') && l.startsWith('http'))
+            if (urls.length > 0) {
+                urls.forEach((url, i) => {
+                    createImageSourceNodeAtDrop({ x: worldPos.x + i * spacing, y: worldPos.y }, url, 'URL')
+                })
+                return
+            }
+        }
+
+        const html = e.dataTransfer.getData('text/html')
+        if (html) {
+            const srcs = Array.from(new DOMParser().parseFromString(html, 'text/html').querySelectorAll('img'))
+                .map((img) => (img as HTMLImageElement).src)
+                .filter((src) => src.startsWith('http'))
+            if (srcs.length > 0) {
+                srcs.forEach((src, i) => {
+                    createImageSourceNodeAtDrop({ x: worldPos.x + i * spacing, y: worldPos.y }, src, 'URL')
+                })
+                return
+            }
+        }
+
+        const text = e.dataTransfer.getData('text/plain')?.trim()
+        if (text?.startsWith('http')) {
+            createImageSourceNodeAtDrop(worldPos, text, 'URL')
         }
     }
 
@@ -1340,7 +1499,7 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
     }
 
     return (
-        <div className="w-full h-full overflow-hidden relative bg-slate-50 dark:bg-zinc-900 touch-none" onMouseDown={handleCanvasDown} onWheel={handleWheel} onContextMenu={(e) => e.preventDefault()}>
+        <div className="w-full h-full overflow-hidden relative bg-slate-50 dark:bg-zinc-900 touch-none" onMouseDown={handleCanvasDown} onWheel={handleWheel} onContextMenu={(e) => e.preventDefault()} onDragOver={handleCanvasDragOver} onDrop={handleCanvasDrop}>
             {/* Graph Title in Center */}
             <GraphTitle
                 graphName={currentGraphName}
@@ -1584,15 +1743,37 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
             {/* Top Right Gallery Button */}
             <div className="absolute top-4 right-4 z-50 pointer-events-auto flex items-center gap-2">
                 {selectedNodeIds.length > 1 && (
-                    <div className="flex items-center gap-1.5 px-3 py-2 bg-indigo-500/90 backdrop-blur-md rounded-lg shadow-lg text-white text-sm font-semibold select-none">
-                        <span>{selectedNodeIds.length} selected</span>
-                        <button
-                            onClick={() => { setSelectedNodeIds([]); setSelectedNodeId(null) }}
-                            className="ml-1 opacity-70 hover:opacity-100 transition-opacity"
-                            title="Clear selection"
-                        >
-                            <X size={13} />
-                        </button>
+                    <div className="flex flex-col items-end gap-1.5">
+                        <div className="flex items-center gap-1.5 px-3 py-2 bg-indigo-500/90 backdrop-blur-md rounded-lg shadow-lg text-white text-sm font-semibold select-none">
+                            <span>{selectedNodeIds.length} selected</span>
+                            <button
+                                onClick={() => { setSelectedNodeIds([]); setSelectedNodeId(null) }}
+                                className="ml-1 opacity-70 hover:opacity-100 transition-opacity"
+                                title="Clear selection"
+                            >
+                                <X size={13} />
+                            </button>
+                        </div>
+                        {selectedNodeIds.length > 2 && (
+                            <div className="flex items-center gap-0.5 px-1.5 py-1 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md rounded-lg shadow border border-slate-200 dark:border-zinc-700">
+                                <button onClick={autoAlign} title="Auto align" className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">
+                                    <Sparkles size={13} />
+                                </button>
+                                <button onClick={gridAlign} title="Grid align" className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">
+                                    <LayoutGrid size={13} />
+                                </button>
+                                <button onClick={stackAlign} title="Stack align" className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">
+                                    <Rows3 size={13} />
+                                </button>
+                                <div className="w-px h-4 bg-slate-200 dark:bg-zinc-700 mx-0.5" />
+                                <button onClick={alignLeft} title="Align Left" className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">
+                                    <AlignLeft size={13} />
+                                </button>
+                                <button onClick={alignRight} title="Align Right" className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">
+                                    <AlignRight size={13} />
+                                </button>
+                            </div>
+                        )}
                     </div>
                 )}
                 <button

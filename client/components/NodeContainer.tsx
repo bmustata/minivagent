@@ -115,6 +115,7 @@ export const NodeContainer: React.FC<NodeContainerProps> = ({ node, selected, on
 
     return (
         <div
+            data-node-id={node.id}
             className={`absolute flex flex-col w-80 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-sm rounded-lg shadow-xl ${borderColor} transition-shadow duration-200 touch-none select-none group`}
             style={{
                 left: node.position.x,
