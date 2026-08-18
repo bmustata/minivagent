@@ -1210,8 +1210,12 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                 e.preventDefault()
                 duplicateSelectedNode()
             }
-            // Escape: close props panel and clear multi-selection
+            // Escape: close gallery if open, otherwise close props panel and clear multi-selection
             if (e.key === 'Escape') {
+                if (showGallery) {
+                    setShowGallery(false)
+                    return
+                }
                 setSelectedNodeId(null)
                 setSelectedNodeIds([])
             }
@@ -1229,7 +1233,7 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
         }
         window.addEventListener('keydown', handleKeyDown)
         return () => window.removeEventListener('keydown', handleKeyDown)
-    }, [selectedNodeId, nodes]) // Dependencies for accessing current state
+    }, [selectedNodeId, nodes, showGallery]) // Dependencies for accessing current state
 
     // Mouse Move/Up Global Handlers
     useEffect(() => {
@@ -1754,7 +1758,7 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                                 <X size={13} />
                             </button>
                         </div>
-                        {selectedNodeIds.length > 2 && (
+                        {selectedNodeIds.length >= 2 && (
                             <div className="flex items-center gap-0.5 px-1.5 py-1 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md rounded-lg shadow border border-slate-200 dark:border-zinc-700">
                                 <button onClick={autoAlign} title="Auto align" className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">
                                     <Sparkles size={13} />
