@@ -8,7 +8,7 @@ import { GalleryModal, GalleryImage } from './GalleryModal'
 import { GraphManager } from './GraphManager'
 import { GraphTitle } from './GraphTitle'
 import { listGraphs, GraphResource } from '../services/graphService'
-import { Sun, Moon, Image as ImageIcon, Type, StickyNote, X, ZoomIn, ZoomOut, Maximize2, Minimize2, Info, Code, ChevronDown, Play, Loader2, ScanEye, Box, Sparkles, MessageSquare, RotateCcw, Columns2, Github, Scissors, AlignLeft, AlignRight, LayoutGrid, Rows3 } from 'lucide-react'
+import { Sun, Moon, Image as ImageIcon, Type, StickyNote, X, ZoomIn, ZoomOut, Maximize2, Minimize2, Info, Code, ChevronDown, Play, Loader2, ScanEye, Box, Sparkles, MessageSquare, RotateCcw, Columns2, Github, Scissors, AlignLeft, AlignRight, AlignStartHorizontal, AlignEndHorizontal, LayoutGrid, Rows3 } from 'lucide-react'
 import { APP_CONFIG } from '../config'
 import { generateText, extractTextFromImage, generateImages, planGraphFromPrompt } from '../services/generateService'
 import { ImageGenPropsPanel } from './nodes/ImageGenPropsPanel'
@@ -919,6 +919,20 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
         setNodes((prev) => prev.map((n) => selectedNodeIds.includes(n.id) ? { ...n, position: { ...n.position, x: maxX } } : n))
     }
 
+    const alignTop = () => {
+        const sel = nodes.filter((n) => selectedNodeIds.includes(n.id))
+        if (sel.length < 2) return
+        const minY = Math.min(...sel.map((n) => n.position.y))
+        setNodes((prev) => prev.map((n) => selectedNodeIds.includes(n.id) ? { ...n, position: { ...n.position, y: minY } } : n))
+    }
+
+    const alignBottom = () => {
+        const sel = nodes.filter((n) => selectedNodeIds.includes(n.id))
+        if (sel.length < 2) return
+        const maxY = Math.max(...sel.map((n) => n.position.y))
+        setNodes((prev) => prev.map((n) => selectedNodeIds.includes(n.id) ? { ...n, position: { ...n.position, y: maxY } } : n))
+    }
+
     const stackAlign = () => {
         const sel = nodes.filter((n) => selectedNodeIds.includes(n.id))
         if (sel.length < 2) return
@@ -1628,6 +1642,31 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                                         setShowGallery(true)
                                     }}
                                     onRun={() => executeNode(node.id)}
+                                    onExtractToCanvas={() => {
+                                        const resources = node.data.imageResources
+                                        if (!resources || resources.length < 2) return
+                                        const cols = Math.ceil(Math.sqrt(resources.length))
+                                        const colW = 368
+                                        const rowH = 248
+                                        const anchorX = snapVal(node.position.x + 368)
+                                        const anchorY = snapVal(node.position.y)
+                                        const newNodes = resources.map((item, i) => {
+                                            const existingIds = nodesRef.current.map((n) => n.id)
+                                            const id = generateNodeId(NodeType.IMAGE_SOURCE, existingIds)
+                                            const newNode: Node = {
+                                                id,
+                                                type: NodeType.IMAGE_SOURCE,
+                                                position: {
+                                                    x: anchorX + (i % cols) * colW,
+                                                    y: anchorY + Math.floor(i / cols) * rowH,
+                                                },
+                                                data: { prompt: '', isLoading: false, imageInput: resourceToUrl(item), imageInputType: 'URL' },
+                                            }
+                                            nodesRef.current = [...nodesRef.current, newNode]
+                                            return newNode
+                                        })
+                                        setNodes((prev) => [...prev, ...newNodes])
+                                    }}
                                 />
                             )}
                             {node.type === NodeType.IMAGE_SOURCE && (
@@ -1776,6 +1815,12 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                                 <button onClick={alignRight} title="Align Right" className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">
                                     <AlignRight size={13} />
                                 </button>
+                                <button onClick={alignTop} title="Align Top" className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">
+                                    <AlignStartHorizontal size={13} />
+                                </button>
+                                <button onClick={alignBottom} title="Align Bottom" className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">
+                                    <AlignEndHorizontal size={13} />
+                                </button>
                             </div>
                         )}
                     </div>
@@ -1851,6 +1896,31 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                                 connectedInputText={getConnectedText(selectedNode.id)}
                                 onClose={() => { setSelectedNodeId(null); setSelectedNodeIds([]) }}
                                 onRun={() => executeNode(selectedNode.id)}
+                                onExtractToCanvas={() => {
+                                    const resources = selectedNode.data.imageResources
+                                    if (!resources || resources.length < 2) return
+                                    const cols = Math.ceil(Math.sqrt(resources.length))
+                                    const colW = 368
+                                    const rowH = 248
+                                    const anchorX = snapVal(selectedNode.position.x + 368)
+                                    const anchorY = snapVal(selectedNode.position.y)
+                                    const newNodes = resources.map((item, i) => {
+                                        const existingIds = nodesRef.current.map((n) => n.id)
+                                        const id = generateNodeId(NodeType.IMAGE_SOURCE, existingIds)
+                                        const newNode: Node = {
+                                            id,
+                                            type: NodeType.IMAGE_SOURCE,
+                                            position: {
+                                                x: anchorX + (i % cols) * colW,
+                                                y: anchorY + Math.floor(i / cols) * rowH,
+                                            },
+                                            data: { prompt: '', isLoading: false, imageInput: resourceToUrl(item), imageInputType: 'URL' },
+                                        }
+                                        nodesRef.current = [...nodesRef.current, newNode]
+                                        return newNode
+                                    })
+                                    setNodes((prev) => [...prev, ...newNodes])
+                                }}
                             />
                         )}
                         {selectedNode.type === NodeType.TEXT_GEN && (

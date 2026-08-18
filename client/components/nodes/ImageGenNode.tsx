@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Play, Loader2, Maximize2, ImageOff } from 'lucide-react'
+import { Play, Loader2, Maximize2, ImageOff, PictureInPicture2 } from 'lucide-react'
 import { Node, NodeData } from '../../types'
 import { getModels } from '../../services/generateService'
 import { resourceToUrl } from '../../utils/imageUtils'
@@ -12,9 +12,10 @@ interface ImageGenNodeProps {
     connectedInputImages?: string[]
     onExpand: (imageUrl: string) => void
     onRun: () => void
+    onExtractToCanvas?: () => void
 }
 
-export const ImageGenNode: React.FC<ImageGenNodeProps> = ({ node, connectedInputText, connectedInputImages = [], onExpand, onRun }) => {
+export const ImageGenNode: React.FC<ImageGenNodeProps> = ({ node, connectedInputText, connectedInputImages = [], onExpand, onRun, onExtractToCanvas }) => {
     const { prompt, imageResources, isLoading, error, imageCount = 1, model } = node.data
     const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({})
     const [inputThumbError, setInputThumbError] = useState(false)
@@ -120,15 +121,27 @@ export const ImageGenNode: React.FC<ImageGenNodeProps> = ({ node, connectedInput
                 </div>
             )}
 
-            {/* Generate Button */}
-            <button
-                onClick={(e) => { e.stopPropagation(); onRun() }}
-                disabled={isLoading || !canRun}
-                className="flex items-center justify-center gap-2 w-full py-1.5 bg-purple-600 hover:bg-purple-500 disabled:bg-slate-300 dark:disabled:bg-zinc-700 text-white text-sm font-medium rounded-md transition-colors"
-            >
-                {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} fill="currentColor" />}
-                Generate
-            </button>
+            {/* Generate + Extract row */}
+            <div className="flex gap-2">
+                {imageResources && imageResources.length > 1 && !isLoading && onExtractToCanvas && (
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onExtractToCanvas() }}
+                        className="flex items-center justify-center gap-1.5 px-2 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-medium rounded-md transition-colors shrink-0"
+                        title="Extract outputs on Canvas"
+                    >
+                        <PictureInPicture2 size={13} />
+                        Extract Outputs
+                    </button>
+                )}
+                <button
+                    onClick={(e) => { e.stopPropagation(); onRun() }}
+                    disabled={isLoading || !canRun}
+                    className="flex items-center justify-center gap-2 flex-1 py-1.5 bg-purple-600 hover:bg-purple-500 disabled:bg-slate-300 dark:disabled:bg-zinc-700 text-white text-sm font-medium rounded-md transition-colors"
+                >
+                    {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} fill="currentColor" />}
+                    Generate
+                </button>
+            </div>
         </div>
     )
 }

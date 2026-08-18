@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { X, Sparkles, Link as LinkIcon, Play, Loader2 } from 'lucide-react'
+import { X, Sparkles, Link as LinkIcon, Play, Loader2, PictureInPicture2 } from 'lucide-react'
 import { Node, NodeData } from '../../types'
 import { getModels } from '../../services/generateService'
 import { ProviderIcon } from '../../assets/ProviderIcon'
@@ -10,13 +10,14 @@ interface ImageGenPropsPanelProps {
     connectedInputText?: string
     onClose: () => void
     onRun: () => void
+    onExtractToCanvas?: () => void
 }
 
 const ASPECT_RATIOS = ['1:1', '16:9', '9:16', '4:3', '3:4']
 const OUTPUT_FORMATS = ['PNG', 'JPEG']
 
-export const ImageGenPropsPanel: React.FC<ImageGenPropsPanelProps> = ({ node, updateNodeData, connectedInputText, onClose, onRun }) => {
-    const { prompt, enhancePrompt, enhancedOutput, model, preset, imageCount = 1, aspectRatio = '1:1', outputFormat = 'PNG', isLoading } = node.data
+export const ImageGenPropsPanel: React.FC<ImageGenPropsPanelProps> = ({ node, updateNodeData, connectedInputText, onClose, onRun, onExtractToCanvas }) => {
+    const { prompt, enhancePrompt, enhancedOutput, model, preset, imageCount = 1, aspectRatio = '1:1', outputFormat = 'PNG', isLoading, imageResources } = node.data
 
     const [availableModels, setAvailableModels] = useState<Array<{ name: string; model: string; provider: string; options: any }>>([])
     const [providers, setProviders] = useState<string[]>([])
@@ -308,8 +309,17 @@ export const ImageGenPropsPanel: React.FC<ImageGenPropsPanelProps> = ({ node, up
                 </div>
             </div>
 
-            {/* Generate Button */}
-            <div className="px-3 pb-3 flex justify-end">
+            {/* Generate + Extract row */}
+            <div className="px-3 pb-3 flex gap-2 justify-end">
+                {imageResources && imageResources.length > 1 && !isLoading && onExtractToCanvas && (
+                    <button
+                        onClick={onExtractToCanvas}
+                        className="flex items-center gap-1.5 px-3 py-1 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-medium rounded-md transition-colors"
+                    >
+                        <PictureInPicture2 size={12} />
+                        Extract Outputs
+                    </button>
+                )}
                 <button
                     onClick={onRun}
                     disabled={isLoading || (!prompt?.trim() && !connectedInputText)}
