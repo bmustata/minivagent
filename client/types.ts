@@ -1,6 +1,7 @@
 export enum NodeType {
     TEXT_GEN = 'TEXT_GEN',
     IMAGE_GEN = 'IMAGE_GEN',
+    IMAGE_GEN_PIXELATE = 'IMAGE_GEN_PIXELATE',
     IMAGE_SOURCE = 'IMAGE_SOURCE',
     NOTE = 'NOTE',
     IMAGE_TO_TEXT = 'IMAGE_TO_TEXT',
@@ -40,6 +41,13 @@ export interface NodeData {
     splitOutputs?: string[] // Array of split result parts
     splitPage?: number // Currently selected page index
     includeSplitSeparator?: boolean // For TEXT_GEN: append ==== separator instruction to prompt
+
+    // For Image Gen Pixelate node
+    pixelateSize?: number // 8–256, pixel grid resolution (default 64)
+    paletteEnabled?: boolean // enable color quantization (default true)
+    paletteSize?: number // 2–256 color palette (default 32)
+    preserveAlpha?: boolean // keep transparency (default false)
+    transparentBackground?: boolean // append transparent background to prompt (default false)
 }
 
 export interface Node {

@@ -5,6 +5,7 @@ import { imageGetMetadata, isValidAspectRatio, getValidAspectRatios, getRefImage
 import { resolveReferenceImages } from '../helpers/index.ts'
 import { logger, truncatePromptForLog } from '../utils/logger.ts'
 import { startTimer } from '../utils/observabilityUtils.ts'
+import { pixelateImage } from '../services/pixelateSrv.ts'
 
 const RESOURCES_DIR = path.join(process.cwd(), 'data', 'resources')
 
@@ -166,6 +167,76 @@ export const generateImages = async (req: Request, res: Response): Promise<void>
         } else {
             res.status(500).json({ error: 'Failed to generate images.' })
         }
+    }
+}
+
+/**
+ * Generate + pixelate images handler (HTTP layer only)
+ * POST /api/generate-pixelate-images
+ */
+export const generatePixelateImages = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const timer = startTimer()
+        const {
+            prompt, referenceImages, count = 1, pixelateSize = 64, paletteEnabled = true, paletteSize = 32,
+            preserveAlpha = false, transparentBackground = false,
+            aspectRatio, outputFormat, shouldEnhance, model, preset
+        } = req.body
+        logger.info(
+            `POST /api/generate-pixelate-images - count: ${count}, ratio: ${aspectRatio}, size: ${pixelateSize}, palette: ${paletteEnabled ? paletteSize + ' colors' : 'off'}, alpha: ${preserveAlpha}, model: ${model || 'none'}, refs: ${referenceImages?.length || 0}`
+        )
+
+        if (aspectRatio && !isValidAspectRatio(aspectRatio)) {
+            const validRatios = getValidAspectRatios().join(', ')
+            res.status(400).json({ error: `Invalid aspect ratio. Must be one of: ${validRatios}` })
+            return
+        }
+
+        const resolvedRefs = referenceImages?.length > 0 ? await resolveReferenceImages(referenceImages) : []
+
+        // If no prompt and no reference images, pixelate the reference image directly
+        // (skip generation step when no prompt given and ref images provided)
+        let base64Images: string[]
+        let enhancedPrompt: string | undefined
+
+        const effectivePrompt = transparentBackground && prompt?.trim()
+            ? `${prompt.trim()}, transparent background, no background, isolated subject, alpha channel`
+            : (prompt || '')
+
+        if (!effectivePrompt.trim() && resolvedRefs.length > 0) {
+            // Direct pixelation — repeat source image for each requested count
+            base64Images = Array.from({ length: count }, () => resolvedRefs[0])
+        } else {
+            const result = await generationService.generateImagesBase64({
+                prompt: effectivePrompt,
+                count,
+                referenceImages: resolvedRefs,
+                aspectRatio,
+                outputFormat,
+                shouldEnhance: shouldEnhance && !!prompt?.trim(),
+                model,
+                preset
+            })
+            base64Images = result.images
+            enhancedPrompt = result.enhancedPrompt
+        }
+
+        const imageResources: string[] = []
+        for (const dataUrl of base64Images) {
+            const match = dataUrl.match(/^data:.*;base64,(.+)$/)
+            if (!match) continue
+            const rawBuffer = Buffer.from(match[1], 'base64')
+            const pixelated = await pixelateImage(rawBuffer, pixelateSize, paletteEnabled, paletteSize, preserveAlpha)
+            const resource = await generationService.saveResource(RESOURCES_DIR, pixelated)
+            imageResources.push(resource.id)
+        }
+
+        logger.info(`POST /api/generate-pixelate-images - ✓ pixelated: ${imageResources.length}, time: ${timer.stop()}`)
+        res.json({ imageResources, ...(enhancedPrompt ? { enhancedPrompt } : {}) })
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+        logger.error(`POST /api/generate-pixelate-images - ✗ error: ${errorMessage}`)
+        res.status(500).json({ error: 'Failed to generate pixelated images.' })
     }
 }
 

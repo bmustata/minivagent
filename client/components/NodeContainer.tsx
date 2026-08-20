@@ -1,5 +1,5 @@
 import React from 'react'
-import { X, StickyNote, Type, Image as ImageIcon, ScanEye, Box, Columns2, Scissors } from 'lucide-react'
+import { X, StickyNote, Type, Image as ImageIcon, ScanEye, Box, Columns2, Scissors, Gamepad2 } from 'lucide-react'
 import { Node, NodeType } from '../types'
 
 interface NodeContainerProps {
@@ -35,6 +35,11 @@ export const NodeContainer: React.FC<NodeContainerProps> = ({ node, selected, on
             headerColor = 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
             headerIcon = <ImageIcon size={14} />
             title = 'Image Generation'
+            break
+        case NodeType.IMAGE_GEN_PIXELATE:
+            headerColor = 'bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300'
+            headerIcon = <Gamepad2 size={14} />
+            title = 'Pixelate'
             break
         case NodeType.IMAGE_SOURCE:
             headerColor = 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300'
@@ -88,6 +93,13 @@ export const NodeContainer: React.FC<NodeContainerProps> = ({ node, selected, on
                 top: startTop + i * spacing,
                 color: 'bg-purple-400'
             })
+        }
+    } else if (node.type === NodeType.IMAGE_GEN_PIXELATE) {
+        inputHandles.push({ id: 'prompt', label: 'Prompt', top: 45, color: 'bg-orange-400' })
+        inputHandles.push({ id: 'image', label: 'Image Input', top: 125, color: 'bg-pink-400' })
+        const pxCount = node.data.imageCount || 1
+        for (let i = 0; i < pxCount; i++) {
+            outputHandles.push({ id: `image-${i}`, label: `PX ${i + 1}`, top: 85 + i * 45, color: 'bg-teal-400' })
         }
     } else if (node.type === NodeType.IMAGE_SOURCE) {
         // Image Source Node: 1 Output

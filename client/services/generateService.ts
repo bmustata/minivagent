@@ -186,6 +186,58 @@ export const generateImages = async (
 }
 
 /**
+ * Generates one image from prompt/reference and applies pixel-art effect.
+ * Returns the pixelated image as a saved resource UUID.
+ */
+export const generatePixelateImages = async (
+    prompt: string,
+    referenceImages: string[] = [],
+    count: number = 1,
+    pixelateSize: number = 64,
+    paletteEnabled: boolean = true,
+    paletteSize: number = 32,
+    preserveAlpha: boolean = false,
+    transparentBackground: boolean = false,
+    aspectRatio?: string,
+    outputFormat?: string,
+    shouldEnhance: boolean = false,
+    model?: string,
+    preset?: string
+): Promise<{ imageResources: string[]; enhancedPrompt?: string }> => {
+    try {
+        const response = await fetch(`${API_BASE}/generate-pixelate-images`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                prompt,
+                referenceImages,
+                count,
+                pixelateSize,
+                paletteEnabled,
+                paletteSize,
+                preserveAlpha,
+                transparentBackground,
+                aspectRatio,
+                outputFormat,
+                shouldEnhance,
+                model,
+                preset
+            })
+        })
+
+        if (!response.ok) {
+            const error = await response.json()
+            throw new Error(error.error || 'Pixelate generation failed')
+        }
+
+        return await response.json()
+    } catch (error) {
+        console.error('Pixelate generation error:', error)
+        throw new Error(error instanceof Error ? error.message : 'Failed to generate pixelated image.')
+    }
+}
+
+/**
  * Plans a node graph based on user instructions.
  * Returns a JSON structure compatible with the application's Node/Edge types.
  */

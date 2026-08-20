@@ -2,16 +2,17 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Node, Edge, NodeType, NodeData } from '../types'
 import { NodeContainer } from './NodeContainer'
-import { TextGenNode, ImageGenNode, ImageSourceNode, NoteNode, ImageToTextNode, CompareNode, SplitTextNode } from './nodes'
+import { TextGenNode, ImageGenNode, ImageGenPixelateNode, ImageSourceNode, NoteNode, ImageToTextNode, CompareNode, SplitTextNode } from './nodes'
 import { ConfigModal } from './ConfigModal'
 import { GalleryModal, GalleryImage } from './GalleryModal'
 import { GraphManager } from './GraphManager'
 import { GraphTitle } from './GraphTitle'
 import { listGraphs, GraphResource } from '../services/graphService'
-import { Sun, Moon, Image as ImageIcon, Type, StickyNote, X, ZoomIn, ZoomOut, Maximize2, Minimize2, Info, Code, ChevronDown, Play, Loader2, ScanEye, Box, Sparkles, MessageSquare, RotateCcw, Columns2, Github, Scissors, AlignLeft, AlignRight, AlignStartHorizontal, AlignEndHorizontal, LayoutGrid, Rows3 } from 'lucide-react'
+import { Sun, Moon, Image as ImageIcon, Type, StickyNote, X, ZoomIn, ZoomOut, Maximize2, Minimize2, Info, Code, ChevronDown, Play, Loader2, ScanEye, Box, Sparkles, MessageSquare, RotateCcw, Columns2, Github, Scissors, AlignLeft, AlignRight, AlignStartHorizontal, AlignEndHorizontal, LayoutGrid, Rows3, Gamepad2 } from 'lucide-react'
 import { APP_CONFIG } from '../config'
-import { generateText, extractTextFromImage, generateImages, planGraphFromPrompt } from '../services/generateService'
+import { generateText, extractTextFromImage, generateImages, generatePixelateImages, planGraphFromPrompt } from '../services/generateService'
 import { ImageGenPropsPanel } from './nodes/ImageGenPropsPanel'
+import { ImageGenPixelatePropsPanel } from './nodes/ImageGenPixelatePropsPanel'
 import { TextGenPropsPanel } from './nodes/TextGenPropsPanel'
 import { ComparePropsPanel } from './nodes/ComparePropsPanel'
 import { ImageSourcePropsPanel } from './nodes/ImageSourcePropsPanel'
@@ -258,7 +259,7 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
     // Collect all images for gallery
     const galleryImages = React.useMemo(() => {
         const genImages = nodes
-            .filter((n) => n.type === NodeType.IMAGE_GEN && n.data.imageResources && n.data.imageResources.length > 0)
+            .filter((n) => (n.type === NodeType.IMAGE_GEN || n.type === NodeType.IMAGE_GEN_PIXELATE) && n.data.imageResources && n.data.imageResources.length > 0)
             .flatMap((n) =>
                 (n.data.imageResources || []).map((item) => ({
                     url: resourceToUrl(item),
@@ -411,6 +412,36 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                     enhancedOutput: result.enhancedPrompt,
                     isLoading: false
                 }
+                setNodes((prev) => prev.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, ...update } } : n)))
+                nodesRef.current = nodesRef.current.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, ...update } } : n))
+            } else if (node.type === NodeType.IMAGE_GEN_PIXELATE) {
+                const connectedText = getConnectedText(nodeId, nodesRef.current)
+                const connectedImages = getConnectedImages(nodeId, nodesRef.current)
+
+                let finalPrompt = node.data.prompt || ''
+                if (connectedText) {
+                    finalPrompt = finalPrompt.trim() ? `${finalPrompt} ${connectedText}` : connectedText
+                }
+
+                if (!finalPrompt.trim() && connectedImages.length === 0) throw new Error('No prompt or input image provided.')
+
+                const result = await generatePixelateImages(
+                    finalPrompt,
+                    connectedImages,
+                    node.data.imageCount ?? 1,
+                    node.data.pixelateSize ?? 64,
+                    node.data.paletteEnabled ?? true,
+                    node.data.paletteSize ?? 32,
+                    node.data.preserveAlpha ?? false,
+                    node.data.transparentBackground ?? false,
+                    node.data.aspectRatio,
+                    node.data.outputFormat,
+                    node.data.enhancePrompt,
+                    node.data.model,
+                    node.data.preset
+                )
+
+                const update = { imageResources: result.imageResources, enhancedOutput: result.enhancedPrompt, isLoading: false }
                 setNodes((prev) => prev.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, ...update } } : n)))
                 nodesRef.current = nodesRef.current.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, ...update } } : n))
             } else if (node.type === NodeType.IMAGE_TO_TEXT) {
@@ -831,9 +862,14 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
             data: {
                 prompt: type === NodeType.COMPARE ? undefined! : '',
                 isLoading: type === NodeType.COMPARE ? undefined! : false,
-                imageCount: type === NodeType.IMAGE_GEN ? 1 : undefined,
-                aspectRatio: type === NodeType.IMAGE_GEN ? '1:1' : undefined,
-                outputFormat: type === NodeType.IMAGE_GEN ? 'JPEG' : undefined,
+                imageCount: type === NodeType.IMAGE_GEN || type === NodeType.IMAGE_GEN_PIXELATE ? 1 : undefined,
+                aspectRatio: type === NodeType.IMAGE_GEN || type === NodeType.IMAGE_GEN_PIXELATE ? '1:1' : undefined,
+                outputFormat: type === NodeType.IMAGE_GEN || type === NodeType.IMAGE_GEN_PIXELATE ? 'JPEG' : undefined,
+                pixelateSize: type === NodeType.IMAGE_GEN_PIXELATE ? 64 : undefined,
+                paletteEnabled: type === NodeType.IMAGE_GEN_PIXELATE ? true : undefined,
+                paletteSize: type === NodeType.IMAGE_GEN_PIXELATE ? 32 : undefined,
+                preserveAlpha: type === NodeType.IMAGE_GEN_PIXELATE ? false : undefined,
+                transparentBackground: type === NodeType.IMAGE_GEN_PIXELATE ? false : undefined,
                 imageInputType: type === NodeType.IMAGE_TO_TEXT || type === NodeType.IMAGE_SOURCE ? 'UPLOAD' : undefined,
                 splitSeparator: type === NodeType.SPLIT_TEXT ? '====' : undefined
             }
@@ -1669,6 +1705,20 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                                     }}
                                 />
                             )}
+                            {node.type === NodeType.IMAGE_GEN_PIXELATE && (
+                                <ImageGenPixelateNode
+                                    node={node}
+                                    updateNodeData={updateNodeData}
+                                    connectedInputText={getConnectedText(node.id)}
+                                    connectedInputImages={toDisplayUrls(getConnectedImages(node.id))}
+                                    onExpand={(url) => {
+                                        setActiveGalleryImages([{ url, nodeId: node.id }])
+                                        setGalleryStartIndex(0)
+                                        setShowGallery(true)
+                                    }}
+                                    onRun={() => executeNode(node.id)}
+                                />
+                            )}
                             {node.type === NodeType.IMAGE_SOURCE && (
                                 <ImageSourceNode
                                     node={node}
@@ -1856,6 +1906,11 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                         <span className="text-[10px] font-semibold uppercase">Image Gen</span>
                     </button>
                     <div className="w-[1px] h-8 bg-slate-200 dark:bg-zinc-800 mx-1" />
+                    <button onClick={() => addNode(NodeType.IMAGE_GEN_PIXELATE)} className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors text-slate-600 dark:text-zinc-400">
+                        <Gamepad2 size={20} />
+                        <span className="text-[10px] font-semibold uppercase">Pixelate</span>
+                    </button>
+                    <div className="w-[1px] h-8 bg-slate-200 dark:bg-zinc-800 mx-1" />
                     <button onClick={() => addNode(NodeType.IMAGE_TO_TEXT)} className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors text-slate-600 dark:text-zinc-400">
                         <ScanEye size={20} />
                         <span className="text-[10px] font-semibold uppercase">Vision</span>
@@ -1944,6 +1999,15 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                                 node={selectedNode}
                                 updateNodeData={updateNodeData}
                                 onClose={() => { setSelectedNodeId(null); setSelectedNodeIds([]) }}
+                            />
+                        )}
+                        {selectedNode.type === NodeType.IMAGE_GEN_PIXELATE && (
+                            <ImageGenPixelatePropsPanel
+                                node={selectedNode}
+                                updateNodeData={updateNodeData}
+                                connectedInputText={getConnectedText(selectedNode.id)}
+                                onClose={() => { setSelectedNodeId(null); setSelectedNodeIds([]) }}
+                                onRun={() => executeNode(selectedNode.id)}
                             />
                         )}
                     </div>
