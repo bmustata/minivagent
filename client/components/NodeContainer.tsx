@@ -1,22 +1,56 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import { X, StickyNote, Type, Image as ImageIcon, ScanEye, Box, Columns2, Scissors, Gamepad2 } from 'lucide-react'
 import { Node, NodeType } from '../types'
 
 interface NodeContainerProps {
     node: Node
     selected: boolean
+    zoom?: number
     onDelete: (id: string) => void
     onSelect: (id: string) => void
+    onResize?: (id: string, width: number, height: number) => void
     onDragStart: (e: React.MouseEvent | React.TouchEvent, id: string) => void
     onConnectStart: (e: React.MouseEvent | React.TouchEvent, id: string, type: 'source' | 'target', handleId?: string) => void
     onConnectEnd: (e: React.MouseEvent | React.TouchEvent, id: string, handleId: string) => void
     children: React.ReactNode
 }
 
-export const NodeContainer: React.FC<NodeContainerProps> = ({ node, selected, onDelete, onSelect, onDragStart, onConnectStart, onConnectEnd, children }) => {
+export const NodeContainer: React.FC<NodeContainerProps> = ({ node, selected, zoom = 1, onDelete, onSelect, onResize, onDragStart, onConnectStart, onConnectEnd, children }) => {
     const handlePointerDown = (e: React.MouseEvent | React.TouchEvent) => {
         onDragStart(e, node.id)
     }
+
+    const resizeDragRef = useRef<{ startX: number; startY: number; startW: number; startH: number } | null>(null)
+
+    const handleResizeMouseDown = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        e.preventDefault()
+        const el = e.currentTarget.closest('[data-node-id]') as HTMLElement
+        resizeDragRef.current = {
+            startX: e.clientX,
+            startY: e.clientY,
+            startW: node.data.width ?? el.offsetWidth,
+            startH: node.data.height ?? el.offsetHeight,
+        }
+        const onMove = (ev: MouseEvent) => {
+            if (!resizeDragRef.current) return
+            const newW = Math.max(240, Math.round((resizeDragRef.current.startW + (ev.clientX - resizeDragRef.current.startX) / zoom) / 8) * 8)
+            const newH = Math.max(120, Math.round((resizeDragRef.current.startH + (ev.clientY - resizeDragRef.current.startY) / zoom) / 8) * 8)
+            onResize?.(node.id, newW, newH)
+        }
+        const onUp = () => {
+            resizeDragRef.current = null
+            document.removeEventListener('mousemove', onMove)
+            document.removeEventListener('mouseup', onUp)
+        }
+        document.addEventListener('mousemove', onMove)
+        document.addEventListener('mouseup', onUp)
+    }
+
+    const isNote = node.type === NodeType.NOTE
+    const nodeStyle: React.CSSProperties = isNote
+        ? { left: node.position.x, top: node.position.y, width: node.data.width ?? 320, height: node.data.height ?? undefined }
+        : { left: node.position.x, top: node.position.y }
 
     // Determine styles based on type
     const borderColor = selected ? 'ring-2 ring-indigo-500 dark:ring-indigo-400 border-transparent' : 'border border-slate-300 dark:border-zinc-700'
@@ -128,11 +162,8 @@ export const NodeContainer: React.FC<NodeContainerProps> = ({ node, selected, on
     return (
         <div
             data-node-id={node.id}
-            className={`absolute flex flex-col w-80 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-sm rounded-lg shadow-xl ${borderColor} transition-shadow duration-200 touch-none select-none group`}
-            style={{
-                left: node.position.x,
-                top: node.position.y
-            }}
+            className={`absolute flex flex-col bg-white/95 dark:bg-zinc-900/95 backdrop-blur-sm rounded-lg shadow-xl ${borderColor} transition-shadow duration-200 touch-none select-none group ${isNote ? '' : 'w-80'}`}
+            style={nodeStyle}
         >
             {/* Header / Drag Handle */}
             <div
@@ -157,7 +188,7 @@ export const NodeContainer: React.FC<NodeContainerProps> = ({ node, selected, on
             </div>
 
             {/* Content */}
-            <div className="p-3 relative cursor-default" onClick={() => onSelect(node.id)}>{children}</div>
+            <div className={`p-3 relative cursor-default ${isNote ? 'flex-1 flex flex-col overflow-hidden' : ''}`} onClick={() => onSelect(node.id)}>{children}</div>
 
             {/* Input Handles (Left) */}
             {inputHandles.map((handle) => (
@@ -218,6 +249,18 @@ export const NodeContainer: React.FC<NodeContainerProps> = ({ node, selected, on
                     </div>
                 </div>
             ))}
+
+            {/* Resize handle — NOTE nodes only */}
+            {isNote && (
+                <div
+                    className="absolute bottom-0 right-0 w-6 h-6 cursor-se-resize z-50 flex items-end justify-end pb-1 pr-1"
+                    onMouseDown={handleResizeMouseDown}
+                >
+                    <svg width="12" height="12" viewBox="0 0 12 12" className="text-amber-400 dark:text-amber-500">
+                        <path d="M2 10 L10 2 M6 10 L10 6 M10 10 L10 10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                    </svg>
+                </div>
+            )}
         </div>
     )
 }

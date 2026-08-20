@@ -36,6 +36,10 @@ export interface NodeData {
     // For Compare node
     compareMode?: 'slider' | 'toggle'
 
+    // For resizable nodes (Note)
+    width?: number
+    height?: number
+
     // For Split Text node
     splitSeparator?: string // Default: '===='
     splitOutputs?: string[] // Array of split result parts

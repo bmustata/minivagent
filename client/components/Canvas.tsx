@@ -1510,19 +1510,20 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
         if (type === 'target') {
             let offsetY = 45
             if (handleId === 'image') {
-                if (node.type === NodeType.IMAGE_GEN) offsetY = 125
+                if (node.type === NodeType.IMAGE_GEN || node.type === NodeType.IMAGE_GEN_PIXELATE) offsetY = 125
                 else if (node.type === NodeType.COMPARE) offsetY = 80
                 else offsetY = 100 // IMAGE_TO_TEXT
             }
             return { x: node.position.x - 12, y: node.position.y + offsetY }
         }
 
-        const baseX = node.position.x + 332
+        const nodeWidth = node.type === NodeType.NOTE ? (node.data.width ?? 320) : 320
+        const baseX = node.position.x + nodeWidth + 12
         let offsetY = 0
 
         if (node.type === NodeType.TEXT_GEN || node.type === NodeType.IMAGE_TO_TEXT) {
             offsetY = handleId === 'output' ? 200 : 45
-        } else if (node.type === NodeType.IMAGE_GEN) {
+        } else if (node.type === NodeType.IMAGE_GEN || node.type === NodeType.IMAGE_GEN_PIXELATE) {
             const startTop = 85
             const spacing = 45
 
@@ -1659,7 +1660,7 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
             >
                 <div className="pointer-events-auto">
                     {nodes.map((node) => (
-                        <NodeContainer key={node.id} node={node} selected={selectedNodeIds.includes(node.id)} onDelete={deleteNode} onSelect={setSelectedNodeId} onDragStart={handleDragStart} onConnectStart={handleConnectStart} onConnectEnd={handleConnectEnd}>
+                        <NodeContainer key={node.id} node={node} selected={selectedNodeIds.includes(node.id)} zoom={zoom} onDelete={deleteNode} onSelect={setSelectedNodeId} onResize={(id, w, h) => updateNodeData(id, { width: w, height: h })} onDragStart={handleDragStart} onConnectStart={handleConnectStart} onConnectEnd={handleConnectEnd}>
                             {node.type === NodeType.TEXT_GEN && <TextGenNode node={node} updateNodeData={updateNodeData} connectedInputText={getConnectedText(node.id)} onRun={() => executeNode(node.id)} />}
                             {node.type === NodeType.IMAGE_GEN && (
                                 <ImageGenNode
