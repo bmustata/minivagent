@@ -50,10 +50,10 @@ export const ImageGenPixelateNode: React.FC<ImageGenPixelateNodeProps> = ({
             {/* Model + Pixelate params row */}
             <div className="flex items-center justify-between">
                 <span className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Model</span>
-                <span className="flex items-center gap-1 text-[10px] text-teal-600 dark:text-teal-400 font-medium truncate max-w-[140px]" title={modelLabel}>
+                <div className="flex items-center gap-1 text-[10px] text-teal-600 dark:text-teal-400 font-medium min-w-0 max-w-[140px]">
                     <ProviderIcon provider={modelProvider} />
-                    {modelLabel}
-                </span>
+                    <span className="truncate min-w-0" title={modelLabel}>{modelLabel}</span>
+                </div>
             </div>
 
             {/* Pixelate params badges */}
