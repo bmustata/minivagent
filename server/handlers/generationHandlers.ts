@@ -6,6 +6,7 @@ import { resolveReferenceImages } from '../helpers/index.ts'
 import { logger, truncatePromptForLog } from '../utils/logger.ts'
 import { startTimer } from '../utils/observabilityUtils.ts'
 import { pixelateImage } from '../services/pixelateSrv.ts'
+import { pixelateTexture, resizeTexture, buildTexturePrompt } from '../services/textureSrv.ts'
 
 const RESOURCES_DIR = path.join(process.cwd(), 'data', 'resources')
 
@@ -242,6 +243,67 @@ export const generatePixelateImages = async (req: Request, res: Response): Promi
         const errorMessage = error instanceof Error ? error.message : 'Unknown error'
         logger.error(`POST /api/generate-pixelate-images - ✗ error: ${errorMessage}`)
         res.status(500).json({ error: 'Failed to generate pixelated images.' })
+    }
+}
+
+/**
+ * POST /api/generate-texture-images
+ *
+ * Generates seamless tileable texture images.
+ * The prompt is automatically extended with seamlessness requirements.
+ * If pixelate=true, applies pixel-art downscale at textureSize after generation.
+ */
+export const generateTextureImages = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const timer = startTimer()
+        const {
+            prompt, referenceImages, count = 1,
+            pixelate = false, textureSize = 64, textureResolution = 512,
+            aspectRatio, outputFormat, shouldEnhance, model, preset
+        } = req.body
+        logger.info(
+            `POST /api/generate-texture-images - count: ${count}, ratio: ${aspectRatio}, res: ${textureResolution}px, pixelate: ${pixelate}${pixelate ? ` @ ${textureSize}px` : ''}, model: ${model || 'none'}, refs: ${referenceImages?.length || 0}`
+        )
+
+        if (aspectRatio && !isValidAspectRatio(aspectRatio)) {
+            const validRatios = getValidAspectRatios().join(', ')
+            res.status(400).json({ error: `Invalid aspect ratio. Must be one of: ${validRatios}` })
+            return
+        }
+
+        const resolvedRefs = referenceImages?.length > 0 ? await resolveReferenceImages(referenceImages) : []
+        const effectivePrompt = buildTexturePrompt(prompt?.trim() || '')
+
+        const result = await generationService.generateImagesBase64({
+            prompt: effectivePrompt,
+            count,
+            referenceImages: resolvedRefs,
+            aspectRatio,
+            outputFormat,
+            shouldEnhance: shouldEnhance && !!prompt?.trim(),
+            model,
+            preset
+        })
+
+        const imageResources: string[] = []
+        for (const dataUrl of result.images) {
+            const match = dataUrl.match(/^data:.*;base64,(.+)$/)
+            if (!match) continue
+            const rawBuffer = Buffer.from(match[1], 'base64')
+            const pixelated = pixelate
+                ? await pixelateTexture(rawBuffer, textureSize, outputFormat)
+                : rawBuffer
+            const processed = await resizeTexture(pixelated, textureResolution, outputFormat, pixelate)
+            const resource = await generationService.saveResource(RESOURCES_DIR, processed)
+            imageResources.push(resource.id)
+        }
+
+        logger.info(`POST /api/generate-texture-images - ✓ generated: ${imageResources.length}, time: ${timer.stop()}`)
+        res.json({ imageResources, ...(result.enhancedPrompt ? { enhancedPrompt: result.enhancedPrompt } : {}) })
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+        logger.error(`POST /api/generate-texture-images - ✗ error: ${errorMessage}`)
+        res.status(500).json({ error: 'Failed to generate texture images.' })
     }
 }
 

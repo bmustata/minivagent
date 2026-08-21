@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
-import { X, ChevronLeft, ChevronRight, Download, Check, Image as ImageIcon, ZoomIn, ZoomOut, RotateCcw, Box, ScanEye, ChevronDown, Gamepad2 } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, Download, Check, Image as ImageIcon, ZoomIn, ZoomOut, RotateCcw, Box, ScanEye, ChevronDown, Gamepad2, Layers } from 'lucide-react'
 import { Node, NodeType } from '../types'
 import { ResourceItem, getResourceInfo } from '../services/generateService'
 
@@ -179,6 +179,8 @@ export const GalleryModal: React.FC<GalleryModalProps> = ({ isOpen, onClose, ima
                 return 'Image Gen'
             case NodeType.IMAGE_GEN_PIXELATE:
                 return 'Pixelate'
+            case NodeType.IMAGE_GEN_TEXTURE:
+                return 'Texture'
             case NodeType.IMAGE_SOURCE:
                 return 'Source'
             case NodeType.IMAGE_TO_TEXT:
@@ -194,6 +196,8 @@ export const GalleryModal: React.FC<GalleryModalProps> = ({ isOpen, onClose, ima
                 return <ImageIcon size={16} className="text-purple-500 dark:text-purple-400" />
             case NodeType.IMAGE_GEN_PIXELATE:
                 return <Gamepad2 size={16} className="text-teal-500 dark:text-teal-400" />
+            case NodeType.IMAGE_GEN_TEXTURE:
+                return <Layers size={16} className="text-orange-500 dark:text-orange-400" />
             case NodeType.IMAGE_SOURCE:
                 return <Box size={16} className="text-cyan-500 dark:text-cyan-400" />
             case NodeType.IMAGE_TO_TEXT:

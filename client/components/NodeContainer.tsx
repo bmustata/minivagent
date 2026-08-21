@@ -1,5 +1,5 @@
 import React, { useRef } from 'react'
-import { X, StickyNote, Type, Image as ImageIcon, ScanEye, Box, Columns2, Scissors, Gamepad2 } from 'lucide-react'
+import { X, StickyNote, Type, Image as ImageIcon, ScanEye, Box, Columns2, Scissors, Gamepad2, Layers } from 'lucide-react'
 import { Node, NodeType } from '../types'
 
 interface NodeContainerProps {
@@ -75,6 +75,11 @@ export const NodeContainer: React.FC<NodeContainerProps> = ({ node, selected, zo
             headerIcon = <Gamepad2 size={14} />
             title = 'Pixelate'
             break
+        case NodeType.IMAGE_GEN_TEXTURE:
+            headerColor = 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300'
+            headerIcon = <Layers size={14} />
+            title = 'Texture'
+            break
         case NodeType.IMAGE_SOURCE:
             headerColor = 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300'
             headerIcon = <Box size={14} />
@@ -134,6 +139,12 @@ export const NodeContainer: React.FC<NodeContainerProps> = ({ node, selected, zo
         const pxCount = node.data.imageCount || 1
         for (let i = 0; i < pxCount; i++) {
             outputHandles.push({ id: `image-${i}`, label: `PX ${i + 1}`, top: 85 + i * 45, color: 'bg-teal-400' })
+        }
+    } else if (node.type === NodeType.IMAGE_GEN_TEXTURE) {
+        inputHandles.push({ id: 'prompt', label: 'Prompt', top: 45, color: 'bg-orange-400' })
+        const txCount = node.data.imageCount || 1
+        for (let i = 0; i < txCount; i++) {
+            outputHandles.push({ id: `image-${i}`, label: `TEX ${i + 1}`, top: 85 + i * 45, color: 'bg-orange-400' })
         }
     } else if (node.type === NodeType.IMAGE_SOURCE) {
         // Image Source Node: 1 Output

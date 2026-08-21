@@ -238,6 +238,55 @@ export const generatePixelateImages = async (
 }
 
 /**
+ * Generates seamless tileable texture images.
+ * The prompt is automatically extended with seamlessness requirements on the server.
+ * Optionally applies pixel-art downscale at textureSize.
+ */
+export const generateTextureImages = async (
+    prompt: string,
+    referenceImages: string[] = [],
+    count: number = 1,
+    pixelate: boolean = false,
+    textureSize: number = 64,
+    textureResolution: number = 512,
+    aspectRatio?: string,
+    outputFormat?: string,
+    shouldEnhance: boolean = false,
+    model?: string,
+    preset?: string
+): Promise<{ imageResources: string[]; enhancedPrompt?: string }> => {
+    try {
+        const response = await fetch(`${API_BASE}/generate-texture-images`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                prompt,
+                referenceImages,
+                count,
+                pixelate,
+                textureSize,
+                textureResolution,
+                aspectRatio,
+                outputFormat,
+                shouldEnhance,
+                model,
+                preset
+            })
+        })
+
+        if (!response.ok) {
+            const error = await response.json()
+            throw new Error(error.error || 'Texture generation failed')
+        }
+
+        return await response.json()
+    } catch (error) {
+        console.error('Texture generation error:', error)
+        throw new Error(error instanceof Error ? error.message : 'Failed to generate texture image.')
+    }
+}
+
+/**
  * Plans a node graph based on user instructions.
  * Returns a JSON structure compatible with the application's Node/Edge types.
  */

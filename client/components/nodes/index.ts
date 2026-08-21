@@ -1,6 +1,7 @@
 export { TextGenNode } from './TextGenNode'
 export { ImageGenNode } from './ImageGenNode'
 export { ImageGenPixelateNode } from './ImageGenPixelateNode'
+export { ImageGenTextureNode } from './ImageGenTextureNode'
 export { ImageSourceNode } from './ImageSourceNode'
 export { ImageToTextNode } from './ImageToTextNode'
 export { NoteNode } from './NoteNode'

@@ -2,6 +2,7 @@ export enum NodeType {
     TEXT_GEN = 'TEXT_GEN',
     IMAGE_GEN = 'IMAGE_GEN',
     IMAGE_GEN_PIXELATE = 'IMAGE_GEN_PIXELATE',
+    IMAGE_GEN_TEXTURE = 'IMAGE_GEN_TEXTURE',
     IMAGE_SOURCE = 'IMAGE_SOURCE',
     NOTE = 'NOTE',
     IMAGE_TO_TEXT = 'IMAGE_TO_TEXT',
@@ -47,11 +48,16 @@ export interface NodeData {
     includeSplitSeparator?: boolean // For TEXT_GEN: append ==== separator instruction to prompt
 
     // For Image Gen Pixelate node
-    pixelateSize?: number // 8–256, pixel grid resolution (default 64)
+    pixelateSize?: number // 8–1024, pixel grid resolution (default 64)
     paletteEnabled?: boolean // enable color quantization (default true)
     paletteSize?: number // 2–256 color palette (default 32)
     preserveAlpha?: boolean // keep transparency (default false)
     transparentBackground?: boolean // append transparent background to prompt (default false)
+
+    // For Image Gen Texture node
+    textureSize?: number // 8–1024, pixel grid resolution when pixelating (default 64)
+    texturePixelate?: boolean // apply pixel-art downscale to texture (default false)
+    textureResolution?: number // output resolution in px: 64 | 128 | 256 | 512 | 1024 (default 256)
 }
 
 export interface Node {

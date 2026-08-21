@@ -2,17 +2,18 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Node, Edge, NodeType, NodeData } from '../types'
 import { NodeContainer } from './NodeContainer'
-import { TextGenNode, ImageGenNode, ImageGenPixelateNode, ImageSourceNode, NoteNode, ImageToTextNode, CompareNode, SplitTextNode } from './nodes'
+import { TextGenNode, ImageGenNode, ImageGenPixelateNode, ImageGenTextureNode, ImageSourceNode, NoteNode, ImageToTextNode, CompareNode, SplitTextNode } from './nodes'
 import { ConfigModal } from './ConfigModal'
 import { GalleryModal, GalleryImage } from './GalleryModal'
 import { GraphManager } from './GraphManager'
 import { GraphTitle } from './GraphTitle'
 import { listGraphs, GraphResource } from '../services/graphService'
-import { Sun, Moon, Image as ImageIcon, Type, StickyNote, X, ZoomIn, ZoomOut, Maximize2, Minimize2, Info, Code, ChevronDown, Play, Loader2, ScanEye, Box, Sparkles, MessageSquare, RotateCcw, Columns2, Github, Scissors, AlignLeft, AlignRight, AlignStartHorizontal, AlignEndHorizontal, LayoutGrid, Rows3, Gamepad2 } from 'lucide-react'
+import { Sun, Moon, Image as ImageIcon, Type, StickyNote, X, ZoomIn, ZoomOut, Maximize2, Minimize2, Info, Code, ChevronDown, Play, Loader2, ScanEye, Box, Sparkles, MessageSquare, RotateCcw, Columns2, Github, Scissors, AlignLeft, AlignRight, AlignStartHorizontal, AlignEndHorizontal, LayoutGrid, Rows3, Gamepad2, Layers } from 'lucide-react'
 import { APP_CONFIG } from '../config'
-import { generateText, extractTextFromImage, generateImages, generatePixelateImages, planGraphFromPrompt } from '../services/generateService'
+import { generateText, extractTextFromImage, generateImages, generatePixelateImages, generateTextureImages, planGraphFromPrompt } from '../services/generateService'
 import { ImageGenPropsPanel } from './nodes/ImageGenPropsPanel'
 import { ImageGenPixelatePropsPanel } from './nodes/ImageGenPixelatePropsPanel'
+import { ImageGenTexturePropsPanel } from './nodes/ImageGenTexturePropsPanel'
 import { TextGenPropsPanel } from './nodes/TextGenPropsPanel'
 import { ComparePropsPanel } from './nodes/ComparePropsPanel'
 import { ImageSourcePropsPanel } from './nodes/ImageSourcePropsPanel'
@@ -259,7 +260,7 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
     // Collect all images for gallery
     const galleryImages = React.useMemo(() => {
         const genImages = nodes
-            .filter((n) => (n.type === NodeType.IMAGE_GEN || n.type === NodeType.IMAGE_GEN_PIXELATE) && n.data.imageResources && n.data.imageResources.length > 0)
+            .filter((n) => (n.type === NodeType.IMAGE_GEN || n.type === NodeType.IMAGE_GEN_PIXELATE || n.type === NodeType.IMAGE_GEN_TEXTURE) && n.data.imageResources && n.data.imageResources.length > 0)
             .flatMap((n) =>
                 (n.data.imageResources || []).map((item) => ({
                     url: resourceToUrl(item),
@@ -434,6 +435,33 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                     node.data.paletteSize ?? 32,
                     node.data.preserveAlpha ?? false,
                     node.data.transparentBackground ?? false,
+                    node.data.aspectRatio,
+                    node.data.outputFormat,
+                    node.data.enhancePrompt,
+                    node.data.model,
+                    node.data.preset
+                )
+
+                const update = { imageResources: result.imageResources, enhancedOutput: result.enhancedPrompt, isLoading: false }
+                setNodes((prev) => prev.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, ...update } } : n)))
+                nodesRef.current = nodesRef.current.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, ...update } } : n))
+            } else if (node.type === NodeType.IMAGE_GEN_TEXTURE) {
+                const connectedText = getConnectedText(nodeId, nodesRef.current)
+
+                let finalPrompt = node.data.prompt || ''
+                if (connectedText) {
+                    finalPrompt = finalPrompt.trim() ? `${finalPrompt} ${connectedText}` : connectedText
+                }
+
+                if (!finalPrompt.trim()) throw new Error('No prompt provided.')
+
+                const result = await generateTextureImages(
+                    finalPrompt,
+                    [],
+                    node.data.imageCount ?? 1,
+                    node.data.texturePixelate ?? false,
+                    node.data.textureSize ?? 64,
+                    node.data.textureResolution ?? 512,
                     node.data.aspectRatio,
                     node.data.outputFormat,
                     node.data.enhancePrompt,
@@ -862,14 +890,17 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
             data: {
                 prompt: type === NodeType.COMPARE ? undefined! : '',
                 isLoading: type === NodeType.COMPARE ? undefined! : false,
-                imageCount: type === NodeType.IMAGE_GEN || type === NodeType.IMAGE_GEN_PIXELATE ? 1 : undefined,
-                aspectRatio: type === NodeType.IMAGE_GEN || type === NodeType.IMAGE_GEN_PIXELATE ? '1:1' : undefined,
-                outputFormat: type === NodeType.IMAGE_GEN || type === NodeType.IMAGE_GEN_PIXELATE ? 'JPEG' : undefined,
+                imageCount: type === NodeType.IMAGE_GEN || type === NodeType.IMAGE_GEN_PIXELATE || type === NodeType.IMAGE_GEN_TEXTURE ? 1 : undefined,
+                aspectRatio: type === NodeType.IMAGE_GEN || type === NodeType.IMAGE_GEN_PIXELATE || type === NodeType.IMAGE_GEN_TEXTURE ? '1:1' : undefined,
+                outputFormat: type === NodeType.IMAGE_GEN || type === NodeType.IMAGE_GEN_PIXELATE ? 'JPEG' : type === NodeType.IMAGE_GEN_TEXTURE ? 'PNG' : undefined,
                 pixelateSize: type === NodeType.IMAGE_GEN_PIXELATE ? 64 : undefined,
                 paletteEnabled: type === NodeType.IMAGE_GEN_PIXELATE ? true : undefined,
                 paletteSize: type === NodeType.IMAGE_GEN_PIXELATE ? 32 : undefined,
                 preserveAlpha: type === NodeType.IMAGE_GEN_PIXELATE ? false : undefined,
                 transparentBackground: type === NodeType.IMAGE_GEN_PIXELATE ? false : undefined,
+                textureSize: type === NodeType.IMAGE_GEN_TEXTURE ? 64 : undefined,
+                texturePixelate: type === NodeType.IMAGE_GEN_TEXTURE ? false : undefined,
+                textureResolution: type === NodeType.IMAGE_GEN_TEXTURE ? 512 : undefined,
                 imageInputType: type === NodeType.IMAGE_TO_TEXT || type === NodeType.IMAGE_SOURCE ? 'UPLOAD' : undefined,
                 splitSeparator: type === NodeType.SPLIT_TEXT ? '====' : undefined
             }
@@ -1510,7 +1541,7 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
         if (type === 'target') {
             let offsetY = 45
             if (handleId === 'image') {
-                if (node.type === NodeType.IMAGE_GEN || node.type === NodeType.IMAGE_GEN_PIXELATE) offsetY = 125
+                if (node.type === NodeType.IMAGE_GEN || node.type === NodeType.IMAGE_GEN_PIXELATE || node.type === NodeType.IMAGE_GEN_TEXTURE) offsetY = 125
                 else if (node.type === NodeType.COMPARE) offsetY = 80
                 else offsetY = 100 // IMAGE_TO_TEXT
             }
@@ -1523,7 +1554,7 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
 
         if (node.type === NodeType.TEXT_GEN || node.type === NodeType.IMAGE_TO_TEXT) {
             offsetY = handleId === 'output' ? 200 : 45
-        } else if (node.type === NodeType.IMAGE_GEN || node.type === NodeType.IMAGE_GEN_PIXELATE) {
+        } else if (node.type === NodeType.IMAGE_GEN || node.type === NodeType.IMAGE_GEN_PIXELATE || node.type === NodeType.IMAGE_GEN_TEXTURE) {
             const startTop = 85
             const spacing = 45
 
@@ -1712,6 +1743,19 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                                     updateNodeData={updateNodeData}
                                     connectedInputText={getConnectedText(node.id)}
                                     connectedInputImages={toDisplayUrls(getConnectedImages(node.id))}
+                                    onExpand={(url) => {
+                                        setActiveGalleryImages([{ url, nodeId: node.id }])
+                                        setGalleryStartIndex(0)
+                                        setShowGallery(true)
+                                    }}
+                                    onRun={() => executeNode(node.id)}
+                                />
+                            )}
+                            {node.type === NodeType.IMAGE_GEN_TEXTURE && (
+                                <ImageGenTextureNode
+                                    node={node}
+                                    updateNodeData={updateNodeData}
+                                    connectedInputText={getConnectedText(node.id)}
                                     onExpand={(url) => {
                                         setActiveGalleryImages([{ url, nodeId: node.id }])
                                         setGalleryStartIndex(0)
@@ -1912,6 +1956,11 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                         <span className="text-[10px] font-semibold uppercase">Pixelate</span>
                     </button>
                     <div className="w-[1px] h-8 bg-slate-200 dark:bg-zinc-800 mx-1" />
+                    <button onClick={() => addNode(NodeType.IMAGE_GEN_TEXTURE)} className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors text-slate-600 dark:text-zinc-400">
+                        <Layers size={20} />
+                        <span className="text-[10px] font-semibold uppercase">Texture</span>
+                    </button>
+                    <div className="w-[1px] h-8 bg-slate-200 dark:bg-zinc-800 mx-1" />
                     <button onClick={() => addNode(NodeType.IMAGE_TO_TEXT)} className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors text-slate-600 dark:text-zinc-400">
                         <ScanEye size={20} />
                         <span className="text-[10px] font-semibold uppercase">Vision</span>
@@ -2004,6 +2053,15 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                         )}
                         {selectedNode.type === NodeType.IMAGE_GEN_PIXELATE && (
                             <ImageGenPixelatePropsPanel
+                                node={selectedNode}
+                                updateNodeData={updateNodeData}
+                                connectedInputText={getConnectedText(selectedNode.id)}
+                                onClose={() => { setSelectedNodeId(null); setSelectedNodeIds([]) }}
+                                onRun={() => executeNode(selectedNode.id)}
+                            />
+                        )}
+                        {selectedNode.type === NodeType.IMAGE_GEN_TEXTURE && (
+                            <ImageGenTexturePropsPanel
                                 node={selectedNode}
                                 updateNodeData={updateNodeData}
                                 connectedInputText={getConnectedText(selectedNode.id)}

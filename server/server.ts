@@ -1,7 +1,7 @@
 import express from 'express'
 import path from 'path'
 import { healthCheck } from './handlers/healthCheckHandlers.ts'
-import { enhancePrompt, generateText, extractTextFromImage, generateImages, generatePixelateImages, planGraph } from './handlers/generationHandlers.ts'
+import { enhancePrompt, generateText, extractTextFromImage, generateImages, generatePixelateImages, generateTextureImages, planGraph } from './handlers/generationHandlers.ts'
 import { renderRun, renderRunStream, renderDynamic } from './handlers/renderHandlers.ts'
 import { listGraphs, getGraph, createGraph, updateGraph, deleteGraph } from './handlers/graphFileHandlers.ts'
 import { getModels } from './handlers/modelHandlers.ts'
@@ -41,6 +41,7 @@ app.post('/api/generate-text', generateText)
 app.post('/api/extract-text-from-image', extractTextFromImage)
 app.post('/api/generate-images', generateImages)
 app.post('/api/generate-pixelate-images', generatePixelateImages)
+app.post('/api/generate-texture-images', generateTextureImages)
 app.post('/api/plan-graph', planGraph)
 
 // Render Routes - Under /api/render
