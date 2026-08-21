@@ -252,16 +252,39 @@ export const ImageGenPixelatePropsPanel: React.FC<ImageGenPixelatePropsPanelProp
                     )}
                 </div>
 
+                {/* Preserve Alpha */}
+                <div className="group/alpha flex items-start gap-2 cursor-pointer select-none" onClick={() => updateNodeData(node.id, { preserveAlpha: !preserveAlpha })}>
+                    <input
+                        type="checkbox"
+                        checked={preserveAlpha}
+                        onChange={(e) => updateNodeData(node.id, { preserveAlpha: e.target.checked })}
+                        className="mt-0.5 rounded accent-teal-500"
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                    <div>
+                        <span className="text-xs text-slate-600 dark:text-zinc-300">Preserve Alpha</span>
+                        <p className="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5 max-h-0 overflow-hidden group-hover/alpha:max-h-10 transition-all duration-200 leading-tight">
+                            Keeps the transparency channel intact — background won't be flattened to white before pixelating.
+                        </p>
+                    </div>
+                </div>
+
                 {/* Transparent Background */}
-                <label className="flex items-center gap-2 cursor-pointer select-none">
+                <div className="group/transp flex items-start gap-2 cursor-pointer select-none" onClick={() => updateNodeData(node.id, { transparentBackground: !transparentBackground })}>
                     <input
                         type="checkbox"
                         checked={transparentBackground}
                         onChange={(e) => updateNodeData(node.id, { transparentBackground: e.target.checked })}
-                        className="rounded accent-teal-500"
+                        className="mt-0.5 rounded accent-teal-500"
+                        onClick={(e) => e.stopPropagation()}
                     />
-                    <span className="text-xs text-slate-600 dark:text-zinc-300">Transparent Background <span className="text-[10px] text-slate-400 dark:text-zinc-500">(adds to prompt)</span></span>
-                </label>
+                    <div>
+                        <span className="text-xs text-slate-600 dark:text-zinc-300">Transparent Background</span>
+                        <p className="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5 max-h-0 overflow-hidden group-hover/transp:max-h-10 transition-all duration-200 leading-tight">
+                            Appends "transparent background, isolated subject" to the generation prompt.
+                        </p>
+                    </div>
+                </div>
 
                 {/* Count */}
                 <div className="flex items-center justify-between">
@@ -339,17 +362,6 @@ export const ImageGenPixelatePropsPanel: React.FC<ImageGenPixelatePropsPanelProp
                         </div>
                     </>)}
                 </div>
-
-                {/* Preserve Alpha */}
-                <label className="flex items-center gap-2 cursor-pointer select-none">
-                    <input
-                        type="checkbox"
-                        checked={preserveAlpha}
-                        onChange={(e) => updateNodeData(node.id, { preserveAlpha: e.target.checked })}
-                        className="rounded accent-teal-500"
-                    />
-                    <span className="text-xs text-slate-600 dark:text-zinc-300">Preserve Alpha (transparency)</span>
-                </label>
 
                 {/* Aspect Ratio & Format */}
                 <div className="grid grid-cols-2 gap-2">

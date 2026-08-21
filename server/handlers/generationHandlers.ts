@@ -171,8 +171,11 @@ export const generateImages = async (req: Request, res: Response): Promise<void>
 }
 
 /**
- * Generate + pixelate images handler (HTTP layer only)
  * POST /api/generate-pixelate-images
+ *
+ * Generates images and applies a pixel-art pipeline (downscale → nearest-neighbor → optional palette quantization).
+ * If no prompt is provided but reference images are, skips generation and pixelates the source directly.
+ * Prompt is automatically extended with style hints (transparent background, no stray text/titles).
  */
 export const generatePixelateImages = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -199,9 +202,11 @@ export const generatePixelateImages = async (req: Request, res: Response): Promi
         let base64Images: string[]
         let enhancedPrompt: string | undefined
 
-        const effectivePrompt = transparentBackground && prompt?.trim()
-            ? `${prompt.trim()}, transparent background, no background, isolated subject, alpha channel`
-            : (prompt || '')
+        const basePrompt = prompt?.trim() || ''
+        const suffixes: string[] = []
+        if (transparentBackground) suffixes.push('transparent background, no background, isolated subject, alpha channel')
+        suffixes.push('remove any text, titles, or labels unless explicitly part of the described subject')
+        const effectivePrompt = basePrompt ? `${basePrompt}, ${suffixes.join(', ')}` : ''
 
         if (!effectivePrompt.trim() && resolvedRefs.length > 0) {
             // Direct pixelation — repeat source image for each requested count
@@ -226,7 +231,7 @@ export const generatePixelateImages = async (req: Request, res: Response): Promi
             const match = dataUrl.match(/^data:.*;base64,(.+)$/)
             if (!match) continue
             const rawBuffer = Buffer.from(match[1], 'base64')
-            const pixelated = await pixelateImage(rawBuffer, pixelateSize, paletteEnabled, paletteSize, preserveAlpha)
+            const pixelated = await pixelateImage(rawBuffer, pixelateSize, paletteEnabled, paletteSize, preserveAlpha, outputFormat)
             const resource = await generationService.saveResource(RESOURCES_DIR, pixelated)
             imageResources.push(resource.id)
         }
