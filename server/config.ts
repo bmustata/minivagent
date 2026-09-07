@@ -5,9 +5,10 @@ const imagegen = true
 // Supported providers: gemini, openai, black-forest-labs, bytedance
 export const MODELS = {
     TEXT: [
+        { name: 'Gemini Flash 3.8', provider: 'gemini', model: 'gemini-3.8-flash', options: {} },
         { name: 'Gemini Flash 3.7', provider: 'gemini', model: 'gemini-3.7-flash', options: {} },
         { name: 'Gemini Flash 3.5', provider: 'gemini', model: 'gemini-3.5-flash', options: {} },
-        { name: 'Gemini Flash 3.1 Lite', provider: 'gemini', model: 'gemini-3.1-flash-lite-preview', options: {} },
+        { name: 'Gemini Flash 3.1 Lite', provider: 'gemini', model: 'gemini-3.1-flash-lite', options: {} },
         { name: 'Gemini Flash 3', provider: 'gemini', model: 'gemini-3-flash-preview', options: {} },
         { name: 'Gemini Flash 2.5', provider: 'gemini', model: 'gemini-2.5-flash', options: {} },
         { name: 'GPT-5.6 Sol', provider: 'openai', model: 'gpt-5.6-sol', options: {} },
@@ -36,6 +37,7 @@ export const MODELS = {
         { name: 'Seedream 4.5', provider: 'bytedance', model: 'bytedance/seedream-4.5', options: { referenceImages: 14, presets: ['2K', '4K'] } }
     ],
     VISION: [
+        { name: 'Gemini Flash 3.8', provider: 'gemini', model: 'gemini-3.8-flash', options: {} },
         { name: 'Gemini Flash 3.7', provider: 'gemini', model: 'gemini-3.7-flash', options: {} },
         { name: 'Gemini Flash 3.5', provider: 'gemini', model: 'gemini-3.5-flash', options: {} },
         { name: 'Gemini Flash 3', provider: 'gemini', model: 'gemini-3-flash-preview', options: {} },
@@ -48,6 +50,7 @@ export const MODELS = {
         { name: 'GPT-5.4 Nano', provider: 'openai', model: 'gpt-5.4-nano', options: {} }
     ],
     PLANNER: [
+        { name: 'Gemini Flash 3.8', provider: 'gemini', model: 'gemini-3.8-flash', options: {} },
         { name: 'Gemini Flash 3.7', provider: 'gemini', model: 'gemini-3.7-flash', options: {} },
         { name: 'Gemini Flash 3.5', provider: 'gemini', model: 'gemini-3.5-flash', options: {} },
         { name: 'Gemini Flash 2.5', provider: 'gemini', model: 'gemini-2.5-flash', options: {} }

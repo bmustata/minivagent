@@ -21,7 +21,9 @@ dist-ssr
 .idea
 
 # Claude Code
-.claude/
+.claude/*
+!.claude/agents/
+!.claude/agents/*
 
 .DS_Store
 *.suo
