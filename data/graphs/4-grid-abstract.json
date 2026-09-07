@@ -5,8 +5,8 @@
             "id": "imgsrc336574",
             "type": "IMAGE_SOURCE",
             "position": {
-                "x": 1416,
-                "y": 240
+                "x": 1392,
+                "y": -240
             },
             "data": {
                 "prompt": "",
@@ -59,8 +59,8 @@
             "id": "imagegen137561",
             "type": "IMAGE_GEN",
             "position": {
-                "x": 2208,
-                "y": 408
+                "x": 2376,
+                "y": -24
             },
             "data": {
                 "prompt": "Display the image in elegant picture",
@@ -69,9 +69,9 @@
                 "aspectRatio": "1:1",
                 "outputFormat": "JPEG",
                 "imageResources": [
-                    "3fca1cba-407b-46eb-a045-cf3c1510be95"
+                    "17133b01-2e02-48df-9091-f8ee85a21ce6"
                 ],
-                "model": "gemini-3.1-flash-image-preview",
+                "model": "gemini-3.1-flash-image",
                 "preset": "1K"
             }
         },
@@ -79,8 +79,8 @@
             "id": "imagegen804760",
             "type": "IMAGE_GEN",
             "position": {
-                "x": 2208,
-                "y": 1464
+                "x": 2376,
+                "y": 816
             },
             "data": {
                 "prompt": "Display the image in elegant room or display environment",
@@ -89,9 +89,9 @@
                 "aspectRatio": "1:1",
                 "outputFormat": "JPEG",
                 "imageResources": [
-                    "84833763-cc48-4727-b95d-f5cd33aeb78f"
+                    "059c27b6-630c-4e5b-aa13-b0ffa0197025"
                 ],
-                "model": "gemini-3.1-flash-image-preview",
+                "model": "gemini-3.1-flash-image",
                 "preset": "1K"
             }
         }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
-import { X, ChevronLeft, ChevronRight, Download, Check, Image as ImageIcon, ZoomIn, ZoomOut, RotateCcw, Box, ScanEye, ChevronDown } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, Download, Check, Image as ImageIcon, ZoomIn, ZoomOut, RotateCcw, Box, ScanEye, ChevronDown, Gamepad2, Layers } from 'lucide-react'
 import { Node, NodeType } from '../types'
 import { ResourceItem, getResourceInfo } from '../services/generateService'
 
@@ -62,6 +62,14 @@ export const GalleryModal: React.FC<GalleryModalProps> = ({ isOpen, onClose, ima
             img.src = currentImage.url
             img.onload = () => {
                 setImgSize({ width: img.naturalWidth, height: img.naturalHeight })
+                const node = nodes.find((n) => n.id === currentImage.nodeId)
+                if (node?.type === NodeType.IMAGE_GEN_PIXELATE) {
+                    const containerEl = containerRef.current
+                    const containerW = containerEl ? containerEl.clientWidth : window.innerWidth
+                    const containerH = containerEl ? containerEl.clientHeight : window.innerHeight * 0.75
+                    const fitScale = Math.min(containerW / img.naturalWidth, containerH / img.naturalHeight) * 0.85
+                    setScale(Math.min(Math.max(fitScale, 1), 5))
+                }
             }
         }
     }, [currentImage])
@@ -169,6 +177,10 @@ export const GalleryModal: React.FC<GalleryModalProps> = ({ isOpen, onClose, ima
         switch (type) {
             case NodeType.IMAGE_GEN:
                 return 'Image Gen'
+            case NodeType.IMAGE_GEN_PIXELATE:
+                return 'Pixelate'
+            case NodeType.IMAGE_GEN_TEXTURE:
+                return 'Texture'
             case NodeType.IMAGE_SOURCE:
                 return 'Source'
             case NodeType.IMAGE_TO_TEXT:
@@ -182,6 +194,10 @@ export const GalleryModal: React.FC<GalleryModalProps> = ({ isOpen, onClose, ima
         switch (type) {
             case NodeType.IMAGE_GEN:
                 return <ImageIcon size={16} className="text-purple-500 dark:text-purple-400" />
+            case NodeType.IMAGE_GEN_PIXELATE:
+                return <Gamepad2 size={16} className="text-teal-500 dark:text-teal-400" />
+            case NodeType.IMAGE_GEN_TEXTURE:
+                return <Layers size={16} className="text-orange-500 dark:text-orange-400" />
             case NodeType.IMAGE_SOURCE:
                 return <Box size={16} className="text-cyan-500 dark:text-cyan-400" />
             case NodeType.IMAGE_TO_TEXT:

@@ -2,16 +2,18 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Node, Edge, NodeType, NodeData } from '../types'
 import { NodeContainer } from './NodeContainer'
-import { TextGenNode, ImageGenNode, ImageSourceNode, NoteNode, ImageToTextNode, CompareNode, SplitTextNode } from './nodes'
+import { TextGenNode, ImageGenNode, ImageGenPixelateNode, ImageGenTextureNode, ImageSourceNode, NoteNode, ImageToTextNode, CompareNode, SplitTextNode } from './nodes'
 import { ConfigModal } from './ConfigModal'
 import { GalleryModal, GalleryImage } from './GalleryModal'
 import { GraphManager } from './GraphManager'
 import { GraphTitle } from './GraphTitle'
 import { listGraphs, GraphResource } from '../services/graphService'
-import { Sun, Moon, Image as ImageIcon, Type, StickyNote, X, ZoomIn, ZoomOut, Maximize2, Minimize2, Info, Code, ChevronDown, Play, Loader2, ScanEye, Box, Sparkles, MessageSquare, RotateCcw, Columns2, Github, Scissors } from 'lucide-react'
+import { Sun, Moon, Image as ImageIcon, Type, StickyNote, X, ZoomIn, ZoomOut, Maximize2, Minimize2, Info, Code, ChevronDown, Play, Loader2, ScanEye, Box, Sparkles, MessageSquare, RotateCcw, Columns2, Github, Scissors, AlignLeft, AlignRight, AlignStartHorizontal, AlignEndHorizontal, LayoutGrid, Rows3, Gamepad2, Layers } from 'lucide-react'
 import { APP_CONFIG } from '../config'
-import { generateText, extractTextFromImage, generateImages, planGraphFromPrompt } from '../services/generateService'
+import { generateText, extractTextFromImage, generateImages, generatePixelateImages, generateTextureImages, planGraphFromPrompt } from '../services/generateService'
 import { ImageGenPropsPanel } from './nodes/ImageGenPropsPanel'
+import { ImageGenPixelatePropsPanel } from './nodes/ImageGenPixelatePropsPanel'
+import { ImageGenTexturePropsPanel } from './nodes/ImageGenTexturePropsPanel'
 import { TextGenPropsPanel } from './nodes/TextGenPropsPanel'
 import { ComparePropsPanel } from './nodes/ComparePropsPanel'
 import { ImageSourcePropsPanel } from './nodes/ImageSourcePropsPanel'
@@ -258,7 +260,7 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
     // Collect all images for gallery
     const galleryImages = React.useMemo(() => {
         const genImages = nodes
-            .filter((n) => n.type === NodeType.IMAGE_GEN && n.data.imageResources && n.data.imageResources.length > 0)
+            .filter((n) => (n.type === NodeType.IMAGE_GEN || n.type === NodeType.IMAGE_GEN_PIXELATE || n.type === NodeType.IMAGE_GEN_TEXTURE) && n.data.imageResources && n.data.imageResources.length > 0)
             .flatMap((n) =>
                 (n.data.imageResources || []).map((item) => ({
                     url: resourceToUrl(item),
@@ -411,6 +413,63 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                     enhancedOutput: result.enhancedPrompt,
                     isLoading: false
                 }
+                setNodes((prev) => prev.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, ...update } } : n)))
+                nodesRef.current = nodesRef.current.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, ...update } } : n))
+            } else if (node.type === NodeType.IMAGE_GEN_PIXELATE) {
+                const connectedText = getConnectedText(nodeId, nodesRef.current)
+                const connectedImages = getConnectedImages(nodeId, nodesRef.current)
+
+                let finalPrompt = node.data.prompt || ''
+                if (connectedText) {
+                    finalPrompt = finalPrompt.trim() ? `${finalPrompt} ${connectedText}` : connectedText
+                }
+
+                if (!finalPrompt.trim() && connectedImages.length === 0) throw new Error('No prompt or input image provided.')
+
+                const result = await generatePixelateImages(
+                    finalPrompt,
+                    connectedImages,
+                    node.data.imageCount ?? 1,
+                    node.data.pixelateSize ?? 64,
+                    node.data.paletteEnabled ?? true,
+                    node.data.paletteSize ?? 32,
+                    node.data.preserveAlpha ?? false,
+                    node.data.transparentBackground ?? false,
+                    node.data.aspectRatio,
+                    node.data.outputFormat,
+                    node.data.enhancePrompt,
+                    node.data.model,
+                    node.data.preset
+                )
+
+                const update = { imageResources: result.imageResources, enhancedOutput: result.enhancedPrompt, isLoading: false }
+                setNodes((prev) => prev.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, ...update } } : n)))
+                nodesRef.current = nodesRef.current.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, ...update } } : n))
+            } else if (node.type === NodeType.IMAGE_GEN_TEXTURE) {
+                const connectedText = getConnectedText(nodeId, nodesRef.current)
+
+                let finalPrompt = node.data.prompt || ''
+                if (connectedText) {
+                    finalPrompt = finalPrompt.trim() ? `${finalPrompt} ${connectedText}` : connectedText
+                }
+
+                if (!finalPrompt.trim()) throw new Error('No prompt provided.')
+
+                const result = await generateTextureImages(
+                    finalPrompt,
+                    [],
+                    node.data.imageCount ?? 1,
+                    node.data.texturePixelate ?? false,
+                    node.data.textureSize ?? 64,
+                    node.data.textureResolution ?? 512,
+                    node.data.aspectRatio,
+                    node.data.outputFormat,
+                    node.data.enhancePrompt,
+                    node.data.model,
+                    node.data.preset
+                )
+
+                const update = { imageResources: result.imageResources, enhancedOutput: result.enhancedPrompt, isLoading: false }
                 setNodes((prev) => prev.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, ...update } } : n)))
                 nodesRef.current = nodesRef.current.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, ...update } } : n))
             } else if (node.type === NodeType.IMAGE_TO_TEXT) {
@@ -831,9 +890,17 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
             data: {
                 prompt: type === NodeType.COMPARE ? undefined! : '',
                 isLoading: type === NodeType.COMPARE ? undefined! : false,
-                imageCount: type === NodeType.IMAGE_GEN ? 1 : undefined,
-                aspectRatio: type === NodeType.IMAGE_GEN ? '1:1' : undefined,
-                outputFormat: type === NodeType.IMAGE_GEN ? 'JPEG' : undefined,
+                imageCount: type === NodeType.IMAGE_GEN || type === NodeType.IMAGE_GEN_PIXELATE || type === NodeType.IMAGE_GEN_TEXTURE ? 1 : undefined,
+                aspectRatio: type === NodeType.IMAGE_GEN || type === NodeType.IMAGE_GEN_PIXELATE || type === NodeType.IMAGE_GEN_TEXTURE ? '1:1' : undefined,
+                outputFormat: type === NodeType.IMAGE_GEN || type === NodeType.IMAGE_GEN_PIXELATE ? 'JPEG' : type === NodeType.IMAGE_GEN_TEXTURE ? 'PNG' : undefined,
+                pixelateSize: type === NodeType.IMAGE_GEN_PIXELATE ? 64 : undefined,
+                paletteEnabled: type === NodeType.IMAGE_GEN_PIXELATE ? true : undefined,
+                paletteSize: type === NodeType.IMAGE_GEN_PIXELATE ? 32 : undefined,
+                preserveAlpha: type === NodeType.IMAGE_GEN_PIXELATE ? false : undefined,
+                transparentBackground: type === NodeType.IMAGE_GEN_PIXELATE ? false : undefined,
+                textureSize: type === NodeType.IMAGE_GEN_TEXTURE ? 64 : undefined,
+                texturePixelate: type === NodeType.IMAGE_GEN_TEXTURE ? false : undefined,
+                textureResolution: type === NodeType.IMAGE_GEN_TEXTURE ? 512 : undefined,
                 imageInputType: type === NodeType.IMAGE_TO_TEXT || type === NodeType.IMAGE_SOURCE ? 'UPLOAD' : undefined,
                 splitSeparator: type === NodeType.SPLIT_TEXT ? '====' : undefined
             }
@@ -893,6 +960,99 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
         if (selectedEdgeId === id) setSelectedEdgeId(null)
     }
 
+    // --- Multi-node Alignment ---
+
+    const snapVal = (v: number) => Math.round(v / 24) * 24
+
+    const getNodeDimensions = (id: string): { w: number; h: number } => {
+        const el = document.querySelector(`[data-node-id="${id}"]`)
+        if (!el) return { w: 320, h: 200 }
+        const rect = el.getBoundingClientRect()
+        const z = zoomRef.current
+        return { w: rect.width / z, h: rect.height / z }
+    }
+
+    const alignLeft = () => {
+        const sel = nodes.filter((n) => selectedNodeIds.includes(n.id))
+        if (sel.length < 2) return
+        const minX = Math.min(...sel.map((n) => n.position.x))
+        setNodes((prev) => prev.map((n) => selectedNodeIds.includes(n.id) ? { ...n, position: { ...n.position, x: minX } } : n))
+    }
+
+    const alignRight = () => {
+        const sel = nodes.filter((n) => selectedNodeIds.includes(n.id))
+        if (sel.length < 2) return
+        const maxX = Math.max(...sel.map((n) => n.position.x))
+        setNodes((prev) => prev.map((n) => selectedNodeIds.includes(n.id) ? { ...n, position: { ...n.position, x: maxX } } : n))
+    }
+
+    const alignTop = () => {
+        const sel = nodes.filter((n) => selectedNodeIds.includes(n.id))
+        if (sel.length < 2) return
+        const minY = Math.min(...sel.map((n) => n.position.y))
+        setNodes((prev) => prev.map((n) => selectedNodeIds.includes(n.id) ? { ...n, position: { ...n.position, y: minY } } : n))
+    }
+
+    const alignBottom = () => {
+        const sel = nodes.filter((n) => selectedNodeIds.includes(n.id))
+        if (sel.length < 2) return
+        const maxY = Math.max(...sel.map((n) => n.position.y))
+        setNodes((prev) => prev.map((n) => selectedNodeIds.includes(n.id) ? { ...n, position: { ...n.position, y: maxY } } : n))
+    }
+
+    const stackAlign = () => {
+        const sel = nodes.filter((n) => selectedNodeIds.includes(n.id))
+        if (sel.length < 2) return
+        const sorted = [...sel].sort((a, b) => a.position.y !== b.position.y ? a.position.y - b.position.y : a.position.x - b.position.x)
+        const anchorX = snapVal(Math.min(...sel.map((n) => n.position.x)))
+        const anchorY = snapVal(Math.min(...sel.map((n) => n.position.y)))
+        const offset = 30 // px per card in the stack
+        const updates: Record<string, { x: number; y: number }> = {}
+        sorted.forEach((n, i) => {
+            updates[n.id] = { x: anchorX + i * offset, y: anchorY + i * offset }
+        })
+        setNodes((prev) => prev.map((n) => updates[n.id] ? { ...n, position: updates[n.id] } : n))
+    }
+
+    const gridAlign = () => {
+        const sel = nodes.filter((n) => selectedNodeIds.includes(n.id))
+        if (sel.length < 2) return
+        const cols = Math.ceil(Math.sqrt(sel.length))
+        const colW = 368 // 320px node width + 48px gap
+        const rowH = 248 // fixed row height + gap
+        const anchorX = snapVal(Math.min(...sel.map((n) => n.position.x)))
+        const anchorY = snapVal(Math.min(...sel.map((n) => n.position.y)))
+        const sorted = [...sel].sort((a, b) => a.position.y !== b.position.y ? a.position.y - b.position.y : a.position.x - b.position.x)
+        const updates: Record<string, { x: number; y: number }> = {}
+        sorted.forEach((n, i) => {
+            updates[n.id] = { x: anchorX + (i % cols) * colW, y: anchorY + Math.floor(i / cols) * rowH }
+        })
+        setNodes((prev) => prev.map((n) => updates[n.id] ? { ...n, position: updates[n.id] } : n))
+    }
+
+    const autoAlign = () => {
+        const sel = nodes.filter((n) => selectedNodeIds.includes(n.id))
+        if (sel.length < 2) return
+        const cols = Math.ceil(Math.sqrt(sel.length))
+        const gap = 48
+        const anchorX = snapVal(Math.min(...sel.map((n) => n.position.x)))
+        const anchorY = snapVal(Math.min(...sel.map((n) => n.position.y)))
+        const sorted = [...sel].sort((a, b) => a.position.y !== b.position.y ? a.position.y - b.position.y : a.position.x - b.position.x)
+        const numRows = Math.ceil(sorted.length / cols)
+        const rowHeights: number[] = Array.from({ length: numRows }, (_, r) => {
+            const rowNodes = sorted.slice(r * cols, (r + 1) * cols)
+            return Math.max(...rowNodes.map((n) => getNodeDimensions(n.id).h))
+        })
+        const updates: Record<string, { x: number; y: number }> = {}
+        sorted.forEach((n, i) => {
+            const col = i % cols
+            const row = Math.floor(i / cols)
+            const rowOffsetY = rowHeights.slice(0, row).reduce((sum, h) => sum + h + gap, 0)
+            updates[n.id] = { x: snapVal(anchorX + col * (320 + gap)), y: snapVal(anchorY + rowOffsetY) }
+        })
+        setNodes((prev) => prev.map((n) => updates[n.id] ? { ...n, position: updates[n.id] } : n))
+    }
+
     const handleCanvasDown = (e: React.MouseEvent | React.TouchEvent) => {
         // Check if right click (button 2)
         if ('button' in e && e.button === 2) {
@@ -918,6 +1078,86 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                 selectionRectRef.current = rect
                 setSelectionRect(rect)
             }
+        }
+    }
+
+    // --- Canvas Image Drop Logic ---
+
+    const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif']
+
+    const handleCanvasDragOver = (e: React.DragEvent) => {
+        e.preventDefault()
+        e.dataTransfer.dropEffect = 'copy'
+    }
+
+    const createImageSourceNodeAtDrop = (
+        worldPos: { x: number; y: number },
+        imageInput: string,
+        imageInputType: 'UPLOAD' | 'URL'
+    ) => {
+        const existingIds = nodesRef.current.map((n) => n.id)
+        const id = generateNodeId(NodeType.IMAGE_SOURCE, existingIds)
+        const snap = 24
+        const snappedX = Math.round((worldPos.x - 160) / snap) * snap
+        const snappedY = Math.round((worldPos.y - 100) / snap) * snap
+        const newNode: Node = {
+            id,
+            type: NodeType.IMAGE_SOURCE,
+            position: { x: snappedX, y: snappedY },
+            data: { prompt: '', isLoading: false, imageInput, imageInputType },
+        }
+        setNodes((prev) => [...prev, newNode])
+    }
+
+    const handleCanvasDrop = (e: React.DragEvent) => {
+        e.preventDefault()
+        const worldPos = screenToWorld(e.clientX, e.clientY)
+        const spacing = 360 // ~node width (320px) + 40px gap, snapped to 24px grid
+
+        const validFiles = Array.from(e.dataTransfer.files).filter((f) => ALLOWED_IMAGE_TYPES.includes(f.type))
+        if (validFiles.length > 0) {
+            validFiles.forEach((file, i) => {
+                const offsetPos = { x: worldPos.x + i * spacing, y: worldPos.y }
+                const reader = new FileReader()
+                reader.onload = (event) => {
+                    const result = event.target?.result
+                    if (result) createImageSourceNodeAtDrop(offsetPos, result as string, 'UPLOAD')
+                }
+                reader.readAsDataURL(file)
+            })
+            return
+        }
+
+        const uriList = e.dataTransfer.getData('text/uri-list')
+        if (uriList) {
+            const urls = uriList
+                .split('\n')
+                .map((l) => l.trim())
+                .filter((l) => l && !l.startsWith('#') && l.startsWith('http'))
+            if (urls.length > 0) {
+                urls.forEach((url, i) => {
+                    createImageSourceNodeAtDrop({ x: worldPos.x + i * spacing, y: worldPos.y }, url, 'URL')
+                })
+                return
+            }
+        }
+
+        const html = e.dataTransfer.getData('text/html')
+        if (html) {
+            const srcs = Array.from(new DOMParser().parseFromString(html, 'text/html').querySelectorAll('img'))
+                .map((img) => (img as HTMLImageElement).src)
+                .filter((src) => src.startsWith('http'))
+            if (srcs.length > 0) {
+                srcs.forEach((src, i) => {
+                    createImageSourceNodeAtDrop({ x: worldPos.x + i * spacing, y: worldPos.y }, src, 'URL')
+                })
+                return
+            }
+        }
+
+        const text = e.dataTransfer.getData('text/plain')?.trim()
+        if (text?.startsWith('http')) {
+            createImageSourceNodeAtDrop(worldPos, text, 'URL')
         }
     }
 
@@ -1051,8 +1291,12 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                 e.preventDefault()
                 duplicateSelectedNode()
             }
-            // Escape: close props panel and clear multi-selection
+            // Escape: close gallery if open, otherwise close props panel and clear multi-selection
             if (e.key === 'Escape') {
+                if (showGallery) {
+                    setShowGallery(false)
+                    return
+                }
                 setSelectedNodeId(null)
                 setSelectedNodeIds([])
             }
@@ -1070,7 +1314,7 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
         }
         window.addEventListener('keydown', handleKeyDown)
         return () => window.removeEventListener('keydown', handleKeyDown)
-    }, [selectedNodeId, nodes]) // Dependencies for accessing current state
+    }, [selectedNodeId, nodes, showGallery]) // Dependencies for accessing current state
 
     // Mouse Move/Up Global Handlers
     useEffect(() => {
@@ -1297,19 +1541,20 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
         if (type === 'target') {
             let offsetY = 45
             if (handleId === 'image') {
-                if (node.type === NodeType.IMAGE_GEN) offsetY = 125
+                if (node.type === NodeType.IMAGE_GEN || node.type === NodeType.IMAGE_GEN_PIXELATE || node.type === NodeType.IMAGE_GEN_TEXTURE) offsetY = 125
                 else if (node.type === NodeType.COMPARE) offsetY = 80
                 else offsetY = 100 // IMAGE_TO_TEXT
             }
             return { x: node.position.x - 12, y: node.position.y + offsetY }
         }
 
-        const baseX = node.position.x + 332
+        const nodeWidth = node.type === NodeType.NOTE ? (node.data.width ?? 320) : 320
+        const baseX = node.position.x + nodeWidth + 12
         let offsetY = 0
 
         if (node.type === NodeType.TEXT_GEN || node.type === NodeType.IMAGE_TO_TEXT) {
             offsetY = handleId === 'output' ? 200 : 45
-        } else if (node.type === NodeType.IMAGE_GEN) {
+        } else if (node.type === NodeType.IMAGE_GEN || node.type === NodeType.IMAGE_GEN_PIXELATE || node.type === NodeType.IMAGE_GEN_TEXTURE) {
             const startTop = 85
             const spacing = 45
 
@@ -1340,7 +1585,7 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
     }
 
     return (
-        <div className="w-full h-full overflow-hidden relative bg-slate-50 dark:bg-zinc-900 touch-none" onMouseDown={handleCanvasDown} onWheel={handleWheel} onContextMenu={(e) => e.preventDefault()}>
+        <div className="w-full h-full overflow-hidden relative bg-slate-50 dark:bg-zinc-900 touch-none" onMouseDown={handleCanvasDown} onWheel={handleWheel} onContextMenu={(e) => e.preventDefault()} onDragOver={handleCanvasDragOver} onDrop={handleCanvasDrop}>
             {/* Graph Title in Center */}
             <GraphTitle
                 graphName={currentGraphName}
@@ -1446,7 +1691,7 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
             >
                 <div className="pointer-events-auto">
                     {nodes.map((node) => (
-                        <NodeContainer key={node.id} node={node} selected={selectedNodeIds.includes(node.id)} onDelete={deleteNode} onSelect={setSelectedNodeId} onDragStart={handleDragStart} onConnectStart={handleConnectStart} onConnectEnd={handleConnectEnd}>
+                        <NodeContainer key={node.id} node={node} selected={selectedNodeIds.includes(node.id)} zoom={zoom} onDelete={deleteNode} onSelect={setSelectedNodeId} onResize={(id, w, h) => updateNodeData(id, { width: w, height: h })} onDragStart={handleDragStart} onConnectStart={handleConnectStart} onConnectEnd={handleConnectEnd}>
                             {node.type === NodeType.TEXT_GEN && <TextGenNode node={node} updateNodeData={updateNodeData} connectedInputText={getConnectedText(node.id)} onRun={() => executeNode(node.id)} />}
                             {node.type === NodeType.IMAGE_GEN && (
                                 <ImageGenNode
@@ -1462,6 +1707,58 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                                         setActiveGalleryImages(nodeImages)
                                         const index = nodeImages.findIndex((img) => img.url === url)
                                         setGalleryStartIndex(index >= 0 ? index : 0)
+                                        setShowGallery(true)
+                                    }}
+                                    onRun={() => executeNode(node.id)}
+                                    onExtractToCanvas={() => {
+                                        const resources = node.data.imageResources
+                                        if (!resources || resources.length < 2) return
+                                        const cols = Math.ceil(Math.sqrt(resources.length))
+                                        const colW = 368
+                                        const rowH = 248
+                                        const anchorX = snapVal(node.position.x + 368)
+                                        const anchorY = snapVal(node.position.y)
+                                        const newNodes = resources.map((item, i) => {
+                                            const existingIds = nodesRef.current.map((n) => n.id)
+                                            const id = generateNodeId(NodeType.IMAGE_SOURCE, existingIds)
+                                            const newNode: Node = {
+                                                id,
+                                                type: NodeType.IMAGE_SOURCE,
+                                                position: {
+                                                    x: anchorX + (i % cols) * colW,
+                                                    y: anchorY + Math.floor(i / cols) * rowH,
+                                                },
+                                                data: { prompt: '', isLoading: false, imageInput: resourceToUrl(item), imageInputType: 'URL' },
+                                            }
+                                            nodesRef.current = [...nodesRef.current, newNode]
+                                            return newNode
+                                        })
+                                        setNodes((prev) => [...prev, ...newNodes])
+                                    }}
+                                />
+                            )}
+                            {node.type === NodeType.IMAGE_GEN_PIXELATE && (
+                                <ImageGenPixelateNode
+                                    node={node}
+                                    updateNodeData={updateNodeData}
+                                    connectedInputText={getConnectedText(node.id)}
+                                    connectedInputImages={toDisplayUrls(getConnectedImages(node.id))}
+                                    onExpand={(url) => {
+                                        setActiveGalleryImages([{ url, nodeId: node.id }])
+                                        setGalleryStartIndex(0)
+                                        setShowGallery(true)
+                                    }}
+                                    onRun={() => executeNode(node.id)}
+                                />
+                            )}
+                            {node.type === NodeType.IMAGE_GEN_TEXTURE && (
+                                <ImageGenTextureNode
+                                    node={node}
+                                    updateNodeData={updateNodeData}
+                                    connectedInputText={getConnectedText(node.id)}
+                                    onExpand={(url) => {
+                                        setActiveGalleryImages([{ url, nodeId: node.id }])
+                                        setGalleryStartIndex(0)
                                         setShowGallery(true)
                                     }}
                                     onRun={() => executeNode(node.id)}
@@ -1584,15 +1881,43 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
             {/* Top Right Gallery Button */}
             <div className="absolute top-4 right-4 z-50 pointer-events-auto flex items-center gap-2">
                 {selectedNodeIds.length > 1 && (
-                    <div className="flex items-center gap-1.5 px-3 py-2 bg-indigo-500/90 backdrop-blur-md rounded-lg shadow-lg text-white text-sm font-semibold select-none">
-                        <span>{selectedNodeIds.length} selected</span>
-                        <button
-                            onClick={() => { setSelectedNodeIds([]); setSelectedNodeId(null) }}
-                            className="ml-1 opacity-70 hover:opacity-100 transition-opacity"
-                            title="Clear selection"
-                        >
-                            <X size={13} />
-                        </button>
+                    <div className="flex flex-col items-end gap-1.5">
+                        <div className="flex items-center gap-1.5 px-3 py-2 bg-indigo-500/90 backdrop-blur-md rounded-lg shadow-lg text-white text-sm font-semibold select-none">
+                            <span>{selectedNodeIds.length} selected</span>
+                            <button
+                                onClick={() => { setSelectedNodeIds([]); setSelectedNodeId(null) }}
+                                className="ml-1 opacity-70 hover:opacity-100 transition-opacity"
+                                title="Clear selection"
+                            >
+                                <X size={13} />
+                            </button>
+                        </div>
+                        {selectedNodeIds.length >= 2 && (
+                            <div className="flex items-center gap-0.5 px-1.5 py-1 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md rounded-lg shadow border border-slate-200 dark:border-zinc-700">
+                                <button onClick={autoAlign} title="Auto align" className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">
+                                    <Sparkles size={13} />
+                                </button>
+                                <button onClick={gridAlign} title="Grid align" className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">
+                                    <LayoutGrid size={13} />
+                                </button>
+                                <button onClick={stackAlign} title="Stack align" className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">
+                                    <Rows3 size={13} />
+                                </button>
+                                <div className="w-px h-4 bg-slate-200 dark:bg-zinc-700 mx-0.5" />
+                                <button onClick={alignLeft} title="Align Left" className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">
+                                    <AlignLeft size={13} />
+                                </button>
+                                <button onClick={alignRight} title="Align Right" className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">
+                                    <AlignRight size={13} />
+                                </button>
+                                <button onClick={alignTop} title="Align Top" className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">
+                                    <AlignStartHorizontal size={13} />
+                                </button>
+                                <button onClick={alignBottom} title="Align Bottom" className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">
+                                    <AlignEndHorizontal size={13} />
+                                </button>
+                            </div>
+                        )}
                     </div>
                 )}
                 <button
@@ -1624,6 +1949,16 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                     <button onClick={() => addNode(NodeType.IMAGE_GEN)} className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors text-slate-600 dark:text-zinc-400">
                         <ImageIcon size={20} />
                         <span className="text-[10px] font-semibold uppercase">Image Gen</span>
+                    </button>
+                    <div className="w-[1px] h-8 bg-slate-200 dark:bg-zinc-800 mx-1" />
+                    <button onClick={() => addNode(NodeType.IMAGE_GEN_PIXELATE)} className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors text-slate-600 dark:text-zinc-400">
+                        <Gamepad2 size={20} />
+                        <span className="text-[10px] font-semibold uppercase">Pixelate</span>
+                    </button>
+                    <div className="w-[1px] h-8 bg-slate-200 dark:bg-zinc-800 mx-1" />
+                    <button onClick={() => addNode(NodeType.IMAGE_GEN_TEXTURE)} className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors text-slate-600 dark:text-zinc-400">
+                        <Layers size={20} />
+                        <span className="text-[10px] font-semibold uppercase">Texture</span>
                     </button>
                     <div className="w-[1px] h-8 bg-slate-200 dark:bg-zinc-800 mx-1" />
                     <button onClick={() => addNode(NodeType.IMAGE_TO_TEXT)} className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors text-slate-600 dark:text-zinc-400">
@@ -1666,6 +2001,31 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                                 connectedInputText={getConnectedText(selectedNode.id)}
                                 onClose={() => { setSelectedNodeId(null); setSelectedNodeIds([]) }}
                                 onRun={() => executeNode(selectedNode.id)}
+                                onExtractToCanvas={() => {
+                                    const resources = selectedNode.data.imageResources
+                                    if (!resources || resources.length < 2) return
+                                    const cols = Math.ceil(Math.sqrt(resources.length))
+                                    const colW = 368
+                                    const rowH = 248
+                                    const anchorX = snapVal(selectedNode.position.x + 368)
+                                    const anchorY = snapVal(selectedNode.position.y)
+                                    const newNodes = resources.map((item, i) => {
+                                        const existingIds = nodesRef.current.map((n) => n.id)
+                                        const id = generateNodeId(NodeType.IMAGE_SOURCE, existingIds)
+                                        const newNode: Node = {
+                                            id,
+                                            type: NodeType.IMAGE_SOURCE,
+                                            position: {
+                                                x: anchorX + (i % cols) * colW,
+                                                y: anchorY + Math.floor(i / cols) * rowH,
+                                            },
+                                            data: { prompt: '', isLoading: false, imageInput: resourceToUrl(item), imageInputType: 'URL' },
+                                        }
+                                        nodesRef.current = [...nodesRef.current, newNode]
+                                        return newNode
+                                    })
+                                    setNodes((prev) => [...prev, ...newNodes])
+                                }}
                             />
                         )}
                         {selectedNode.type === NodeType.TEXT_GEN && (
@@ -1689,6 +2049,24 @@ export const Canvas: React.FC<CanvasProps> = ({ isDark, toggleTheme }) => {
                                 node={selectedNode}
                                 updateNodeData={updateNodeData}
                                 onClose={() => { setSelectedNodeId(null); setSelectedNodeIds([]) }}
+                            />
+                        )}
+                        {selectedNode.type === NodeType.IMAGE_GEN_PIXELATE && (
+                            <ImageGenPixelatePropsPanel
+                                node={selectedNode}
+                                updateNodeData={updateNodeData}
+                                connectedInputText={getConnectedText(selectedNode.id)}
+                                onClose={() => { setSelectedNodeId(null); setSelectedNodeIds([]) }}
+                                onRun={() => executeNode(selectedNode.id)}
+                            />
+                        )}
+                        {selectedNode.type === NodeType.IMAGE_GEN_TEXTURE && (
+                            <ImageGenTexturePropsPanel
+                                node={selectedNode}
+                                updateNodeData={updateNodeData}
+                                connectedInputText={getConnectedText(selectedNode.id)}
+                                onClose={() => { setSelectedNodeId(null); setSelectedNodeIds([]) }}
+                                onRun={() => executeNode(selectedNode.id)}
                             />
                         )}
                     </div>

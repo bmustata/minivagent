@@ -4,17 +4,18 @@ This document describes all supported node types in minivagent and their propert
 
 ## Overview
 
-minivagent supports 7 node types for building AI workflows:
+minivagent supports 8 node types for building AI workflows:
 
-| Node Type     | Purpose                            | Input Handles | Output Handles     |
-| ------------- | ---------------------------------- | ------------- | ------------------ |
-| TEXT_GEN      | Generate or process text           | prompt        | prompt, output     |
-| IMAGE_GEN     | Generate images from prompts       | prompt, image | image-0 to image-3 |
-| IMAGE_SOURCE  | Provide input images               | —             | image              |
-| IMAGE_TO_TEXT | Describe/analyze images (Vision)   | prompt, image | output             |
-| NOTE          | Documentation/notes                | —             | prompt             |
-| COMPARE       | Side-by-side image comparison      | image (×2)    | image-0, image-1   |
-| SPLIT_TEXT    | Split text into parts by separator | prompt        | split-0 … split-N  |
+| Node Type          | Purpose                                       | Input Handles | Output Handles     |
+| ------------------ | --------------------------------------------- | ------------- | ------------------ |
+| TEXT_GEN           | Generate or process text                      | prompt        | prompt, output     |
+| IMAGE_GEN          | Generate images from prompts                  | prompt, image | image-0 to image-3 |
+| IMAGE_GEN_PIXELATE | Generate image then apply pixel-art effect    | prompt, image | image-0 to image-3 |
+| IMAGE_SOURCE       | Provide input images                          | —             | image              |
+| IMAGE_TO_TEXT      | Describe/analyze images (Vision)              | prompt, image | output             |
+| NOTE               | Documentation/notes                           | —             | prompt             |
+| COMPARE            | Side-by-side image comparison                 | image (×2)    | image-0, image-1   |
+| SPLIT_TEXT         | Split text into parts by separator            | prompt        | split-0 … split-N  |
 
 Each node type supports model selection from available AI providers. Models can be selected via the node's dropdown menu in the UI or specified in the graph JSON configuration.
 
@@ -141,6 +142,49 @@ See [Supported Models](supported-models.md) for available models and their optio
         "enhancePrompt": true,
         "isLoading": false
     }
+}
+```
+
+---
+
+## IMAGE_GEN_PIXELATE (Pixelate)
+
+**Purpose:** Generate an image from a prompt (or pass through a connected image) and apply a pixel-art effect pipeline: downscale → color-palette reduction with dithering → nearest-neighbor upscale.
+
+**Input Handles:**
+- `prompt` — text prompt for image generation (optional if an image is connected)
+- `image` — reference image to pixelate directly (skips generation when no prompt is provided)
+
+**Output Handles:**
+- `image-0` to `image-3` — pixelated result images (count configured via Count selector, 1–4)
+
+**Properties:**
+
+| Property       | Type    | Default | Range    | Description                                    |
+| -------------- | ------- | ------- | -------- | ---------------------------------------------- |
+| `pixelateSize` | number  | 65      | 8–256    | Pixel grid resolution — smaller = coarser look |
+| `paletteSize`  | number  | 32      | 2–256    | Number of colors in the quantized palette      |
+| `preserveAlpha`| boolean | false   | —        | Keep transparency instead of flattening to white |
+| `aspectRatio`  | string  | `'1:1'` | —        | Generation aspect ratio                        |
+| `outputFormat` | string  | `'PNG'` | PNG/JPEG | Output format                                  |
+| `model`        | string  | default | —        | Image generation model                         |
+| `enhancePrompt`| boolean | false   | —        | AI prompt enhancement before generation        |
+
+**Example JSON:**
+```json
+{
+  "id": "igp-1",
+  "type": "IMAGE_GEN_PIXELATE",
+  "position": { "x": 400, "y": 200 },
+  "data": {
+    "prompt": "a medieval castle at sunset",
+    "pixelateSize": 48,
+    "paletteSize": 16,
+    "preserveAlpha": false,
+    "aspectRatio": "1:1",
+    "outputFormat": "PNG",
+    "isLoading": false
+  }
 }
 ```
 

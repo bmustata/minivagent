@@ -64,18 +64,17 @@
             "id": "imagegen605343",
             "type": "IMAGE_GEN",
             "position": {
-                "x": 2448,
+                "x": 2520,
                 "y": 192
             },
             "data": {
                 "aspectRatio": "16:9",
                 "imageCount": 1,
                 "isLoading": false,
-                "model": "gemini-3.1-flash-image-preview",
+                "model": "gemini-3.1-flash-image",
                 "preset": "512",
-                "error": "Failed to generate images.",
                 "imageResources": [
-                    "98bf3ceb-19ce-4043-8e5c-54fda77b61d0"
+                    "a715da3a-eac6-4341-a268-2255a4695088"
                 ]
             }
         },
@@ -90,10 +89,10 @@
                 "aspectRatio": "16:9",
                 "imageCount": 1,
                 "isLoading": false,
-                "model": "gemini-3.1-flash-image-preview",
+                "model": "gemini-3.1-flash-image",
                 "preset": "512",
                 "imageResources": [
-                    "d5a6263b-7785-4b79-bd76-9859577d42bb"
+                    "bfb5a3e0-944c-4f9d-a567-9e8065373441"
                 ]
             }
         },
@@ -108,10 +107,10 @@
                 "aspectRatio": "16:9",
                 "imageCount": 1,
                 "isLoading": false,
-                "model": "gemini-3.1-flash-image-preview",
+                "model": "gemini-3.1-flash-image",
                 "preset": "512",
                 "imageResources": [
-                    "c8ef0c7f-acea-4714-ac65-afbd3c9c1619"
+                    "d77230cd-9b94-4419-987f-12b5beb2a5a4"
                 ]
             }
         }

@@ -14,9 +14,17 @@ dist-ssr
 *.local
 
 # Editor directories and files
-.vscode/*
-!.vscode/extensions.json
+# VS Code
+.vscode/
+
+# JetBrains IDEs
 .idea
+
+# Claude Code
+.claude/*
+!.claude/agents/
+!.claude/agents/*
+
 .DS_Store
 *.suo
 *.ntvs*

@@ -29,11 +29,11 @@
                 "aspectRatio": "16:9",
                 "outputFormat": "JPEG",
                 "imageResources": [
-                    "445a57a4-3bef-4692-bc0e-30104ddad345"
+                    "4c0aa8bb-0703-4225-ab9b-afe749330eff"
                 ],
-                "model": "gemini-3.1-flash-image-preview",
+                "model": "gemini-3.1-flash-image",
                 "enhancePrompt": false,
-                "preset": "2K"
+                "preset": "512"
             }
         },
         {

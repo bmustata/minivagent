@@ -1,0 +1,159 @@
+{
+    "name": "pixel-art",
+    "nodes": [
+        {
+            "id": "node249732",
+            "type": "IMAGE_GEN_PIXELATE",
+            "position": {
+                "x": 456,
+                "y": 480
+            },
+            "data": {
+                "prompt": "The Industrial Drone\nAn old autonomous security machine still protecting the station. Boxy low-poly chassis, rotating sensor head, one weapon arm, exposed cables, warning lights.",
+                "isLoading": false,
+                "imageCount": 1,
+                "aspectRatio": "1:1",
+                "outputFormat": "PNG",
+                "pixelateSize": 256,
+                "paletteSize": 64,
+                "preserveAlpha": false,
+                "model": "gemini-3.1-flash-image",
+                "imageResources": [
+                    "211566b4-3877-4ae9-b504-b88e2c498018"
+                ],
+                "transparentBackground": true,
+                "paletteEnabled": true,
+                "preset": "512"
+            }
+        },
+        {
+            "id": "node376242",
+            "type": "IMAGE_GEN_PIXELATE",
+            "position": {
+                "x": 912,
+                "y": 480
+            },
+            "data": {
+                "prompt": "The Scavenger\nA small, fast humanoid/creature that has adapted to abandoned machinery. Thin body, long arms, improvised metal plates, glowing eyes. It hides behind machinery, crawls through vents, and rushes the player when close.",
+                "isLoading": false,
+                "imageCount": 1,
+                "aspectRatio": "1:1",
+                "outputFormat": "JPEG",
+                "pixelateSize": 256,
+                "paletteSize": 64,
+                "preserveAlpha": false,
+                "model": "gemini-2.5-flash-image",
+                "imageResources": [
+                    "3c7b960d-8ca4-4ac3-ac16-268088a6d193"
+                ],
+                "transparentBackground": false,
+                "paletteEnabled": true
+            }
+        },
+        {
+            "id": "node104262",
+            "type": "IMAGE_GEN_PIXELATE",
+            "position": {
+                "x": 1368,
+                "y": 480
+            },
+            "data": {
+                "prompt": "The Worm-Touched Guardian\nA former station worker or soldier transformed by the planet’s underground organism. Much larger silhouette, asymmetrical body, partly armored, with worm-like growths emerging through the suit.",
+                "isLoading": false,
+                "imageCount": 1,
+                "aspectRatio": "1:1",
+                "outputFormat": "PNG",
+                "pixelateSize": 128,
+                "paletteSize": 64,
+                "preserveAlpha": false,
+                "model": "black-forest-labs/flux-2-dev",
+                "imageResources": [
+                    "54ceb723-544a-4d11-849f-62b9f3145dd6"
+                ],
+                "transparentBackground": true,
+                "paletteEnabled": true
+            }
+        },
+        {
+            "id": "note150543",
+            "type": "NOTE",
+            "position": {
+                "x": -528,
+                "y": 24
+            },
+            "data": {
+                "prompt": "The universe is a harsh, isolated sci-fi frontier set far from the centers of human civilization. Humanity has expanded across hostile desert planets, building industrial settlements, power stations, mining complexes, military outposts, and underground infrastructure wherever valuable resources can be extracted.\n\nThe game takes place on one such world: a vast, almost lifeless desert planet marked by endless dunes, violent winds, buried ruins, and enormous underground structures. The surface feels empty, but beneath it lies a dense network of old power facilities, tunnels, abandoned settlements, research sites, and places of worship built around something ancient living deep below.\n\nTechnology is advanced but heavy and industrial rather than clean or futuristic. Machines are large, mechanical, noisy, and frequently repaired instead of replaced. Buildings are made from concrete, metal plates, pipes, vents, cables, massive doors, cooling systems, generators, and exposed machinery. Everything feels functional, worn, and built to survive.\n\nThe planet itself is not passive. Deep beneath the desert exists a colossal native lifeform—or perhaps an entire ecosystem—that humans only partially understand. Early settlers treated it as a natural phenomenon. Later groups began to worship it. Some believed the creatures below were responsible for strange electromagnetic effects, hallucinations, missing memories, and changes in human behavior.",
+                "isLoading": false,
+                "width": 616,
+                "height": 592
+            }
+        },
+        {
+            "id": "node420280",
+            "type": "IMAGE_GEN_TEXTURE",
+            "position": {
+                "x": 456,
+                "y": 984
+            },
+            "data": {
+                "prompt": "The first image is a seamless desert sand texture with soft, wind-swept ripples running diagonally across the surface. It uses warm golden-yellow and tan tones, with subtle darker grooves, tiny pebbles, and scattered grain details.",
+                "isLoading": false,
+                "imageCount": 1,
+                "aspectRatio": "1:1",
+                "outputFormat": "PNG",
+                "textureSize": 64,
+                "texturePixelate": false,
+                "model": "gemini-3.1-flash-image",
+                "preset": "512",
+                "imageResources": [
+                    "3bec2027-f79c-48bb-9d28-2dc37137454b"
+                ]
+            }
+        },
+        {
+            "id": "node986939",
+            "type": "IMAGE_GEN_TEXTURE",
+            "position": {
+                "x": 912,
+                "y": 984
+            },
+            "data": {
+                "prompt": "The second image is a seamless cracked desert rock texture made of irregular sandstone slabs separated by dark fissures. Small angular stones and gravel sit between the larger plates, giving the surface a dry, eroded look.",
+                "isLoading": false,
+                "imageCount": 1,
+                "aspectRatio": "1:1",
+                "outputFormat": "PNG",
+                "textureSize": 64,
+                "texturePixelate": false,
+                "model": "gemini-3.1-flash-image",
+                "preset": "512",
+                "imageResources": [
+                    "bdc31763-fd64-4dc9-828c-71d52918578a"
+                ]
+            }
+        }
+    ],
+    "edges": [
+        {
+            "id": "e990020",
+            "source": "note150543",
+            "sourceHandle": "prompt",
+            "target": "node249732",
+            "targetHandle": "prompt"
+        },
+        {
+            "id": "e161340",
+            "source": "note150543",
+            "sourceHandle": "prompt",
+            "target": "node376242",
+            "targetHandle": "prompt"
+        },
+        {
+            "id": "e182903",
+            "source": "note150543",
+            "sourceHandle": "prompt",
+            "target": "node104262",
+            "targetHandle": "prompt"
+        }
+    ]
+}
