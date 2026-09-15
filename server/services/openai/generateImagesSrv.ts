@@ -8,7 +8,7 @@ export interface OpenAIGenerateImagesOptions {
     referenceImages?: string[] // Base64 data URIs for reference-image editing. e.g. ["data:image/jpeg;base64,..."]
     aspectRatio?: string // Mapped to OpenAI size string via ASPECT_RATIO_TO_SIZE. e.g. "16:9" → "1536x1024"
     outputFormat?: string // Desired format, normalised to 'png' | 'jpeg'. e.g. "JPEG"
-    preset?: string // App-level size label for gpt-image-2 generations. e.g. "2K" → "2048x2048"
+    preset?: string // App-level size label for GPT Image 2+ generations. e.g. "2K" → "2048x2048"
     validatedModel: string // OpenAI model identifier. e.g. "gpt-image-1.5"
 }
 
@@ -27,7 +27,7 @@ const convertImageFormat = async (base64Data: string, targetFormat: 'png' | 'jpe
 }
 
 // Models that do NOT support response_format (always return b64_json)
-const MODELS_WITHOUT_RESPONSE_FORMAT = ['gpt-image-1-mini', 'gpt-image-1.5', 'gpt-image-1', 'gpt-image-2']
+const MODELS_WITHOUT_RESPONSE_FORMAT = ['gpt-image-1-mini', 'gpt-image-1.5', 'gpt-image-1', 'gpt-image-2', 'gpt-image-2.5-flare', 'gpt-image-2.5-sunburst']
 
 // Map aspect ratio (e.g. '1:1') to OpenAI size string (e.g. '1024x1024')
 const ASPECT_RATIO_TO_SIZE: Record<string, string> = {
@@ -38,7 +38,7 @@ const ASPECT_RATIO_TO_SIZE: Record<string, string> = {
     '3:4': '1024x1536'
 }
 
-// Map app preset label → size for gpt-image-2 generations endpoint
+// Map app preset label → size for GPT Image 2+ generations endpoint
 const PRESET_TO_SIZE: Record<string, string> = {
     '1K': '1024x1024',
     '2K': '2048x2048',
@@ -82,7 +82,7 @@ export const openaiGenerateImages = async (options: OpenAIGenerateImagesOptions)
 
     if (referenceImages.length > 0) {
         // Use the edits endpoint when reference images are provided.
-        // Preset-based sizes are only valid for gpt-image-2 generations, so use aspect ratio here.
+        // Preset-based sizes are only valid for GPT Image 2+ generations, so use aspect ratio here.
         const imageFiles = await Promise.all(referenceImages.map((img, i) => dataUriToFile(img, i)))
         const promises = Array(count)
             .fill(null)
@@ -104,7 +104,7 @@ export const openaiGenerateImages = async (options: OpenAIGenerateImagesOptions)
     }
 
     // No reference images — use the generations endpoint.
-    // Preset takes priority over aspect ratio for gpt-image-2.
+    // Preset takes priority over aspect ratio for GPT Image 2+.
     const size = (preset ? PRESET_TO_SIZE[preset] : undefined) ?? aspectSize
     const supportsResponseFormat = !MODELS_WITHOUT_RESPONSE_FORMAT.includes(validatedModel)
 

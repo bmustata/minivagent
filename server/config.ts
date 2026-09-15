@@ -26,6 +26,8 @@ export const MODELS = {
         { name: 'GPT Image 1', provider: 'openai', model: 'gpt-image-1-mini', options: { referenceImages: 16 } },
         { name: 'GPT Image 1.5', provider: 'openai', model: 'gpt-image-1.5', options: { referenceImages: 16 } },
         { name: 'GPT Image 2', provider: 'openai', model: 'gpt-image-2', options: { referenceImages: 16, presets: ['1K', '2K', '4K'] } },
+        { name: 'GPT Image 2.5 Flare', provider: 'openai', model: 'gpt-image-2.5-flare', options: { referenceImages: 16, presets: ['1K', '2K', '4K'] } },
+        { name: 'GPT Image 2.5 Sunburst', provider: 'openai', model: 'gpt-image-2.5-sunburst', options: { referenceImages: 16, presets: ['1K', '2K', '4K'] } },
         { name: 'Flux Schnell', provider: 'black-forest-labs', model: 'black-forest-labs/flux-schnell', options: {} },
         { name: 'Flux Dev', provider: 'black-forest-labs', model: 'black-forest-labs/flux-dev', options: { referenceImages: 1 } },
         { name: 'Flux 1.1 Pro', provider: 'black-forest-labs', model: 'black-forest-labs/flux-1.1-pro', options: { referenceImages: 1, safetyTolerance: 6 } },
